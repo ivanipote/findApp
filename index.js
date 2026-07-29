@@ -24,17 +24,17 @@ var CATEGORIES = [
 var state = {
     user: null,
     isAuthenticated: false,
-    selectedCategories: new Set(CATEGORIES.map(function(c) { return c.id; })),
+    selectedCategories: new Set(),
     userLat: null,
     userLng: null,
-    places: [],
     photoFiles: [],
     routingControl: null,
     following: null,
     followChannel: null,
     trackMarker: null,
     trackPolyline: null,
-    isTracking: false
+    isTracking: false,
+    isFollowingActive: false // Pour le toggle de suivi GPS
 };
 
 // ================================================================
@@ -199,47 +199,23 @@ async function uploadPhoto(file, placeId, token) {
 }
 
 // ================================================================
-// CHARGER LES LIEUX
-// ================================================================
-async function loadPlaces() {
-    try {
-        var places = await apiFetch('/rest/v1/position?select=*&order=created_at.desc', { method: 'GET' });
-        if (!places || places.length === 0) {
-            state.places = [];
-            filterMarkers();
-            return;
-        }
-
-        var placeIds = places.map(function(p) { return p.id; });
-        var idsString = placeIds.map(function(id) { return '"' + id + '"'; }).join(',');
-        var photos = await apiFetch('/rest/v1/photos?select=*&position_id=in.(' + idsString + ')', { method: 'GET' });
-
-        var photosByPlace = {};
-        if (photos && photos.length > 0) {
-            photos.forEach(function(photo) {
-                if (!photosByPlace[photo.position_id]) {
-                    photosByPlace[photo.position_id] = [];
-                }
-                photosByPlace[photo.position_id].push(photo);
-            });
-        }
-
-        places.forEach(function(place) {
-            place.photos = photosByPlace[place.id] || [];
-        });
-
-        state.places = places;
-        filterMarkers();
-    } catch (e) {
-        console.warn('⚠️ Erreur chargement lieux:', e);
-        state.places = [];
-        filterMarkers();
-    }
-}
-
-// ================================================================
 // CATÉGORIES
 // ================================================================
+function loadSelectedCategories() {
+    try {
+        var saved = localStorage.getItem('selectedCategories');
+        if (saved) {
+            var parsed = JSON.parse(saved);
+            return new Set(parsed);
+        }
+    } catch (e) {}
+    return new Set(CATEGORIES.map(function(c) { return c.id; }));
+}
+
+function saveSelectedCategories() {
+    localStorage.setItem('selectedCategories', JSON.stringify([...state.selectedCategories]));
+}
+
 function renderCategories() {
     var grid = DOM.categoriesGrid;
     if (!grid) return;
@@ -264,19 +240,21 @@ function toggleCategory(id) {
     } else {
         state.selectedCategories.add(id);
     }
+    saveSelectedCategories();
     renderCategories();
-    filterMarkers();
 }
 
 function resetCategories() {
     state.selectedCategories = new Set(CATEGORIES.map(function(c) { return c.id; }));
+    saveSelectedCategories();
     renderCategories();
-    filterMarkers();
 }
 
 // ================================================================
 // GEOLOCALISATION
 // ================================================================
+var watchId = null;
+
 function getPosition() {
     if (!navigator.geolocation) {
         state.userLat = 5.3599517;
@@ -289,6 +267,10 @@ function getPosition() {
             state.userLng = pos.coords.longitude;
             if (DOM.posStatus) DOM.posStatus.textContent = '✓';
             updateUserMarker(state.userLat, state.userLng);
+            // ✅ CENTRER LA CARTE SUR LA POSITION DE L'UTILISATEUR
+            if (state.isFollowingActive && map) {
+                map.setView([state.userLat, state.userLng], 15);
+            }
         },
         function(err) {
             state.userLat = 5.3599517;
@@ -306,8 +288,7 @@ function getPosition() {
 // ================================================================
 var map = null;
 var userMarker = null;
-var markerLayer = null;
-var markers = [];
+var trackMarker = null;
 
 function initMap() {
     if (typeof L === 'undefined') {
@@ -335,9 +316,7 @@ function initMap() {
             iconAnchor: [8, 8]
         })
     }).addTo(map);
-    userMarker.bindPopup('📍 Position actuelle');
-
-    markerLayer = L.layerGroup().addTo(map);
+    userMarker.bindPopup('📍 Ma position');
 
     setTimeout(function() { map.invalidateSize(); }, 400);
 }
@@ -348,49 +327,15 @@ function updateUserMarker(lat, lng) {
     if (DOM.posStatus) DOM.posStatus.textContent = '✓';
     state.userLat = lat;
     state.userLng = lng;
-    if (DOM.toggleFollow && DOM.toggleFollow.classList.contains('active')) {
-        map.setView([lat, lng], 14);
+    
+    // ✅ CENTRER LA CARTE SI LE SUIVI EST ACTIF
+    if (state.isFollowingActive && map) {
+        map.setView([lat, lng], 15);
     }
-}
-
-function addMarker(place) {
-    if (!map || !markerLayer) return;
-    var lat = parseFloat(place.lat);
-    var lng = parseFloat(place.lng);
-    if (isNaN(lat) || isNaN(lng)) return;
-
-    var cat = CATEGORIES.find(function(c) { return c.id === place.category; });
-    var color = cat ? cat.color : '#1976d2';
-    var icon = cat ? cat.icon : 'fa-location-dot';
-
-    var marker = L.marker([lat, lng], {
-        icon: L.divIcon({
-            className: 'place-marker',
-            html: '<i class="fas ' + icon + '" style="color:' + color + ';font-size:22px;text-shadow:0 2px 4px rgba(0,0,0,0.2);"></i>',
-            iconSize: [22, 22],
-            iconAnchor: [11, 22]
-        })
-    }).addTo(markerLayer);
-
-    marker.bindPopup('<strong>' + place.name + '</strong><br>' + (place.address || ''));
-
-    marker.on('click', function() {
-        redirectToInfo(place.id);
-    });
-
-    markers.push({ marker: marker, place: place });
-    return marker;
-}
-
-function filterMarkers() {
-    if (!markerLayer) return;
-    markerLayer.clearLayers();
-    markers = [];
-    state.places.forEach(function(place) {
-        if (state.selectedCategories.has(place.category)) {
-            addMarker(place);
-        }
-    });
+    
+    if (state.following) {
+        updateTrackStats(state.following.lat, state.following.lng);
+    }
 }
 
 // ================================================================
@@ -589,8 +534,6 @@ function initAddOverlay() {
                     }
                 }
 
-                await loadPlaces();
-
                 DOM.addOverlay.classList.remove('active');
                 DOM.addForm.reset();
                 state.photoFiles = [];
@@ -599,7 +542,7 @@ function initAddOverlay() {
                 DOM.placeStatusText.textContent = 'Oui';
                 DOM.placeStatusText.className = 'toggle-status active';
 
-                toast('✅ "' + name + '" ajouté avec ' + photoUrls.length + ' photo(s) !', 'success', 3000);
+                toast('✅ "' + name + '" ajouté !', 'success', 3000);
 
             } catch (error) {
                 console.error('❌ Erreur:', error);
@@ -687,7 +630,6 @@ async function verifyCode(code) {
         if (data && data.length > 0) {
             var record = data[0];
 
-            // ✅ VÉRIFIER : Si c'est son propre code
             if (session && session.user && record.user_id === session.user.id) {
                 DOM.followLoader.classList.remove('active');
                 DOM.followInputArea.style.display = 'block';
@@ -747,9 +689,9 @@ function stopFollowing() {
         state.followChannel = null;
     }
 
-    if (state.trackMarker) {
-        map.removeLayer(state.trackMarker);
-        state.trackMarker = null;
+    if (trackMarker) {
+        map.removeLayer(trackMarker);
+        trackMarker = null;
     }
 
     if (state.trackPolyline) {
@@ -775,9 +717,9 @@ function stopFollowing() {
 }
 
 function showTrackMarker(lat, lng, email) {
-    if (state.trackMarker) {
-        map.removeLayer(state.trackMarker);
-        state.trackMarker = null;
+    if (trackMarker) {
+        map.removeLayer(trackMarker);
+        trackMarker = null;
     }
 
     var icon = L.divIcon({
@@ -787,8 +729,14 @@ function showTrackMarker(lat, lng, email) {
         iconAnchor: [14, 28]
     });
 
-    state.trackMarker = L.marker([lat, lng], { icon: icon }).addTo(map);
-    state.trackMarker.bindPopup('📍 ' + email);
+    trackMarker = L.marker([lat, lng], { icon: icon }).addTo(map);
+    trackMarker.bindPopup('📍 ' + email);
+
+    trackMarker.on('click', function() {
+        if (state.following) {
+            openTrackSlider(state.following);
+        }
+    });
 
     map.setView([lat, lng], 14);
 }
@@ -819,8 +767,8 @@ function subscribeToFollow(recordId) {
                     return;
                 }
 
-                if (state.trackMarker) {
-                    state.trackMarker.setLatLng([newData.latitude, newData.longitude]);
+                if (trackMarker) {
+                    trackMarker.setLatLng([newData.latitude, newData.longitude]);
                     if (state.isTracking) {
                         updateTrackStats(newData.latitude, newData.longitude);
                     }
@@ -843,7 +791,7 @@ function openTrackSlider(record) {
 
     DOM.trackSlider.classList.add('active');
 
-    updateTrackStats(record.latitude, record.longitude);
+    updateTrackStats(record.lat, record.lng);
 
     DOM.trackActionBtn.onclick = function() {
         if (!state.isTracking) {
@@ -874,9 +822,17 @@ function updateTrackStats(lat, lng) {
             Math.sin(dLng/2) * Math.sin(dLng/2);
     var c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
     var distance = R * c;
-    var time = Math.round(distance / 5 * 60);
 
-    DOM.trackDistance.textContent = distance.toFixed(1);
+    if (distance < 1) {
+        var meters = Math.round(distance * 1000);
+        DOM.trackDistance.textContent = meters;
+        document.querySelector('.track-stat:first-child .track-stat-label').textContent = 'Mètres';
+    } else {
+        DOM.trackDistance.textContent = distance.toFixed(1);
+        document.querySelector('.track-stat:first-child .track-stat-label').textContent = 'Km';
+    }
+
+    var time = Math.max(1, Math.round(distance / 5 * 60));
     DOM.trackTime.textContent = time;
 }
 
@@ -888,8 +844,49 @@ function calculateRoute() {
     var lat2 = state.following.lat;
     var lng2 = state.following.lng;
 
-    if (isNaN(lat2) || isNaN(lng2)) {
-        toast('Position non disponible', 'error', 3000);
+    if (isNaN(lat2) || isNaN(lng2) || lat2 === 0 || lng2 === 0) {
+        toast('⚠️ Position non disponible', 'error', 3000);
+        return;
+    }
+
+    var R = 6371;
+    var dLat = (lat2 - lat1) * Math.PI / 180;
+    var dLng = (lng2 - lng1) * Math.PI / 180;
+    var a = Math.sin(dLat/2) * Math.sin(dLat/2) +
+            Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) *
+            Math.sin(dLng/2) * Math.sin(dLng/2);
+    var c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+    var distance = R * c;
+
+    if (distance < 1) {
+        var meters = Math.round(distance * 1000);
+        DOM.trackDistance.textContent = meters;
+        document.querySelector('.track-stat:first-child .track-stat-label').textContent = 'Mètres';
+    } else {
+        DOM.trackDistance.textContent = distance.toFixed(1);
+        document.querySelector('.track-stat:first-child .track-stat-label').textContent = 'Km';
+    }
+
+    var time = Math.max(1, Math.round(distance / 5 * 60));
+    DOM.trackTime.textContent = time;
+
+    if (distance < 0.05) {
+        toast('📍 Vous êtes à ' + Math.round(distance * 1000) + ' mètres', 'info', 3000);
+        DOM.trackBtnLabel.textContent = 'Mettre à jour';
+        DOM.trackActionBtn.className = 'track-btn tracking';
+        DOM.trackActionBtn.disabled = false;
+        state.isTracking = true;
+
+        if (state.trackPolyline) {
+            map.removeLayer(state.trackPolyline);
+            state.trackPolyline = null;
+        }
+        if (state.routingControl) {
+            if (typeof state.routingControl.remove === 'function') {
+                state.routingControl.remove();
+            }
+            state.routingControl = null;
+        }
         return;
     }
 
@@ -902,7 +899,7 @@ function calculateRoute() {
 
     fetch(url)
         .then(function(response) {
-            if (!response.ok) throw new Error('Erreur OSM');
+            if (!response.ok) throw new Error('Erreur OSM: ' + response.status);
             return response.json();
         })
         .then(function(data) {
@@ -911,11 +908,17 @@ function calculateRoute() {
             }
 
             var route = data.routes[0];
-            var distance = (route.distance / 1000).toFixed(1);
-            var time = Math.round(route.duration / 60);
+            var distanceRoute = (route.distance / 1000).toFixed(1);
+            var timeRoute = Math.round(route.duration / 60);
 
-            DOM.trackDistance.textContent = distance;
-            DOM.trackTime.textContent = time;
+            if (distanceRoute < 1) {
+                DOM.trackDistance.textContent = Math.round(route.distance);
+                document.querySelector('.track-stat:first-child .track-stat-label').textContent = 'Mètres';
+            } else {
+                DOM.trackDistance.textContent = distanceRoute;
+                document.querySelector('.track-stat:first-child .track-stat-label').textContent = 'Km';
+            }
+            DOM.trackTime.textContent = Math.max(1, timeRoute);
 
             if (state.trackPolyline) {
                 map.removeLayer(state.trackPolyline);
@@ -955,8 +958,8 @@ function calculateRoute() {
             toast('✅ Itinéraire tracé', 'success', 2000);
         })
         .catch(function(error) {
-            console.warn('⚠️ Erreur OSM:', error);
-            toast('Erreur: ' + error.message, 'error', 3000);
+            console.warn('⚠️ Erreur OSRM:', error);
+            toast('❌ Erreur: ' + error.message, 'error', 3000);
             DOM.trackActionBtn.disabled = false;
             DOM.trackBtnLabel.textContent = 'Calculer l\'itinéraire';
         });
@@ -1020,13 +1023,30 @@ function initSearch() {
 }
 
 // ================================================================
-// FOLLOW TOGGLE
+// FOLLOW TOGGLE (GPS)
 // ================================================================
 function initFollowToggle() {
     if (!DOM.toggleFollow) return;
+    
+    // ✅ État initial : désactivé
+    DOM.toggleFollow.classList.remove('active');
+    state.isFollowingActive = false;
+    
     DOM.toggleFollow.addEventListener('click', function() {
         this.classList.toggle('active');
-        toast(this.classList.contains('active') ? '📍 Suivi activé' : 'Suivi désactivé', 'info', 1500);
+        state.isFollowingActive = this.classList.contains('active');
+        
+        if (state.isFollowingActive) {
+            toast('📍 Suivi GPS activé', 'info', 1500);
+            // ✅ CENTRER LA CARTE SUR LA POSITION ACTUELLE
+            if (state.userLat && state.userLng && map) {
+                map.setView([state.userLat, state.userLng], 15);
+            }
+            // Forcer une mise à jour de la position
+            getPosition();
+        } else {
+            toast('📍 Suivi GPS désactivé', 'info', 1500);
+        }
     });
 }
 
@@ -1043,13 +1063,31 @@ function SupabaseChannel() {
 }
 
 // ================================================================
+// SERVICE WORKER - PWA
+// ================================================================
+function registerServiceWorker() {
+    if ('serviceWorker' in navigator) {
+        navigator.serviceWorker.register('sw.js')
+            .then(function(registration) {
+                console.log('✅ Service Worker enregistré');
+            })
+            .catch(function(error) {
+                console.log('❌ Service Worker échoué:', error);
+            });
+    }
+}
+
+// ================================================================
 // INIT
 // ================================================================
 async function init() {
     console.log('🚀 Initialisation de l\'application...');
     cacheDom();
     checkAuth();
+    
+    state.selectedCategories = loadSelectedCategories();
     renderCategories();
+    
     getPosition();
     initMap();
     initSearch();
@@ -1058,15 +1096,16 @@ async function init() {
     initAddOverlay();
     initFollow();
 
-    await loadPlaces();
-
     if (DOM.resetCategories) {
         DOM.resetCategories.addEventListener('click', resetCategories);
     }
 
-    console.log('🏠 easily by megane — prêt');
+    // ✅ Enregistrer le Service Worker
+    registerServiceWorker();
+
+    console.log('🏠 easily by megane — prêt (PWA)');
     console.log('🔐 Authentifié:', state.isAuthenticated);
-    console.log('📌 ' + state.places.length + ' lieux en mémoire');
+    console.log('📌 Catégories sélectionnées:', [...state.selectedCategories]);
 }
 
 if (document.readyState === 'loading') {

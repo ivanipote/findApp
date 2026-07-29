@@ -1,0 +1,18 @@
+{
+  "name": "easily by megane",
+  "short_name": "easily",
+  "description": "Trouvez des lieux autour de vous et suivez vos proches en temps réel",
+  "start_url": "https://ivanipote.github.io/findApp/index.html",
+  "display": "standalone",
+  "background_color": "#f0f2f5",
+  "theme_color": "#1976d2",
+  "orientation": "portrait",
+  "icons": [
+    {
+      "src": "icon.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ]
+}
