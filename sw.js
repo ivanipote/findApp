@@ -2,13 +2,14 @@
 // SERVICE WORKER - easily by megane
 // ================================================================
 
-var CACHE_NAME = 'megane-v1';
+var CACHE_NAME = 'megane-v2';
 var urlsToCache = [
     '/findApp/',
     '/findApp/index.html',
     '/findApp/style.css',
     '/findApp/index.js',
-    '/findApp/icon.png',
+    '/findApp/icon-192.png',
+    '/findApp/icon-512.png',
     '/findApp/manifest.json',
     'https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css',
     'https://unpkg.com/leaflet@1.9.4/dist/leaflet.css',

@@ -1,0 +1,893 @@
+/* ============================================================ */
+/* ME.CSS - PAGE MON PROFIL */
+/* ============================================================ */
+
+:root {
+    --blue: #1976d2;
+    --blue-dark: #1565c0;
+    --blue-light: #e3edfb;
+    --green: #2ecc71;
+    --green-light: #e8f5e9;
+    --red: #d32f2f;
+    --red-light: #fce4ec;
+    --orange: #e67e22;
+    --orange-light: #fdf1e6;
+    --ink: #1a2a5a;
+    --muted: #8a9aaa;
+    --muted-light: #aab4c8;
+    --border: #e8ecf4;
+    --bg: #f0f2f5;
+    --surface: #ffffff;
+    --surface-soft: #f8f9fc;
+
+    --r-lg: 20px;
+    --r-md: 14px;
+    --r-sm: 10px;
+    --r-pill: 999px;
+}
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    background: var(--bg);
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    min-height: 100vh;
+    padding-top: 84px;
+    padding-bottom: 24px;
+    margin: 0;
+}
+
+/* ============================================================ */
+/* TOAST NOTIFICATION */
+/* ============================================================ */
+.toast-notification {
+    position: fixed;
+    top: 84px;
+    left: 50%;
+    transform: translateX(-50%) translateY(-16px);
+    z-index: 9999;
+    max-width: 440px;
+    width: 90%;
+    padding: 12px 18px;
+    border-radius: var(--r-md);
+    font-size: 0.85rem;
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.3s ease, transform 0.3s ease;
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15);
+}
+
+.toast-notification.show {
+    opacity: 1;
+    transform: translateX(-50%) translateY(0);
+    pointer-events: auto;
+}
+
+.toast-notification.success { background: var(--green); color: #fff; }
+.toast-notification.error { background: var(--red); color: #fff; }
+.toast-notification.info { background: var(--blue); color: #fff; }
+
+.toast-notification .toast-icon { font-size: 1.1rem; flex-shrink: 0; }
+.toast-notification .toast-message { flex: 1; }
+
+/* ============================================================ */
+/* HEADER */
+/* ============================================================ */
+.header-profile {
+    position: fixed;
+    top: 12px;
+    left: 12px;
+    right: 12px;
+    z-index: 1000;
+    height: 56px;
+    background: var(--surface);
+    border-radius: var(--r-pill);
+    display: flex;
+    align-items: center;
+    padding: 0 8px 0 6px;
+    gap: 10px;
+    box-shadow: 0 2px 14px rgba(0, 0, 0, 0.07);
+    max-width: 480px;
+    margin: 0 auto;
+}
+
+@media (min-width: 480px) {
+    .header-profile {
+        left: 50%;
+        transform: translateX(-50%);
+        right: auto;
+    }
+}
+
+.header-profile .back-btn,
+.header-profile .menu-btn {
+    background: var(--surface-soft);
+    border: none;
+    color: var(--blue);
+    font-size: 1rem;
+    cursor: pointer;
+    width: 38px;
+    height: 38px;
+    border-radius: 50%;
+    flex-shrink: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: background 0.2s ease;
+}
+
+.header-profile .back-btn:hover,
+.header-profile .menu-btn:hover {
+    background: var(--blue-light);
+}
+
+.header-profile .email {
+    flex: 1;
+    font-weight: 600;
+    font-size: 0.85rem;
+    color: var(--ink);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    min-width: 0;
+}
+
+/* ============================================================ */
+/* DROPDOWN MENU */
+/* ============================================================ */
+.dropdown-menu {
+    position: fixed;
+    top: 72px;
+    right: 16px;
+    background: var(--surface);
+    border-radius: var(--r-md);
+    box-shadow: 0 10px 32px rgba(0, 0, 0, 0.14);
+    min-width: 200px;
+    padding: 6px;
+    opacity: 0;
+    visibility: hidden;
+    transform: translateY(-8px);
+    transition: opacity 0.2s ease, transform 0.2s ease, visibility 0.2s ease;
+    z-index: 2000;
+}
+
+.dropdown-menu.active {
+    opacity: 1;
+    visibility: visible;
+    transform: translateY(0);
+}
+
+.dropdown-menu .dropdown-item {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    width: 100%;
+    padding: 11px 14px;
+    background: none;
+    border: none;
+    border-radius: var(--r-sm);
+    font-size: 0.85rem;
+    font-weight: 600;
+    color: var(--ink);
+    cursor: pointer;
+    transition: background 0.15s ease;
+    text-align: left;
+}
+
+.dropdown-menu .dropdown-item i {
+    font-size: 1rem;
+    width: 20px;
+    text-align: center;
+    flex-shrink: 0;
+}
+
+.dropdown-menu .dropdown-item i.fa-map-pin { color: var(--blue); }
+.dropdown-menu .dropdown-item i.fa-sign-out-alt { color: var(--red); }
+.dropdown-menu .dropdown-item i.fa-sync { color: var(--green); }
+
+.dropdown-menu .dropdown-item:hover { background: var(--surface-soft); }
+.dropdown-menu .dropdown-item.danger:hover { background: var(--red-light); }
+
+/* ============================================================ */
+/* CONTAINER */
+/* ============================================================ */
+.profile-container {
+    max-width: 480px;
+    margin: 0 auto;
+    padding: 0 14px;
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+}
+
+/* ============================================================ */
+/* CARDS — arrondies partout, plus de version "pleine largeur" */
+/* ============================================================ */
+.card {
+    background: var(--surface);
+    border-radius: var(--r-lg);
+    padding: 16px;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.04);
+    width: 100%;
+}
+
+.card .card-title {
+    font-size: 0.8rem;
+    font-weight: 700;
+    color: var(--ink);
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 12px;
+    text-transform: uppercase;
+    letter-spacing: 0.02em;
+}
+
+.card .card-title i { color: var(--blue); font-size: 0.85rem; }
+
+/* ============================================================ */
+/* SETTINGS ITEMS */
+/* ============================================================ */
+.settings-item {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 12px 4px;
+    border-bottom: 1px solid var(--border);
+    flex-wrap: wrap;
+}
+
+.settings-item:last-of-type { border-bottom: none; }
+
+.settings-item .icon {
+    width: 38px;
+    height: 38px;
+    border-radius: var(--r-sm);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1rem;
+    flex-shrink: 0;
+    color: #ffffff;
+}
+
+.settings-item .info {
+    flex: 1;
+    min-width: 140px;
+}
+
+.settings-item .info .label {
+    font-size: 0.85rem;
+    font-weight: 600;
+    color: var(--ink);
+}
+
+.settings-item .info .description {
+    font-size: 0.7rem;
+    color: var(--muted);
+    margin-top: 1px;
+}
+
+.settings-item .right {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    flex-shrink: 0;
+    margin-left: auto;
+}
+
+/* ============================================================ */
+/* TOGGLE */
+/* ============================================================ */
+.toggle-samsung {
+    width: 44px;
+    height: 24px;
+    background: #cfd6e4;
+    border-radius: var(--r-pill);
+    position: relative;
+    cursor: pointer;
+    transition: background 0.25s ease;
+    flex-shrink: 0;
+}
+
+.toggle-samsung .thumb {
+    width: 18px;
+    height: 18px;
+    background: #ffffff;
+    border-radius: 50%;
+    position: absolute;
+    top: 3px;
+    left: 3px;
+    transition: left 0.25s ease;
+    box-shadow: 0 1px 4px rgba(0, 0, 0, 0.2);
+}
+
+.toggle-samsung.active { background: var(--blue); }
+.toggle-samsung.active .thumb { left: 23px; }
+
+/* ============================================================ */
+/* CODE BOX */
+/* ============================================================ */
+.code-samsung {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    background: var(--surface-soft);
+    border-radius: var(--r-sm);
+    padding: 7px 10px;
+    margin-top: 4px;
+    width: fit-content;
+    max-width: 100%;
+}
+
+.code-samsung .code-value {
+    font-size: 0.9rem;
+    font-weight: 700;
+    color: var(--blue);
+    font-family: 'Courier New', monospace;
+    letter-spacing: 0.5px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.code-samsung .btn-copy {
+    background: none;
+    border: none;
+    color: var(--blue);
+    font-size: 0.8rem;
+    cursor: pointer;
+    padding: 3px 6px;
+    border-radius: 6px;
+    flex-shrink: 0;
+    transition: background 0.15s ease;
+}
+
+.code-samsung .btn-copy:hover { background: var(--blue-light); }
+
+/* ============================================================ */
+/* BOUTON RÉINITIALISER */
+/* ============================================================ */
+.btn-reset-samsung {
+    padding: 8px 10px;
+    background: var(--surface-soft);
+    border: none;
+    border-radius: var(--r-sm);
+    font-size: 0.8rem;
+    color: var(--muted);
+    cursor: pointer;
+    transition: 0.2s;
+    display: flex;
+    align-items: center;
+    gap: 4px;
+}
+
+.btn-reset-samsung:hover { color: var(--red); background: var(--red-light); }
+
+/* ============================================================ */
+/* ENVOYER — INPUT + BOUTON */
+/* ============================================================ */
+.settings-item .right input[type="email"] {
+    padding: 9px 12px;
+    border: 1.5px solid var(--border);
+    border-radius: var(--r-sm);
+    font-size: 0.8rem;
+    color: var(--ink);
+    background: var(--surface-soft);
+    transition: 0.2s;
+    width: 100%;
+    flex: 1;
+    min-width: 0;
+}
+
+.settings-item .right input[type="email"]:focus {
+    border-color: var(--blue);
+    outline: none;
+    background: #ffffff;
+}
+
+.settings-item .right .btn-send {
+    padding: 9px 14px;
+    background: var(--blue);
+    color: #ffffff;
+    border: none;
+    border-radius: var(--r-sm);
+    font-size: 0.8rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background 0.2s;
+    white-space: nowrap;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    flex-shrink: 0;
+}
+
+.settings-item .right .btn-send:hover { background: var(--blue-dark); }
+.settings-item .right .btn-send:disabled { opacity: 0.6; cursor: not-allowed; }
+
+/* Ligne "Envoyer le code" : email + bouton sur toute la largeur, en dessous du label */
+.settings-item:has(#shareEmail) {
+    flex-direction: column;
+    align-items: stretch;
+}
+
+.settings-item:has(#shareEmail) .right {
+    width: 100%;
+    margin-left: 0;
+    margin-top: 4px;
+}
+
+/* ============================================================ */
+/* HISTORIQUE — TABS */
+/* ============================================================ */
+.history-card .tabs {
+    display: flex;
+    background: var(--surface-soft);
+    border-radius: var(--r-sm);
+    padding: 4px;
+    margin-bottom: 10px;
+    gap: 4px;
+}
+
+.history-card .tabs .tab {
+    flex: 1;
+    padding: 9px 0;
+    text-align: center;
+    font-size: 0.78rem;
+    font-weight: 600;
+    color: var(--muted);
+    cursor: pointer;
+    border-radius: 8px;
+    transition: 0.2s;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+}
+
+.history-card .tabs .tab.active {
+    background: #ffffff;
+    color: var(--blue);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+}
+
+.history-card .tabs .tab .badge-count {
+    font-size: 0.6rem;
+    background: var(--blue);
+    color: #fff;
+    padding: 1px 7px;
+    border-radius: var(--r-pill);
+}
+
+.history-card .history-content {
+    max-height: 320px;
+    overflow-y: auto;
+    padding-right: 2px;
+}
+
+.history-card .history-content::-webkit-scrollbar { width: 4px; }
+.history-card .history-content::-webkit-scrollbar-thumb {
+    background: #d0d5e0;
+    border-radius: 4px;
+}
+
+/* ============================================================ */
+/* HISTORY ITEM — structure réelle générée par le JS :          */
+/* .h-icon / .h-info (.h-code + .h-email) / .h-status / .h-time / .h-actions */
+/* ============================================================ */
+.history-item {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 10px;
+    padding: 12px;
+    background: var(--surface-soft);
+    border-radius: var(--r-md);
+    margin-bottom: 8px;
+    transition: background 0.15s ease;
+}
+
+.history-item:last-child { margin-bottom: 0; }
+.history-item:hover { background: #f1f4fa; }
+
+.history-item .h-icon {
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.85rem;
+    color: #ffffff;
+    flex-shrink: 0;
+}
+
+.history-item .h-icon.received { background: var(--blue); }
+.history-item .h-icon.sent { background: var(--orange); }
+
+.history-item .h-info {
+    flex: 1;
+    min-width: 110px;
+}
+
+.history-item .h-code {
+    font-size: 0.9rem;
+    font-weight: 700;
+    color: var(--ink);
+    font-family: 'Courier New', monospace;
+    letter-spacing: 0.5px;
+}
+
+.history-item .h-email {
+    font-size: 0.72rem;
+    color: var(--muted);
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    margin-top: 2px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.history-item .h-status {
+    font-size: 0.62rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.03em;
+    padding: 3px 9px;
+    border-radius: var(--r-pill);
+    flex-shrink: 0;
+}
+
+.history-item .h-status.pending { background: var(--orange-light); color: var(--orange); }
+.history-item .h-status.success { background: var(--green-light); color: #1f8a4c; }
+.history-item .h-status.failed { background: var(--red-light); color: var(--red); }
+
+.history-item .h-time {
+    font-size: 0.62rem;
+    color: var(--muted-light);
+    flex-shrink: 0;
+}
+
+.history-item .h-actions {
+    display: flex;
+    gap: 6px;
+    width: 100%;
+    justify-content: flex-end;
+}
+
+.history-item .h-actions .btn-action {
+    background: none;
+    border: none;
+    font-size: 0.72rem;
+    cursor: pointer;
+    padding: 6px 10px;
+    border-radius: 8px;
+    transition: 0.2s;
+    display: flex;
+    align-items: center;
+    gap: 4px;
+}
+
+.history-item .h-actions .btn-copy-code { color: var(--blue); background: var(--blue-light); }
+.history-item .h-actions .btn-copy-code:hover { background: #c5d9f5; }
+
+.history-item .h-actions .btn-maps { color: #1f8a4c; background: var(--green-light); }
+.history-item .h-actions .btn-maps:hover { background: #c8e6c9; }
+
+/* ============================================================ */
+/* EMPTY STATE */
+/* ============================================================ */
+.empty-state {
+    text-align: center;
+    padding: 30px 0;
+    color: var(--muted-light);
+    font-size: 0.8rem;
+}
+
+.empty-state i {
+    display: block;
+    font-size: 1.8rem;
+    color: #d0d5e0;
+    margin-bottom: 8px;
+}
+
+/* ============================================================ */
+/* RESPONSIVE */
+/* ============================================================ */
+@media (max-width: 480px) {
+    body { padding-top: 76px; }
+
+    .header-profile {
+        height: 50px;
+        top: 10px;
+        left: 10px;
+        right: 10px;
+    }
+
+    .header-profile .back-btn,
+    .header-profile .menu-btn {
+        width: 34px;
+        height: 34px;
+        font-size: 0.9rem;
+    }
+
+    .header-profile .email { font-size: 0.78rem; }
+
+    .profile-container { padding: 0 10px; gap: 10px; }
+
+    .card { padding: 13px; border-radius: 16px; }
+
+    .settings-item { padding: 10px 2px; }
+
+    .settings-item .icon {
+        width: 34px;
+        height: 34px;
+        font-size: 0.9rem;
+    }
+
+    .settings-item .info .label { font-size: 0.8rem; }
+    .settings-item .info .description { font-size: 0.65rem; }
+
+    .code-samsung .code-value { font-size: 0.82rem; }
+
+    .history-item .h-code { font-size: 0.82rem; }
+    .history-item .h-email { font-size: 0.68rem; }
+    .history-item .h-actions .btn-action { font-size: 0.68rem; padding: 5px 8px; }
+
+    .history-card .history-content { max-height: 260px; }
+}
+
+@media (max-width: 360px) {
+    .history-item .h-time { display: none; }
+}
+/* ============================================================ */
+/* ME-ADDITIONAL.CSS - BOUTON SUPPRIMER & ACTIONS */
+/* ============================================================ */
+
+/* ============================================================ */
+/* ACTIONS - ALIGNEMENT ET TAILLE */
+/* ============================================================ */
+
+.history-item .h-actions {
+    display: flex;
+    gap: 8px;
+    width: 100%;
+    justify-content: flex-end;
+    flex-wrap: wrap;
+    margin-top: 6px;
+}
+
+.history-item .h-actions .btn-action {
+    background: none;
+    border: none;
+    font-size: 0.72rem;
+    font-weight: 600;
+    cursor: pointer;
+    padding: 6px 12px;
+    border-radius: 8px;
+    transition: 0.2s;
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    min-width: 70px;
+    justify-content: center;
+}
+
+/* ============================================================ */
+/* BOUTON COPIER */
+/* ============================================================ */
+.history-item .h-actions .btn-copy-code {
+    color: #1976d2;
+    background: #e3edfb;
+}
+
+.history-item .h-actions .btn-copy-code:hover {
+    background: #c5d9f5;
+}
+
+/* ============================================================ */
+/* BOUTON MAPS */
+/* ============================================================ */
+.history-item .h-actions .btn-maps {
+    color: #1f8a4c;
+    background: #e8f5e9;
+}
+
+.history-item .h-actions .btn-maps:hover {
+    background: #c8e6c9;
+}
+
+/* ============================================================ */
+/* BOUTON SUPPRIMER */
+/* ============================================================ */
+.history-item .h-actions .btn-delete {
+    color: #d32f2f;
+    background: #fce4ec;
+}
+
+.history-item .h-actions .btn-delete:hover {
+    background: #f8bbd0;
+}
+
+.history-item .h-actions .btn-delete:active {
+    transform: scale(0.95);
+}
+
+/* ============================================================ */
+/* RESPONSIVE - PETITS ÉCRANS */
+/* ============================================================ */
+@media (max-width: 480px) {
+    .history-item .h-actions {
+        gap: 6px;
+        justify-content: flex-start;
+        flex-wrap: wrap;
+    }
+
+    .history-item .h-actions .btn-action {
+        font-size: 0.65rem;
+        padding: 5px 10px;
+        min-width: 60px;
+    }
+
+    .history-item .h-actions .btn-action i {
+        font-size: 0.6rem;
+    }
+}
+
+@media (max-width: 360px) {
+    .history-item .h-actions .btn-action {
+        font-size: 0.6rem;
+        padding: 4px 8px;
+        min-width: 50px;
+    }
+
+    .history-item .h-actions {
+        gap: 4px;
+    }
+}
+
+/* ============================================================ */
+/* DARK MODE (optionnel) */
+/* ============================================================ */
+@media (prefers-color-scheme: dark) {
+    .history-item .h-actions .btn-copy-code {
+        background: #1a2a5a;
+        color: #58a6ff;
+    }
+
+    .history-item .h-actions .btn-copy-code:hover {
+        background: #2a3a6a;
+    }
+
+    .history-item .h-actions .btn-maps {
+        background: #1a4a2a;
+        color: #4caf50;
+    }
+
+    .history-item .h-actions .btn-maps:hover {
+        background: #2a5a3a;
+    }
+
+    .history-item .h-actions .btn-delete {
+        background: #4a1a1a;
+        color: #ef5350;
+    }
+
+    .history-item .h-actions .btn-delete:hover {
+        background: #5a2a2a;
+    }
+}
+/* ============================================================ */
+/* ACTIONS - ESPACEMENT ÉQUITABLE */
+/* ============================================================ */
+
+.history-item .h-actions {
+    display: flex;
+    gap: 0;
+    width: 100%;
+    justify-content: space-between;
+    margin-top: 8px;
+    padding-top: 8px;
+    border-top: 1px solid #eef1f6;
+}
+
+.history-item .h-actions .btn-action {
+    background: none;
+    border: none;
+    font-size: 0.72rem;
+    font-weight: 600;
+    cursor: pointer;
+    padding: 6px 8px;
+    border-radius: 8px;
+    transition: 0.2s;
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    flex: 1;
+    justify-content: center;
+    max-width: 120px;
+    min-width: 70px;
+}
+
+/* ============================================================ */
+/* BOUTON COPIER (à gauche) */
+/* ============================================================ */
+.history-item .h-actions .btn-copy-code {
+    color: #1976d2;
+    background: #e3edfb;
+    margin-right: auto;
+}
+
+.history-item .h-actions .btn-copy-code:hover {
+    background: #c5d9f5;
+}
+
+/* ============================================================ */
+/* BOUTON MAPS (au centre) */
+/* ============================================================ */
+.history-item .h-actions .btn-maps {
+    color: #1f8a4c;
+    background: #e8f5e9;
+}
+
+.history-item .h-actions .btn-maps:hover {
+    background: #c8e6c9;
+}
+
+/* ============================================================ */
+/* BOUTON SUPPRIMER (à droite) */
+/* ============================================================ */
+.history-item .h-actions .btn-delete {
+    color: #d32f2f;
+    background: #fce4ec;
+    margin-left: auto;
+}
+
+.history-item .h-actions .btn-delete:hover {
+    background: #f8bbd0;
+}
+
+.history-item .h-actions .btn-delete:active {
+    transform: scale(0.95);
+}
+
+/* ============================================================ */
+/* RESPONSIVE - PETITS ÉCRANS */
+/* ============================================================ */
+@media (max-width: 480px) {
+    .history-item .h-actions .btn-action {
+        font-size: 0.65rem;
+        padding: 5px 6px;
+        min-width: 50px;
+        max-width: 100px;
+    }
+
+    .history-item .h-actions .btn-action i {
+        font-size: 0.6rem;
+    }
+}
+
+@media (max-width: 360px) {
+    .history-item .h-actions .btn-action {
+        font-size: 0.55rem;
+        padding: 4px 4px;
+        min-width: 40px;
+        max-width: 80px;
+        gap: 2px;
+    }
+
+    .history-item .h-actions {
+        gap: 2px;
+    }
+}
