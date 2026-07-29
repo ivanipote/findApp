@@ -1,0 +1,258 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="description" content="easily by megane — trouvez des lieux autour de vous" />
+    <title>easily by megane</title>
+
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+
+    <!-- ============================================================ -->
+    <!-- HEADER -->
+    <!-- ============================================================ -->
+    <header class="header-search" id="searchHeader">
+        <i class="fas fa-search icon"></i>
+        <input type="text" id="searchInput" placeholder="Rechercher un lieu..." readonly />
+        <button class="menu-dots" id="menuDots" type="button" aria-label="Menu">
+            <i class="fas fa-ellipsis-v"></i>
+        </button>
+        <div class="dropdown-menu" id="dropdownMenu">
+            <button class="dropdown-item" id="navAdd" type="button">
+                <i class="fas fa-plus-circle"></i> Add place
+            </button>
+            <button class="dropdown-item" id="navMe" type="button">
+                <i class="fas fa-user"></i> <span id="navMeLabel">Se connecter</span>
+            </button>
+            <button class="dropdown-item" id="navFollow" type="button">
+                <i class="fas fa-eye"></i> <span id="navFollowLabel">Suivre quelqu'un</span>
+            </button>
+        </div>
+    </header>
+
+    <!-- ============================================================ -->
+    <!-- MAIN -->
+    <!-- ============================================================ -->
+    <main class="main">
+
+        <!-- CATÉGORIES -->
+        <section class="categories-section" id="categoriesSection">
+            <div class="categories-header">
+                <span class="categories-title"><i class="fas fa-tags"></i> Catégories</span>
+                <button class="btn-reset-categories" id="resetCategories" type="button"><i class="fas fa-undo"></i> Tout</button>
+            </div>
+            <div class="categories-grid" id="categoriesGrid">
+                <!-- Généré par JavaScript -->
+            </div>
+        </section>
+
+        <!-- CARTE -->
+        <section class="position-card" id="positionCard">
+            <div class="card-header">
+                <div class="left">
+                    <button class="toggle-btn active" id="toggleFollow" type="button">
+                        <span class="toggle-track"><span class="toggle-thumb"></span></span>
+                        Suivre
+                    </button>
+                </div>
+                <div class="right">
+                    <span class="info-item"><i class="fas fa-location-dot"></i> <span id="posStatus">--</span></span>
+                </div>
+            </div>
+            <div id="map"></div>
+        </section>
+
+    </main>
+
+    <!-- ============================================================ -->
+    <!-- OVERLAY AJOUT AVEC PHOTOS -->
+    <!-- ============================================================ -->
+    <div class="add-overlay" id="addOverlay">
+        <div class="add-sheet">
+            <span class="add-handle"></span>
+
+            <div class="add-header">
+                <h2><i class="fas fa-plus-circle"></i> Ajouter un lieu</h2>
+                <button class="close-add" id="closeAdd"><i class="fas fa-times"></i></button>
+            </div>
+
+            <form class="add-form" id="addForm">
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>Nom <span class="required">*</span></label>
+                        <input type="text" id="placeName" placeholder="Ex: Megane Shop" required />
+                    </div>
+                    <div class="form-group">
+                        <label>Catégorie <span class="required">*</span></label>
+                        <select id="placeCategory" required>
+                            <option value="">Choisir...</option>
+                            <option value="boutiques">🛍️ Boutique</option>
+                            <option value="restaurants">🍽️ Restaurant</option>
+                            <option value="domiciles">🏠 Domicile</option>
+                            <option value="cybercafes">💻 Cybercafé</option>
+                            <option value="sante">🏥 Santé</option>
+                            <option value="stations">⛽ Station</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>Adresse <span class="required">*</span></label>
+                        <input type="text" id="placeAddress" placeholder="Ex: Cocody Angré" required />
+                    </div>
+                    <div class="form-group">
+                        <label>Téléphone</label>
+                        <input type="tel" id="placePhone" placeholder="07 00 00 00 00" />
+                    </div>
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>Horaires</label>
+                        <input type="text" id="placeHours" placeholder="08:00 - 20:00" />
+                    </div>
+                    <div class="form-group">
+                        <label>Description</label>
+                        <input type="text" id="placeDescription" placeholder="Vente de vêtements..." />
+                    </div>
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group" style="flex:1;">
+                        <label>Photos</label>
+                        <div class="file-input-wrapper" id="photoInputWrapper">
+                            <i class="fas fa-image"></i>
+                            <span class="file-label" id="photoLabel">Aucun fichier</span>
+                            <button class="file-btn" type="button" id="photoBtn">Choisir</button>
+                            <input type="file" id="placePhotos" accept="image/*" multiple style="display:none;" />
+                        </div>
+                        <div class="photo-preview" id="photoPreview"></div>
+                    </div>
+                </div>
+
+                <div class="form-actions">
+                    <div class="toggle-item">
+                        <div class="toggle-switch active" id="placeStatusToggle">
+                            <span class="toggle-thumb"></span>
+                        </div>
+                        <span class="toggle-label">Actif</span>
+                        <span class="toggle-status active" id="placeStatusText">Oui</span>
+                    </div>
+                    <div class="checkbox-item">
+                        <input type="checkbox" id="placeShare" checked />
+                        <label for="placeShare">Partager <span class="required">*</span></label>
+                    </div>
+                </div>
+
+                <button type="submit" class="btn-submit" id="submitBtn">
+                    <i class="fas fa-check"></i> VALIDER
+                </button>
+            </form>
+        </div>
+    </div>
+
+    <!-- ============================================================ -->
+    <!-- OVERLAY SUIVRE QUELQU'UN -->
+    <!-- ============================================================ -->
+    <div class="follow-overlay" id="followOverlay">
+        <div class="follow-sheet">
+            <span class="follow-handle"></span>
+
+            <div class="follow-header">
+                <h2><i class="fas fa-eye"></i> Suivre quelqu'un</h2>
+                <button class="close-follow" id="closeFollow"><i class="fas fa-times"></i></button>
+            </div>
+
+            <div class="follow-content">
+                <!-- Snippet 2 : Points bondissants -->
+                <div class="follow-loader" id="followLoader">
+                    <div class="dots">
+                        <div class="dot"></div>
+                        <div class="dot"></div>
+                        <div class="dot"></div>
+                    </div>
+                    <p class="loader-text">Vérification du code...</p>
+                </div>
+
+                <div class="follow-input-area" id="followInputArea">
+                    <div class="follow-icon">
+                        <i class="fas fa-key"></i>
+                    </div>
+                    <p class="follow-subtitle">Entrez le code de la personne à suivre</p>
+                    <div class="follow-input-group">
+                        <input type="text" id="followCode" placeholder="Ex: MAMA-007" maxlength="8" autocomplete="off" />
+                        <button class="btn-follow-confirm" id="followConfirmBtn">
+                            <i class="fas fa-check"></i> Confirmer
+                        </button>
+                    </div>
+                    <div class="follow-error" id="followError">Code invalide. Veuillez réessayer.</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ============================================================ -->
+    <!-- SLIDER SUIVI (info de la personne suivie) -->
+    <!-- ============================================================ -->
+    <div class="track-slider" id="trackSlider">
+        <div class="track-sheet">
+            <div class="track-header">
+                <span class="track-email" id="trackEmail">📧 email@exemple.com</span>
+                <button class="track-close" id="trackClose"><i class="fas fa-times"></i></button>
+            </div>
+            <div class="track-body">
+                <div class="track-info">
+                    <div class="track-stat">
+                        <span class="track-stat-value" id="trackDistance">--</span>
+                        <span class="track-stat-label">Km</span>
+                    </div>
+                    <div class="track-stat">
+                        <span class="track-stat-value" id="trackTime">--</span>
+                        <span class="track-stat-label">Min</span>
+                    </div>
+                </div>
+                <button class="track-btn" id="trackActionBtn">
+                    <i class="fas fa-route"></i> <span id="trackBtnLabel">Calculer l'itinéraire</span>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- ============================================================ -->
+    <!-- OVERLAY REDIRECTION -->
+    <!-- ============================================================ -->
+    <div class="redirect-overlay" id="redirectOverlay">
+        <div class="wave-container">
+            <div class="bar"></div>
+            <div class="bar"></div>
+            <div class="bar"></div>
+            <div class="bar"></div>
+            <div class="bar"></div>
+            <div class="bar"></div>
+            <div class="bar"></div>
+            <div class="bar"></div>
+        </div>
+        <div class="redirect-text">
+            <i class="fas fa-spinner"></i> Veuillez patienter...
+        </div>
+    </div>
+
+    <!-- ============================================================ -->
+    <!-- TOAST -->
+    <!-- ============================================================ -->
+    <div class="toast" id="toast"></div>
+
+    <!-- ============================================================ -->
+    <!-- SCRIPTS -->
+    <!-- ============================================================ -->
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <script src="https://unpkg.com/leaflet-routing-machine@3.2.12/dist/leaflet-routing-machine.js"></script>
+    <script src="index.js"></script>
+
+</body>
+</html>

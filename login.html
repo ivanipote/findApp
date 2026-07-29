@@ -1,0 +1,744 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>easily by megane - Connexion</title>
+
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
+    <link rel="stylesheet" href="style.css" />
+
+    <style>
+        /* ============================================================ */
+        /* PAGE AUTH */
+        /* ============================================================ */
+        body {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+            background: #f0f2f5;
+            padding-top: 20px;
+        }
+
+        .auth-container {
+            background: #ffffff;
+            border-radius: 28px;
+            padding: 32px 28px;
+            max-width: 400px;
+            width: 100%;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.1);
+        }
+
+        .auth-header {
+            text-align: center;
+            margin-bottom: 24px;
+        }
+
+        .auth-header .auth-icon {
+            font-size: 2.5rem;
+            color: #1976d2;
+            display: block;
+            margin-bottom: 8px;
+        }
+
+        .auth-header h1 {
+            font-size: 1.6rem;
+            color: #1a2a5a;
+            font-weight: 700;
+        }
+
+        .auth-header .auth-subtitle {
+            font-size: 0.85rem;
+            color: #8a9aaa;
+            margin-top: 4px;
+        }
+
+        .auth-tabs {
+            display: flex;
+            gap: 8px;
+            margin-bottom: 20px;
+            background: #f0f2f5;
+            border-radius: 16px;
+            padding: 4px;
+        }
+
+        .auth-tab {
+            flex: 1;
+            padding: 10px;
+            border: none;
+            border-radius: 12px;
+            font-size: 0.85rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: 0.2s;
+            background: transparent;
+            color: #8a9aaa;
+        }
+
+        .auth-tab.active {
+            background: #ffffff;
+            color: #1976d2;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+        }
+
+        .auth-tab:hover:not(.active) {
+            color: #1a2a5a;
+        }
+
+        .auth-form {
+            display: none;
+        }
+
+        .auth-form.active {
+            display: block;
+        }
+
+        .auth-form .form-group {
+            margin-bottom: 14px;
+        }
+
+        .auth-form .form-group label {
+            display: block;
+            font-size: 0.8rem;
+            font-weight: 600;
+            color: #1a2a5a;
+            margin-bottom: 4px;
+        }
+
+        .auth-form .form-group .input-wrapper {
+            position: relative;
+        }
+
+        .auth-form .form-group .input-wrapper i {
+            position: absolute;
+            left: 14px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: #8a9aaa;
+            font-size: 0.95rem;
+        }
+
+        .auth-form .form-group .input-wrapper input {
+            width: 100%;
+            padding: 12px 14px 12px 44px;
+            border: 2px solid #e8ecf4;
+            border-radius: 12px;
+            font-size: 0.9rem;
+            color: #1a2a5a;
+            background: #f8f9fc;
+            transition: 0.2s;
+        }
+
+        .auth-form .form-group .input-wrapper input:focus {
+            border-color: #1976d2;
+            outline: none;
+            background: #ffffff;
+            box-shadow: 0 0 0 3px rgba(25, 118, 210, 0.1);
+        }
+
+        .auth-form .form-group .input-wrapper input::placeholder {
+            color: #aab4c8;
+        }
+
+        .auth-form .form-options {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin: 6px 0 16px 0;
+            font-size: 0.8rem;
+        }
+
+        .auth-form .form-options label {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            color: #6b7a9a;
+            cursor: pointer;
+        }
+
+        .auth-form .form-options label input[type="checkbox"] {
+            accent-color: #1976d2;
+            width: 16px;
+            height: 16px;
+            cursor: pointer;
+        }
+
+        .auth-form .form-options a {
+            color: #1976d2;
+            text-decoration: none;
+            font-weight: 600;
+        }
+
+        .auth-form .form-options a:hover {
+            text-decoration: underline;
+        }
+
+        .btn-auth {
+            width: 100%;
+            padding: 14px;
+            background: #1976d2;
+            color: #ffffff;
+            border: none;
+            border-radius: 12px;
+            font-size: 1rem;
+            font-weight: 700;
+            cursor: pointer;
+            transition: 0.2s;
+            margin-top: 4px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+
+        .btn-auth:hover {
+            background: #1565c0;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 16px rgba(25, 118, 210, 0.25);
+        }
+
+        .btn-auth:active {
+            transform: scale(0.97);
+        }
+
+        .btn-auth:disabled {
+            opacity: 0.7;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .auth-divider {
+            display: flex;
+            align-items: center;
+            margin: 20px 0;
+            color: #d0d5e0;
+            font-size: 0.8rem;
+        }
+
+        .auth-divider::before,
+        .auth-divider::after {
+            content: '';
+            flex: 1;
+            height: 1px;
+            background: #e8ecf4;
+        }
+
+        .auth-divider span {
+            padding: 0 16px;
+            color: #8a9aaa;
+        }
+
+        .btn-guest {
+            width: 100%;
+            padding: 14px;
+            background: #f0f2f5;
+            color: #1a2a5a;
+            border: none;
+            border-radius: 12px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: 0.2s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+
+        .btn-guest:hover {
+            background: #e8ecf4;
+            transform: translateY(-2px);
+        }
+
+        .btn-guest:active {
+            transform: scale(0.97);
+        }
+
+        #authMessage {
+            margin-top: 16px;
+            padding: 12px 16px;
+            border-radius: 12px;
+            font-size: 0.85rem;
+            display: none;
+            text-align: center;
+        }
+
+        #authMessage.error {
+            display: block;
+            background: #fee2e2;
+            color: #991b1b;
+            border: 1px solid #fecaca;
+        }
+
+        #authMessage.success {
+            display: block;
+            background: #dcfce7;
+            color: #166534;
+            border: 1px solid #bbf7d0;
+        }
+
+        #authMessage.info {
+            display: block;
+            background: #dbeafe;
+            color: #1e40af;
+            border: 1px solid #bfdbfe;
+        }
+
+        .spinner {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 3px solid rgba(255, 255, 255, 0.3);
+            border-top: 3px solid #ffffff;
+            border-radius: 50%;
+            animation: spin 0.8s linear infinite;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        @media (max-width: 480px) {
+            .auth-container {
+                padding: 24px 18px;
+                border-radius: 20px;
+            }
+
+            .auth-header h1 {
+                font-size: 1.3rem;
+            }
+
+            .auth-tab {
+                font-size: 0.75rem;
+                padding: 8px;
+            }
+
+            .auth-form .form-group .input-wrapper input {
+                padding: 10px 12px 10px 38px;
+                font-size: 0.85rem;
+            }
+
+            .btn-auth,
+            .btn-guest {
+                font-size: 0.9rem;
+                padding: 12px;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="auth-container">
+
+        <!-- HEADER -->
+        <div class="auth-header">
+            <span class="auth-icon"><i class="fas fa-map-location-dot"></i></span>
+            <h1>easily by megane</h1>
+            <p class="auth-subtitle">Connectez-vous pour ajouter et gérer vos lieux</p>
+        </div>
+
+        <!-- TABS -->
+        <div class="auth-tabs">
+            <button class="auth-tab active" data-tab="login" id="authTabLogin">
+                <i class="fas fa-sign-in-alt"></i> Connexion
+            </button>
+            <button class="auth-tab" data-tab="register" id="authTabRegister">
+                <i class="fas fa-user-plus"></i> Inscription
+            </button>
+        </div>
+
+        <!-- CONNEXION -->
+        <form id="loginForm" class="auth-form active">
+            <div class="form-group">
+                <label>Email</label>
+                <div class="input-wrapper">
+                    <i class="fas fa-envelope"></i>
+                    <input type="email" id="loginEmail" placeholder="exemple@email.com" required />
+                </div>
+            </div>
+            <div class="form-group">
+                <label>Mot de passe</label>
+                <div class="input-wrapper">
+                    <i class="fas fa-lock"></i>
+                    <input type="password" id="loginPassword" placeholder="••••••••" required />
+                </div>
+            </div>
+            <div class="form-options">
+                <label>
+                    <input type="checkbox" id="rememberMe" /> Se souvenir de moi
+                </label>
+                <a href="#" id="forgotPassword">Mot de passe oublié ?</a>
+            </div>
+            <button type="submit" class="btn-auth" id="loginBtn">
+                <i class="fas fa-sign-in-alt"></i> Se connecter
+            </button>
+        </form>
+
+        <!-- INSCRIPTION -->
+        <form id="registerForm" class="auth-form">
+            <div class="form-group">
+                <label>Email</label>
+                <div class="input-wrapper">
+                    <i class="fas fa-envelope"></i>
+                    <input type="email" id="registerEmail" placeholder="exemple@email.com" required />
+                </div>
+            </div>
+            <div class="form-group">
+                <label>Mot de passe</label>
+                <div class="input-wrapper">
+                    <i class="fas fa-lock"></i>
+                    <input type="password" id="registerPassword" placeholder="••••••••" required />
+                </div>
+            </div>
+            <div class="form-group">
+                <label>Confirmer le mot de passe</label>
+                <div class="input-wrapper">
+                    <i class="fas fa-lock"></i>
+                    <input type="password" id="registerPasswordConfirm" placeholder="••••••••" required />
+                </div>
+            </div>
+            <button type="submit" class="btn-auth" id="registerBtn">
+                <i class="fas fa-user-plus"></i> S'inscrire
+            </button>
+        </form>
+
+        <!-- DIVIDER -->
+        <div class="auth-divider">
+            <span>ou</span>
+        </div>
+
+        <!-- GUEST -->
+        <button class="btn-guest" id="guestBtn">
+            <i class="fas fa-user"></i> Continuer sans compte
+        </button>
+
+        <!-- MESSAGE -->
+        <div id="authMessage"></div>
+
+    </div>
+
+    <!-- ============================================================ -->
+    <!-- SCRIPT -->
+    <!-- ============================================================ -->
+    <script>
+        (function() {
+            'use strict';
+
+            // ============================================================
+            // 🔑 CONFIGURATION SUPABASE - NOUVELLES CLÉS
+            // ============================================================
+            var SUPABASE_URL = 'https://slanrdeaxapzfqtuqhbf.supabase.co';
+            var SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InNsYW5yZGVheGFwemZxdHVxaGJmIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODUzMzA3OTcsImV4cCI6MjEwMDkwNjc5N30.pUCb_N-66pjFs-QP2RefsqjAnffC4Rbq-rP9qHfnvK8';
+
+            console.log('🔐 Auth via API REST (nouvelles clés)');
+
+            // ============================================================
+            // ÉLÉMENTS DOM
+            // ============================================================
+            var loginForm = document.getElementById('loginForm');
+            var registerForm = document.getElementById('registerForm');
+            var loginBtn = document.getElementById('loginBtn');
+            var registerBtn = document.getElementById('registerBtn');
+            var guestBtn = document.getElementById('guestBtn');
+            var authMessage = document.getElementById('authMessage');
+
+            var tabLogin = document.getElementById('authTabLogin');
+            var tabRegister = document.getElementById('authTabRegister');
+
+            var loginEmail = document.getElementById('loginEmail');
+            var loginPassword = document.getElementById('loginPassword');
+            var registerEmail = document.getElementById('registerEmail');
+            var registerPassword = document.getElementById('registerPassword');
+            var registerPasswordConfirm = document.getElementById('registerPasswordConfirm');
+            var forgotPassword = document.getElementById('forgotPassword');
+
+            // ============================================================
+            // AFFICHER LE MESSAGE
+            // ============================================================
+            function showMessage(message, type) {
+                authMessage.textContent = message;
+                authMessage.className = type;
+                if (type !== 'error') {
+                    setTimeout(function() {
+                        authMessage.className = '';
+                        authMessage.textContent = '';
+                    }, 5000);
+                }
+            }
+
+            // ============================================================
+            // CHANGER D'ONGLET
+            // ============================================================
+            function switchTab(tab) {
+                tabLogin.classList.toggle('active', tab === 'login');
+                tabRegister.classList.toggle('active', tab === 'register');
+                loginForm.classList.toggle('active', tab === 'login');
+                registerForm.classList.toggle('active', tab === 'register');
+                authMessage.className = '';
+                authMessage.textContent = '';
+            }
+
+            tabLogin.addEventListener('click', function(e) {
+                e.preventDefault();
+                switchTab('login');
+            });
+
+            tabRegister.addEventListener('click', function(e) {
+                e.preventDefault();
+                switchTab('register');
+            });
+
+            // ============================================================
+            // VALIDATION
+            // ============================================================
+            function isValidEmail(email) {
+                return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
+            }
+
+            function isValidPassword(password) {
+                return password.length >= 6;
+            }
+
+            // ============================================================
+            // GESTION DES ERREURS
+            // ============================================================
+            function handleError(error) {
+                console.error('❌ Erreur:', error);
+
+                var messages = {
+                    'Invalid login credentials': 'Email ou mot de passe incorrect.',
+                    'Email not confirmed': 'Veuillez confirmer votre email avant de vous connecter.',
+                    'User already registered': 'Cet email est déjà utilisé.',
+                    'Password should be at least 6 characters': 'Le mot de passe doit contenir au moins 6 caractères.',
+                    'Invalid email': 'Veuillez saisir un email valide.'
+                };
+
+                var msg = error.message || error.msg || 'Une erreur est survenue.';
+                return messages[msg] || msg;
+            }
+
+            // ============================================================
+            // INSCRIPTION (API REST)
+            // ============================================================
+            registerForm.addEventListener('submit', function(e) {
+                e.preventDefault();
+
+                var email = registerEmail.value.trim();
+                var password = registerPassword.value.trim();
+                var confirm = registerPasswordConfirm.value.trim();
+
+                if (!isValidEmail(email)) {
+                    showMessage('Veuillez saisir un email valide.', 'error');
+                    return;
+                }
+
+                if (!isValidPassword(password)) {
+                    showMessage('Le mot de passe doit contenir au moins 6 caractères.', 'error');
+                    return;
+                }
+
+                if (password !== confirm) {
+                    showMessage('Les mots de passe ne correspondent pas.', 'error');
+                    return;
+                }
+
+                registerBtn.disabled = true;
+                registerBtn.innerHTML = '<span class="spinner"></span> Inscription...';
+
+                fetch(SUPABASE_URL + '/auth/v1/signup', {
+                    method: 'POST',
+                    headers: {
+                        'apikey': SUPABASE_ANON_KEY,
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ email: email, password: password })
+                })
+                .then(function(response) {
+                    return response.json().then(function(data) {
+                        if (!response.ok) {
+                            throw { message: data.msg || data.message || 'Erreur inscription', data: data };
+                        }
+                        return data;
+                    });
+                })
+                .then(function(data) {
+                    console.log('✅ Inscription réussie:', data);
+                    showMessage('✅ Inscription réussie ! Un email de confirmation vous a été envoyé.', 'success');
+
+                    setTimeout(function() {
+                        switchTab('login');
+                        loginEmail.value = email;
+                        loginPassword.value = '';
+                        showMessage('Compte créé ! Connectez-vous maintenant.', 'info');
+                    }, 2000);
+                })
+                .catch(function(error) {
+                    showMessage(handleError(error), 'error');
+                })
+                .finally(function() {
+                    registerBtn.disabled = false;
+                    registerBtn.innerHTML = '<i class="fas fa-user-plus"></i> S\'inscrire';
+                });
+            });
+
+            // ============================================================
+            // CONNEXION (API REST)
+            // ============================================================
+            loginForm.addEventListener('submit', function(e) {
+                e.preventDefault();
+
+                var email = loginEmail.value.trim();
+                var password = loginPassword.value.trim();
+
+                if (!isValidEmail(email)) {
+                    showMessage('Veuillez saisir un email valide.', 'error');
+                    return;
+                }
+
+                if (!isValidPassword(password)) {
+                    showMessage('Le mot de passe doit contenir au moins 6 caractères.', 'error');
+                    return;
+                }
+
+                loginBtn.disabled = true;
+                loginBtn.innerHTML = '<span class="spinner"></span> Connexion...';
+
+                fetch(SUPABASE_URL + '/auth/v1/token?grant_type=password', {
+                    method: 'POST',
+                    headers: {
+                        'apikey': SUPABASE_ANON_KEY,
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ email: email, password: password })
+                })
+                .then(function(response) {
+                    return response.json().then(function(data) {
+                        if (!response.ok) {
+                            throw { message: data.msg || data.message || 'Erreur connexion', data: data };
+                        }
+                        return data;
+                    });
+                })
+                .then(function(data) {
+                    console.log('✅ Connexion réussie:', data);
+
+                    var user = data.user;
+                    var session = {
+                        access_token: data.access_token,
+                        refresh_token: data.refresh_token,
+                        expires_in: data.expires_in,
+                        user: user
+                    };
+
+                    localStorage.setItem('sb_user', JSON.stringify(user));
+                    localStorage.setItem('sb_session', JSON.stringify(session));
+
+                    showMessage('✅ Connexion réussie ! Redirection...', 'success');
+
+                    setTimeout(function() {
+                        window.location.href = 'index.html';
+                    }, 1500);
+                })
+                .catch(function(error) {
+                    showMessage(handleError(error), 'error');
+                    loginBtn.disabled = false;
+                    loginBtn.innerHTML = '<i class="fas fa-sign-in-alt"></i> Se connecter';
+                });
+            });
+
+            // ============================================================
+            // MOT DE PASSE OUBLIÉ (API REST)
+            // ============================================================
+            forgotPassword.addEventListener('click', function(e) {
+                e.preventDefault();
+
+                var email = loginEmail.value.trim();
+                if (!isValidEmail(email)) {
+                    showMessage('Veuillez saisir votre email pour réinitialiser votre mot de passe.', 'error');
+                    return;
+                }
+
+                fetch(SUPABASE_URL + '/auth/v1/recover', {
+                    method: 'POST',
+                    headers: {
+                        'apikey': SUPABASE_ANON_KEY,
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ email: email })
+                })
+                .then(function(response) {
+                    if (!response.ok) {
+                        return response.json().then(function(data) {
+                            throw { message: data.msg || data.message || 'Erreur' };
+                        });
+                    }
+                    return response.json();
+                })
+                .then(function() {
+                    showMessage('✅ Un email de réinitialisation vous a été envoyé.', 'success');
+                })
+                .catch(function(error) {
+                    showMessage(handleError(error), 'error');
+                });
+            });
+
+            // ============================================================
+            // MODE INVITÉ
+            // ============================================================
+            guestBtn.addEventListener('click', function() {
+                guestBtn.disabled = true;
+                guestBtn.innerHTML = '<span class="spinner"></span> Chargement...';
+
+                setTimeout(function() {
+                    localStorage.setItem('easily_guest', 'true');
+                    showMessage('👤 Mode invité activé. Accès en lecture seule.', 'info');
+                    setTimeout(function() {
+                        window.location.href = 'index.html';
+                    }, 1500);
+                }, 1000);
+            });
+
+            // ============================================================
+            // TOUCHE ENTRÉE
+            // ============================================================
+            document.addEventListener('keydown', function(e) {
+                if (e.key === 'Enter') {
+                    if (loginForm.classList.contains('active')) {
+                        loginForm.dispatchEvent(new Event('submit'));
+                    } else if (registerForm.classList.contains('active')) {
+                        registerForm.dispatchEvent(new Event('submit'));
+                    }
+                }
+            });
+
+            // ============================================================
+            // VÉRIFIER LA SESSION
+            // ============================================================
+            function checkSession() {
+                try {
+                    var session = localStorage.getItem('sb_session');
+                    if (session) {
+                        var parsed = JSON.parse(session);
+                        if (parsed && parsed.access_token) {
+                            console.log('👤 Session existante, redirection...');
+                            window.location.href = 'index.html';
+                        }
+                    }
+                } catch (e) {
+                    console.log('Aucune session valide');
+                }
+            }
+
+            // ============================================================
+            // INIT
+            // ============================================================
+            console.log('🔐 Page login.html (API REST) - Nouvelles clés');
+            checkSession();
+
+        })();
+    </script>
+
+</body>
+</html>

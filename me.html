@@ -1,0 +1,1107 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>👤 Mon Profil - easily by megane</title>
+
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
+    <link rel="stylesheet" href="style.css" />
+
+    <style>
+        /* ============================================================ */
+        /* PAGE MON PROFIL */
+        /* ============================================================ */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            background: #f0f2f5;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            min-height: 100vh;
+            padding-top: 76px;
+            padding-bottom: 20px;
+            margin: 0;
+        }
+
+        /* ============================================================ */
+        /* HEADER */
+        /* ============================================================ */
+        .header-profile {
+            position: fixed;
+            top: 12px;
+            left: 12px;
+            right: 12px;
+            z-index: 1000;
+            height: 60px;
+            background: #ffffff;
+            border-radius: 35px;
+            display: flex;
+            align-items: center;
+            padding: 0 20px;
+            gap: 14px;
+            box-shadow: 0 2px 12px rgba(0, 0, 0, 0.06);
+            border: 3px solid #1976d2;
+            max-width: 480px;
+            margin: 0 auto;
+        }
+
+        @media (min-width: 480px) {
+            .header-profile {
+                left: 50%;
+                transform: translateX(-50%);
+                right: auto;
+                top: 12px;
+            }
+        }
+
+        .header-profile .back-btn {
+            background: none;
+            border: none;
+            color: #1976d2;
+            font-size: 1.2rem;
+            cursor: pointer;
+            padding: 4px 6px;
+            border-radius: 50%;
+            transition: 0.2s;
+        }
+
+        .header-profile .back-btn:hover {
+            background: #f0f2f5;
+        }
+
+        .header-profile .email {
+            flex: 1;
+            font-weight: 600;
+            font-size: 0.85rem;
+            color: #1a2a5a;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .header-profile .menu-btn {
+            background: none;
+            border: none;
+            color: #1976d2;
+            font-size: 1.3rem;
+            cursor: pointer;
+            padding: 4px 8px;
+            border-radius: 30px;
+            transition: 0.2s;
+        }
+
+        .header-profile .menu-btn:hover {
+            background: #f0f4ff;
+        }
+
+        /* ============================================================ */
+        /* DROPDOWN MENU */
+        /* ============================================================ */
+        .dropdown-menu {
+            position: fixed;
+            top: 76px;
+            right: 20px;
+            background: #ffffff;
+            border-radius: 16px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.15);
+            border: 1px solid #eef1f6;
+            min-width: 200px;
+            padding: 8px 0;
+            opacity: 0;
+            visibility: hidden;
+            transform: translateY(-10px);
+            transition: opacity 0.25s ease, transform 0.25s ease, visibility 0.25s ease;
+            z-index: 2000;
+            max-width: 480px;
+        }
+
+        .dropdown-menu.active {
+            opacity: 1;
+            visibility: visible;
+            transform: translateY(0);
+        }
+
+        .dropdown-menu .dropdown-item {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            width: 100%;
+            padding: 12px 20px;
+            background: none;
+            border: none;
+            font-size: 0.9rem;
+            font-weight: 600;
+            color: #1a2a5a;
+            cursor: pointer;
+            transition: 0.15s;
+            text-align: left;
+        }
+
+        .dropdown-menu .dropdown-item i {
+            font-size: 1.1rem;
+            width: 24px;
+            text-align: center;
+            color: #1976d2;
+        }
+
+        .dropdown-menu .dropdown-item:hover {
+            background: #f0f4ff;
+        }
+
+        /* ============================================================ */
+        /* CONTAINER */
+        /* ============================================================ */
+        .profile-container {
+            max-width: 480px;
+            margin: 0 auto;
+            padding: 0 12px;
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+        }
+
+        /* ============================================================ */
+        /* CARDS */
+        /* ============================================================ */
+        .card {
+            background: #ffffff;
+            border-radius: 16px;
+            padding: 16px 18px;
+            border: 1px solid #e8ecf4;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.03);
+        }
+
+        .card .card-title {
+            font-size: 0.8rem;
+            font-weight: 700;
+            color: #1a2a5a;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin-bottom: 14px;
+        }
+
+        .card .card-title i {
+            color: #1976d2;
+        }
+
+        /* --- Toggle --- */
+        .toggle-row {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 14px;
+        }
+
+        .toggle-row .toggle-label {
+            font-size: 0.85rem;
+            font-weight: 600;
+            color: #1a2a5a;
+        }
+
+        .toggle-row .toggle-label small {
+            font-weight: 400;
+            color: #8a9aaa;
+            font-size: 0.7rem;
+        }
+
+        .toggle-switch {
+            width: 48px;
+            height: 26px;
+            background: #b0b8c8;
+            border-radius: 30px;
+            position: relative;
+            cursor: pointer;
+            transition: 0.3s;
+            flex-shrink: 0;
+        }
+
+        .toggle-switch .thumb {
+            width: 20px;
+            height: 20px;
+            background: #ffffff;
+            border-radius: 50%;
+            position: absolute;
+            top: 3px;
+            left: 3px;
+            transition: 0.3s;
+            box-shadow: 0 1px 4px rgba(0, 0, 0, 0.15);
+        }
+
+        .toggle-switch.active {
+            background: #1976d2;
+        }
+
+        .toggle-switch.active .thumb {
+            left: 25px;
+        }
+
+        /* --- Code --- */
+        .code-row {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            background: #f8f9fc;
+            border-radius: 12px;
+            padding: 10px 14px;
+            border: 1px solid #eef1f6;
+            margin-bottom: 10px;
+        }
+
+        .code-row .code-label {
+            font-size: 0.7rem;
+            font-weight: 600;
+            color: #8a9aaa;
+            text-transform: uppercase;
+            letter-spacing: 0.3px;
+        }
+
+        .code-row .code-value {
+            flex: 1;
+            font-size: 1.1rem;
+            font-weight: 700;
+            color: #1976d2;
+            font-family: 'Courier New', monospace;
+            letter-spacing: 1px;
+        }
+
+        .code-row .btn-copy {
+            background: none;
+            border: none;
+            color: #1976d2;
+            font-size: 1rem;
+            cursor: pointer;
+            padding: 4px 8px;
+            border-radius: 8px;
+            transition: 0.2s;
+        }
+
+        .code-row .btn-copy:hover {
+            background: #e3edfb;
+        }
+
+        .code-row .btn-copy.copied {
+            color: #2ecc71;
+        }
+
+        /* --- Boutons --- */
+        .btn-reset {
+            width: 100%;
+            padding: 10px;
+            background: #f8f9fc;
+            border: 1px solid #eef1f6;
+            border-radius: 10px;
+            font-size: 0.8rem;
+            font-weight: 600;
+            color: #1a2a5a;
+            cursor: pointer;
+            transition: 0.2s;
+            margin-bottom: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 6px;
+        }
+
+        .btn-reset:hover {
+            background: #fce4ec;
+            border-color: #d32f2f;
+            color: #d32f2f;
+        }
+
+        /* --- Email share --- */
+        .email-share {
+            display: flex;
+            gap: 8px;
+        }
+
+        .email-share input {
+            flex: 1;
+            padding: 10px 14px;
+            border: 1px solid #e8ecf4;
+            border-radius: 10px;
+            font-size: 0.85rem;
+            color: #1a2a5a;
+            background: #f8f9fc;
+            transition: 0.2s;
+        }
+
+        .email-share input:focus {
+            border-color: #1976d2;
+            outline: none;
+            background: #ffffff;
+        }
+
+        .email-share .btn-send {
+            padding: 10px 16px;
+            background: #1976d2;
+            color: #ffffff;
+            border: none;
+            border-radius: 10px;
+            font-size: 0.8rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: 0.2s;
+            white-space: nowrap;
+        }
+
+        .email-share .btn-send:hover {
+            background: #1565c0;
+        }
+
+        /* --- Codes reçus --- */
+        .received-item {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 10px 12px;
+            background: #f8f9fc;
+            border-radius: 10px;
+            border: 1px solid #eef1f6;
+            margin-bottom: 8px;
+        }
+
+        .received-item:last-child {
+            margin-bottom: 0;
+        }
+
+        .received-item .received-code {
+            font-size: 0.9rem;
+            font-weight: 700;
+            color: #1976d2;
+            font-family: 'Courier New', monospace;
+            letter-spacing: 0.5px;
+            min-width: 80px;
+        }
+
+        .received-item .received-from {
+            flex: 1;
+            font-size: 0.75rem;
+            color: #8a9aaa;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .received-item .received-from i {
+            font-size: 0.6rem;
+            color: #aab4c8;
+            margin-right: 4px;
+        }
+
+        .received-item .received-time {
+            font-size: 0.65rem;
+            color: #aab4c8;
+            white-space: nowrap;
+        }
+
+        .received-item .btn-copy-small {
+            background: none;
+            border: none;
+            color: #1976d2;
+            font-size: 0.85rem;
+            cursor: pointer;
+            padding: 4px 6px;
+            border-radius: 6px;
+            transition: 0.2s;
+        }
+
+        .received-item .btn-copy-small:hover {
+            background: #e3edfb;
+        }
+
+        .received-item .btn-copy-small.copied {
+            color: #2ecc71;
+        }
+
+        .empty-state-small {
+            text-align: center;
+            padding: 20px;
+            color: #aab4c8;
+            font-size: 0.8rem;
+        }
+
+        .empty-state-small i {
+            display: block;
+            font-size: 1.8rem;
+            color: #d0d5e0;
+            margin-bottom: 6px;
+        }
+
+        /* ============================================================ */
+        /* TOAST */
+        /* ============================================================ */
+        .toast-me {
+            position: fixed;
+            bottom: 24px;
+            left: 50%;
+            transform: translateX(-50%);
+            padding: 10px 20px;
+            border-radius: 30px;
+            font-size: 0.8rem;
+            font-weight: 600;
+            z-index: 9999;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.3s ease;
+            max-width: 90%;
+            text-align: center;
+            background: #1a2a5a;
+            color: #ffffff;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
+        }
+
+        .toast-me.show {
+            opacity: 1;
+        }
+
+        .toast-me.success {
+            background: #2ecc71;
+            color: #fff;
+        }
+
+        .toast-me.error {
+            background: #d32f2f;
+            color: #fff;
+        }
+
+        .toast-me.info {
+            background: #1976d2;
+            color: #fff;
+        }
+
+        /* ============================================================ */
+        /* RESPONSIVE */
+        /* ============================================================ */
+        @media (max-width: 480px) {
+            body {
+                padding-top: 68px;
+            }
+
+            .header-profile {
+                height: 52px;
+                padding: 0 16px;
+                top: 10px;
+                left: 10px;
+                right: 10px;
+                border-radius: 30px;
+                border-width: 2px;
+            }
+
+            .header-profile .email {
+                font-size: 0.75rem;
+            }
+
+            .dropdown-menu {
+                top: 68px;
+                right: 16px;
+                min-width: 170px;
+            }
+
+            .code-row .code-value {
+                font-size: 0.95rem;
+            }
+
+            .email-share {
+                flex-wrap: wrap;
+            }
+
+            .email-share input {
+                flex: 1 1 100%;
+            }
+
+            .email-share .btn-send {
+                flex: 1 1 100%;
+            }
+
+            .received-item {
+                flex-wrap: wrap;
+                gap: 4px 10px;
+            }
+
+            .received-item .received-from {
+                flex: 1 1 100%;
+                font-size: 0.7rem;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- ============================================================ -->
+    <!-- HEADER -->
+    <!-- ============================================================ -->
+    <header class="header-profile">
+        <button class="back-btn" id="backBtn" type="button" aria-label="Retour">
+            <i class="fas fa-arrow-left"></i>
+        </button>
+        <span class="email" id="userEmail">📧 Chargement...</span>
+        <button class="menu-btn" id="menuBtn" type="button" aria-label="Menu">
+            <i class="fas fa-ellipsis-v"></i>
+        </button>
+    </header>
+
+    <!-- DROPDOWN MENU -->
+    <div class="dropdown-menu" id="dropdownMenu">
+        <button class="dropdown-item" id="navPositions" type="button">
+            <i class="fas fa-map-pin"></i> Mes positions
+        </button>
+    </div>
+
+    <!-- ============================================================ -->
+    <!-- CONTENU -->
+    <!-- ============================================================ -->
+    <div class="profile-container">
+
+        <!-- ============================================================ -->
+        <!-- CADRE 1 : PARTAGE DE POSITION -->
+        <!-- ============================================================ -->
+        <div class="card">
+            <div class="card-title">
+                <i class="fas fa-share-alt"></i> Partage de position
+            </div>
+
+            <div class="toggle-row">
+                <span class="toggle-label">
+                    Partager ma position
+                    <small>(activé en continu)</small>
+                </span>
+                <div class="toggle-switch" id="shareToggle">
+                    <span class="thumb"></span>
+                </div>
+            </div>
+
+            <div class="code-row">
+                <span class="code-label">📋 Code</span>
+                <span class="code-value" id="shareCode">Aucun code</span>
+                <button class="btn-copy" id="copyCodeBtn" type="button" title="Copier">
+                    <i class="fas fa-copy"></i>
+                </button>
+            </div>
+
+            <button class="btn-reset" id="resetCodeBtn" type="button">
+                <i class="fas fa-undo"></i> Réinitialiser mon code
+            </button>
+
+            <div class="email-share">
+                <input type="email" id="shareEmail" placeholder="Email du destinataire..." />
+                <button class="btn-send" id="sendEmailBtn" type="button">
+                    <i class="fas fa-paper-plane"></i> Envoyer
+                </button>
+            </div>
+        </div>
+
+        <!-- ============================================================ -->
+        <!-- CADRE 2 : CODES REÇUS -->
+        <!-- ============================================================ -->
+        <div class="card">
+            <div class="card-title">
+                <i class="fas fa-inbox"></i> Codes reçus
+            </div>
+            <div id="receivedList">
+                <div class="empty-state-small">
+                    <i class="fas fa-inbox"></i>
+                    Aucun code reçu pour l'instant
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    <!-- ============================================================ -->
+    <!-- TOAST -->
+    <!-- ============================================================ -->
+    <div class="toast-me" id="toastMe"></div>
+
+    <!-- ============================================================ -->
+    <!-- SCRIPT -->
+    <!-- ============================================================ -->
+    <script>
+        (function() {
+            'use strict';
+
+            // ============================================================
+            // 🔑 CONFIGURATION SUPABASE
+            // ============================================================
+            var SUPABASE_URL = 'https://slanrdeaxapzfqtuqhbf.supabase.co';
+            var SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InNsYW5yZGVheGFwemZxdHVxaGJmIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODUzMzA3OTcsImV4cCI6MjEwMDkwNjc5N30.pUCb_N-66pjFs-QP2RefsqjAnffC4Rbq-rP9qHfnvK8';
+
+            // ============================================================
+            // DOM REFS
+            // ============================================================
+            var backBtn = document.getElementById('backBtn');
+            var menuBtn = document.getElementById('menuBtn');
+            var dropdownMenu = document.getElementById('dropdownMenu');
+            var navPositions = document.getElementById('navPositions');
+            var shareToggle = document.getElementById('shareToggle');
+            var shareCode = document.getElementById('shareCode');
+            var copyCodeBtn = document.getElementById('copyCodeBtn');
+            var resetCodeBtn = document.getElementById('resetCodeBtn');
+            var shareEmail = document.getElementById('shareEmail');
+            var sendEmailBtn = document.getElementById('sendEmailBtn');
+            var toastEl = document.getElementById('toastMe');
+            var userEmailEl = document.getElementById('userEmail');
+            var receivedList = document.getElementById('receivedList');
+
+            var toastTimer = null;
+            var currentRecordId = null;
+            var watchId = null;
+
+            // ============================================================
+            // TOAST
+            // ============================================================
+            function showToast(message, type) {
+                toastEl.textContent = message;
+                toastEl.className = 'toast-me show ' + type;
+                if (toastTimer) clearTimeout(toastTimer);
+                toastTimer = setTimeout(function() {
+                    toastEl.classList.remove('show');
+                }, 2500);
+            }
+
+            // ============================================================
+            // SESSION
+            // ============================================================
+            function getSession() {
+                try {
+                    var session = localStorage.getItem('sb_session');
+                    if (session) return JSON.parse(session);
+                } catch (e) {}
+                return null;
+            }
+
+            function getHeaders(token) {
+                var headers = {
+                    'apikey': SUPABASE_ANON_KEY,
+                    'Content-Type': 'application/json'
+                };
+                if (token) {
+                    headers['Authorization'] = 'Bearer ' + token;
+                } else {
+                    headers['Authorization'] = 'Bearer ' + SUPABASE_ANON_KEY;
+                }
+                return headers;
+            }
+
+            // ============================================================
+            // GÉNÉRER CODE
+            // ============================================================
+            function generateCode() {
+                var chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
+                var code = '';
+                for (var i = 0; i < 8; i++) {
+                    code += chars.charAt(Math.floor(Math.random() * chars.length));
+                    if (i === 3) code += '-';
+                }
+                return code;
+            }
+
+            // ============================================================
+            // CHARGER MON CODE
+            // ============================================================
+            async function loadMyCode() {
+                var session = getSession();
+                if (!session || !session.access_token) {
+                    userEmailEl.textContent = '📧 Non connecté';
+                    return;
+                }
+
+                userEmailEl.textContent = '📧 ' + session.user.email;
+
+                try {
+                    var response = await fetch(
+                        SUPABASE_URL + '/rest/v1/shared_locations?user_id=eq.' + session.user.id +
+                        '&select=*&limit=1&order=created_at.desc', {
+                            headers: getHeaders(session.access_token)
+                        }
+                    );
+                    if (!response.ok) return;
+                    var data = await response.json();
+
+                    if (data && data.length > 0) {
+                        var record = data[0];
+                        currentRecordId = record.id;
+                        shareCode.textContent = record.code;
+                        shareToggle.classList.toggle('active', record.active === true);
+
+                        // Si actif, lancer la mise à jour de la position
+                        if (record.active) {
+                            startUpdatingLocation(record.id, session.user.id);
+                        }
+                    } else {
+                        shareCode.textContent = 'Aucun code';
+                        shareToggle.classList.remove('active');
+                    }
+                } catch (e) {
+                    console.error('❌ Erreur chargement code:', e);
+                }
+            }
+
+            // ============================================================
+            // CRÉER UN CODE
+            // ============================================================
+            async function createShareCode() {
+                var session = getSession();
+                if (!session || !session.access_token) {
+                    showToast('Veuillez vous connecter', 'error');
+                    return null;
+                }
+
+                var code = generateCode();
+                var data = {
+                    user_id: session.user.id,
+                    code: code,
+                    email: session.user.email,
+                    latitude: 0,
+                    longitude: 0,
+                    active: true
+                };
+
+                try {
+                    var response = await fetch(SUPABASE_URL + '/rest/v1/shared_locations', {
+                        method: 'POST',
+                        headers: {
+                            ...getHeaders(session.access_token),
+                            'Prefer': 'return=representation'
+                        },
+                        body: JSON.stringify(data)
+                    });
+
+                    if (!response.ok) {
+                        var err = await response.text();
+                        throw new Error('Erreur ' + response.status + ': ' + err);
+                    }
+
+                    var result = await response.json();
+                    var record = result[0] || result;
+                    currentRecordId = record.id;
+                    shareCode.textContent = record.code;
+                    shareToggle.classList.add('active');
+
+                    // Lancer la mise à jour de la position
+                    startUpdatingLocation(record.id, session.user.id);
+
+                    showToast('✅ Code créé : ' + record.code, 'success');
+                    return record;
+                } catch (e) {
+                    console.error('❌ Erreur création code:', e);
+                    showToast('Erreur: ' + e.message, 'error');
+                    return null;
+                }
+            }
+
+            // ============================================================
+            // RÉINITIALISER LE CODE
+            // ============================================================
+            async function resetShareCode() {
+                if (!currentRecordId) {
+                    showToast('Aucun code à réinitialiser', 'error');
+                    return;
+                }
+
+                var session = getSession();
+                if (!session || !session.access_token) {
+                    showToast('Veuillez vous connecter', 'error');
+                    return;
+                }
+
+                var newCode = generateCode();
+
+                try {
+                    var response = await fetch(SUPABASE_URL + '/rest/v1/shared_locations?id=eq.' + currentRecordId, {
+                        method: 'PATCH',
+                        headers: getHeaders(session.access_token),
+                        body: JSON.stringify({ code: newCode })
+                    });
+
+                    if (!response.ok) {
+                        var err = await response.text();
+                        throw new Error('Erreur ' + response.status + ': ' + err);
+                    }
+
+                    shareCode.textContent = newCode;
+                    showToast('🔄 Code réinitialisé : ' + newCode, 'success');
+                } catch (e) {
+                    console.error('❌ Erreur réinitialisation:', e);
+                    showToast('Erreur: ' + e.message, 'error');
+                }
+            }
+
+            // ============================================================
+            // TOGGLE ACTIVE
+            // ============================================================
+            async function toggleShare(active) {
+                if (!currentRecordId) {
+                    if (active) {
+                        // Pas de code → en créer un
+                        await createShareCode();
+                    }
+                    return;
+                }
+
+                var session = getSession();
+                if (!session || !session.access_token) {
+                    showToast('Veuillez vous connecter', 'error');
+                    return;
+                }
+
+                try {
+                    var response = await fetch(SUPABASE_URL + '/rest/v1/shared_locations?id=eq.' + currentRecordId, {
+                        method: 'PATCH',
+                        headers: getHeaders(session.access_token),
+                        body: JSON.stringify({ active: active })
+                    });
+
+                    if (!response.ok) {
+                        var err = await response.text();
+                        throw new Error('Erreur ' + response.status + ': ' + err);
+                    }
+
+                    if (active) {
+                        showToast('📍 Partage activé', 'success');
+                        // Démarrer le suivi GPS
+                        var session2 = getSession();
+                        startUpdatingLocation(currentRecordId, session2.user.id);
+                    } else {
+                        showToast('📍 Partage désactivé', 'info');
+                        // Arrêter le suivi GPS
+                        if (watchId) {
+                            navigator.geolocation.clearWatch(watchId);
+                            watchId = null;
+                        }
+                    }
+                } catch (e) {
+                    console.error('❌ Erreur toggle:', e);
+                    showToast('Erreur: ' + e.message, 'error');
+                }
+            }
+
+            // ============================================================
+            // SUIVI GPS
+            // ============================================================
+            function startUpdatingLocation(recordId, userId) {
+                if (!navigator.geolocation) {
+                    console.warn('⚠️ Géolocalisation non disponible');
+                    return;
+                }
+
+                if (watchId) {
+                    navigator.geolocation.clearWatch(watchId);
+                    watchId = null;
+                }
+
+                watchId = navigator.geolocation.watchPosition(
+                    async function(pos) {
+                        var lat = pos.coords.latitude;
+                        var lng = pos.coords.longitude;
+                        var accuracy = pos.coords.accuracy;
+
+                        var session = getSession();
+                        if (!session || !session.access_token) return;
+
+                        try {
+                            await fetch(SUPABASE_URL + '/rest/v1/shared_locations?id=eq.' + recordId, {
+                                method: 'PATCH',
+                                headers: getHeaders(session.access_token),
+                                body: JSON.stringify({
+                                    latitude: lat,
+                                    longitude: lng,
+                                    accuracy: accuracy,
+                                    last_update: new Date().toISOString()
+                                })
+                            });
+                        } catch (e) {
+                            console.warn('⚠️ Erreur mise à jour position:', e);
+                        }
+                    },
+                    function(err) {
+                        console.warn('⚠️ Erreur GPS:', err.message);
+                    }, {
+                        enableHighAccuracy: true,
+                        timeout: 10000,
+                        maximumAge: 5000
+                    }
+                );
+            }
+
+            // ============================================================
+            // CHARGER LES CODES REÇUS
+            // ============================================================
+            async function loadReceivedCodes() {
+                var session = getSession();
+                if (!session || !session.access_token) return;
+
+                try {
+                    var response = await fetch(
+                        SUPABASE_URL + '/rest/v1/shared_locations?select=*&active=eq.true&user_id=neq.' + session.user
+                        .id + '&order=last_update.desc', {
+                            headers: getHeaders(session.access_token)
+                        }
+                    );
+                    if (!response.ok) return;
+                    var data = await response.json();
+
+                    if (data && data.length > 0) {
+                        var html = '';
+                        data.forEach(function(item) {
+                            var time = new Date(item.last_update);
+                            var timeStr = time.toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' });
+                            html +=
+                                '<div class="received-item">' +
+                                '<span class="received-code">' + item.code + '</span>' +
+                                '<span class="received-from"><i class="fas fa-user"></i> ' + item.email +
+                                '</span>' +
+                                '<span class="received-time">' + timeStr + '</span>' +
+                                '<button class="btn-copy-small" data-code="' + item.code +
+                                '" type="button" title="Copier">' +
+                                '<i class="fas fa-copy"></i>' +
+                                '</button>' +
+                                '</div>';
+                        });
+                        receivedList.innerHTML = html;
+
+                        // Copier les codes
+                        document.querySelectorAll('.btn-copy-small').forEach(function(btn) {
+                            btn.addEventListener('click', function() {
+                                var code = this.dataset.code;
+                                navigator.clipboard.writeText(code).then(function() {
+                                    btn.classList.add('copied');
+                                    btn.innerHTML = '<i class="fas fa-check"></i>';
+                                    showToast('📋 Code copié : ' + code, 'success');
+                                    setTimeout(function() {
+                                        btn.classList.remove('copied');
+                                        btn.innerHTML = '<i class="fas fa-copy"></i>';
+                                    }, 2000);
+                                }).catch(function() {
+                                    var textarea = document.createElement('textarea');
+                                    textarea.value = code;
+                                    document.body.appendChild(textarea);
+                                    textarea.select();
+                                    document.execCommand('copy');
+                                    document.body.removeChild(textarea);
+                                    showToast('📋 Code copié', 'success');
+                                });
+                            });
+                        });
+
+                    } else {
+                        receivedList.innerHTML =
+                            '<div class="empty-state-small">' +
+                            '<i class="fas fa-inbox"></i>' +
+                            'Aucun code reçu pour l\'instant' +
+                            '</div>';
+                    }
+                } catch (e) {
+                    console.error('❌ Erreur chargement codes reçus:', e);
+                }
+            }
+
+            // ============================================================
+            // ÉVÉNEMENTS
+            // ============================================================
+
+            backBtn.addEventListener('click', function() {
+                window.history.back();
+            });
+
+            menuBtn.addEventListener('click', function(e) {
+                e.stopPropagation();
+                dropdownMenu.classList.toggle('active');
+            });
+
+            document.addEventListener('click', function() {
+                dropdownMenu.classList.remove('active');
+            });
+
+            navPositions.addEventListener('click', function() {
+                dropdownMenu.classList.remove('active');
+                showToast('📍 Redirection vers Mes positions...', 'info');
+                setTimeout(function() {
+                    window.location.href = 'mespositions.html';
+                }, 500);
+            });
+
+            // Toggle
+            shareToggle.addEventListener('click', function() {
+                var isActive = this.classList.contains('active');
+                var newState = !isActive;
+                this.classList.toggle('active');
+                toggleShare(newState);
+            });
+
+            // Copier code
+            copyCodeBtn.addEventListener('click', function() {
+                var code = shareCode.textContent;
+                if (code === 'Aucun code') {
+                    showToast('Aucun code à copier', 'error');
+                    return;
+                }
+                navigator.clipboard.writeText(code).then(function() {
+                    copyCodeBtn.classList.add('copied');
+                    copyCodeBtn.innerHTML = '<i class="fas fa-check"></i>';
+                    showToast('📋 Code copié : ' + code, 'success');
+                    setTimeout(function() {
+                        copyCodeBtn.classList.remove('copied');
+                        copyCodeBtn.innerHTML = '<i class="fas fa-copy"></i>';
+                    }, 2000);
+                }).catch(function() {
+                    var textarea = document.createElement('textarea');
+                    textarea.value = code;
+                    document.body.appendChild(textarea);
+                    textarea.select();
+                    document.execCommand('copy');
+                    document.body.removeChild(textarea);
+                    showToast('📋 Code copié', 'success');
+                });
+            });
+
+            // Réinitialiser
+            resetCodeBtn.addEventListener('click', function() {
+                if (!currentRecordId) {
+                    showToast('Aucun code à réinitialiser', 'error');
+                    return;
+                }
+                resetShareCode();
+            });
+
+            // Envoyer par email (simulation)
+            sendEmailBtn.addEventListener('click', function() {
+                var email = shareEmail.value.trim();
+                if (!email || !email.includes('@')) {
+                    showToast('Email invalide', 'error');
+                    return;
+                }
+                var code = shareCode.textContent;
+                if (code === 'Aucun code') {
+                    showToast('Générez un code d\'abord', 'error');
+                    return;
+                }
+                showToast('📤 Code envoyé à ' + email + ' !', 'success');
+                shareEmail.value = '';
+            });
+
+            // ============================================================
+            // INIT
+            // ============================================================
+            async function init() {
+                console.log('👤 Mon Profil - Supabase');
+                await loadMyCode();
+                await loadReceivedCodes();
+
+                // Rafraîchir les codes reçus toutes les 30 secondes
+                setInterval(function() {
+                    loadReceivedCodes();
+                }, 30000);
+            }
+
+            init();
+
+        })();
+    </script>
+
+</body>
+</html>

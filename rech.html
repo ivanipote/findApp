@@ -1,0 +1,1103 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>🔍 Recherche - easily by megane</title>
+
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
+    <link rel="stylesheet" href="style.css" />
+
+    <style>
+        /* ============================================================ */
+        /* PAGE RECHERCHE - PLEINE LARGEUR */
+        /* ============================================================ */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            background: #f0f2f5;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            min-height: 100vh;
+            padding-top: 76px;
+            padding-bottom: 20px;
+            margin: 0;
+        }
+
+        /* ============================================================ */
+        /* HEADER FIXE */
+        /* ============================================================ */
+        .header-search {
+            position: fixed;
+            top: 12px;
+            left: 12px;
+            right: 12px;
+            z-index: 1000;
+            height: 60px;
+            background: #ffffff;
+            border-radius: 35px;
+            display: flex;
+            align-items: center;
+            padding: 0 20px;
+            gap: 14px;
+            box-shadow: 0 2px 12px rgba(0, 0, 0, 0.06);
+            border: 3px solid #1976d2;
+            max-width: 480px;
+            margin: 0 auto;
+        }
+
+        @media (min-width: 480px) {
+            .header-search {
+                left: 50%;
+                transform: translateX(-50%);
+                right: auto;
+                top: 12px;
+            }
+        }
+
+        .header-search .back-btn {
+            background: none;
+            border: none;
+            color: #1976d2;
+            font-size: 1.2rem;
+            cursor: pointer;
+            padding: 4px 6px;
+            border-radius: 50%;
+            transition: 0.2s;
+        }
+
+        .header-search .back-btn:hover {
+            background: #f0f2f5;
+        }
+
+        .header-search .icon {
+            color: #1976d2;
+            font-size: 1rem;
+        }
+
+        .header-search input {
+            flex: 1;
+            border: none;
+            outline: none;
+            font-size: 0.95rem;
+            color: #1a2a5a;
+            background: transparent;
+            height: 100%;
+        }
+
+        .header-search input::placeholder {
+            color: #aab4c8;
+        }
+
+        .header-search .clear-btn {
+            background: none;
+            border: none;
+            color: #aab4c8;
+            font-size: 1rem;
+            cursor: pointer;
+            padding: 4px;
+            display: none;
+        }
+
+        .header-search .clear-btn.visible {
+            display: block;
+        }
+
+        /* ============================================================ */
+        /* CONTAINER DES RÉSULTATS */
+        /* ============================================================ */
+        .results-container {
+            width: 100%;
+            max-width: 100%;
+            padding: 0 12px;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        /* ============================================================ */
+        /* SNIPPET 4 : SQUELETTE (SHIMMER) */
+        /* ============================================================ */
+        .skeleton-container {
+            width: 100%;
+            padding: 0 12px;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .skeleton-item {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            padding: 14px 18px;
+            background: #ffffff;
+            border-radius: 14px;
+            border: 1px solid #e8ecf4;
+            width: 100%;
+            height: 110px;
+            min-height: 110px;
+            max-height: 110px;
+        }
+
+        .skeleton-item .skeleton-icon {
+            width: 64px;
+            height: 64px;
+            border-radius: 16px;
+            flex-shrink: 0;
+            background: #e8ecf4;
+            animation: shimmer 1.5s ease-in-out infinite;
+            background: linear-gradient(90deg, #e8ecf4 25%, #f0f2f5 50%, #e8ecf4 75%);
+            background-size: 200% 100%;
+        }
+
+        .skeleton-item .skeleton-info {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+        }
+
+        .skeleton-item .skeleton-info .skeleton-line {
+            height: 12px;
+            border-radius: 6px;
+            background: #e8ecf4;
+            animation: shimmer 1.5s ease-in-out infinite;
+            background: linear-gradient(90deg, #e8ecf4 25%, #f0f2f5 50%, #e8ecf4 75%);
+            background-size: 200% 100%;
+        }
+
+        .skeleton-item .skeleton-info .skeleton-line:nth-child(1) { width: 40%; }
+        .skeleton-item .skeleton-info .skeleton-line:nth-child(2) { width: 60%; }
+        .skeleton-item .skeleton-info .skeleton-line:nth-child(3) { width: 30%; }
+
+        .skeleton-item .skeleton-arrow {
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            flex-shrink: 0;
+            background: #e8ecf4;
+            animation: shimmer 1.5s ease-in-out infinite;
+            background: linear-gradient(90deg, #e8ecf4 25%, #f0f2f5 50%, #e8ecf4 75%);
+            background-size: 200% 100%;
+        }
+
+        @keyframes shimmer {
+            0% { background-position: 200% 0; }
+            100% { background-position: -200% 0; }
+        }
+
+        /* ============================================================ */
+        /* RÉSULTAT */
+        /* ============================================================ */
+        .result-item {
+            display: flex;
+            align-items: stretch;
+            gap: 16px;
+            padding: 14px 18px;
+            background: #ffffff;
+            border-radius: 14px;
+            border: 1px solid #e8ecf4;
+            cursor: pointer;
+            transition: 0.3s;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.03);
+            width: 100%;
+            height: 110px;
+            min-height: 110px;
+            max-height: 110px;
+            opacity: 0;
+            transform: translateY(20px) scale(0.97);
+            animation: resultAppear 0.4s ease forwards;
+        }
+
+        .result-item:nth-child(1) { animation-delay: 0.05s; }
+        .result-item:nth-child(2) { animation-delay: 0.10s; }
+        .result-item:nth-child(3) { animation-delay: 0.15s; }
+        .result-item:nth-child(4) { animation-delay: 0.20s; }
+        .result-item:nth-child(5) { animation-delay: 0.25s; }
+        .result-item:nth-child(6) { animation-delay: 0.30s; }
+        .result-item:nth-child(7) { animation-delay: 0.35s; }
+        .result-item:nth-child(8) { animation-delay: 0.40s; }
+        .result-item:nth-child(9) { animation-delay: 0.45s; }
+        .result-item:nth-child(10) { animation-delay: 0.50s; }
+        .result-item:nth-child(11) { animation-delay: 0.55s; }
+        .result-item:nth-child(12) { animation-delay: 0.60s; }
+        .result-item:nth-child(13) { animation-delay: 0.65s; }
+        .result-item:nth-child(14) { animation-delay: 0.70s; }
+        .result-item:nth-child(15) { animation-delay: 0.75s; }
+
+        @keyframes resultAppear {
+            0% {
+                opacity: 0;
+                transform: translateY(20px) scale(0.97);
+            }
+            100% {
+                opacity: 1;
+                transform: translateY(0) scale(1);
+            }
+        }
+
+        .result-item:hover {
+            border-color: #1976d2;
+            transform: translateX(4px);
+            box-shadow: 0 4px 16px rgba(25, 118, 210, 0.08);
+        }
+
+        .result-item .icon-box {
+            width: 64px;
+            height: 64px;
+            border-radius: 16px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 2rem;
+            flex-shrink: 0;
+            color: #ffffff;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+            align-self: center;
+            border: 3px solid #1976d2;
+        }
+
+        .result-item .info {
+            flex: 1;
+            min-width: 0;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            gap: 6px;
+        }
+
+        .result-item .info .top {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            width: 100%;
+            gap: 12px;
+        }
+
+        .result-item .info .top .name {
+            font-weight: 700;
+            font-size: 1.05rem;
+            color: #1976d2;
+            text-align: center;
+            flex: 1;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .result-item .info .top .status-box {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 20px;
+            padding: 4px 14px;
+            flex-shrink: 0;
+        }
+
+        .result-item .info .top .status-box .status {
+            font-size: 0.55rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.3px;
+            white-space: nowrap;
+        }
+
+        .result-item .info .top .status-box.open {
+            background: #e8f5e9;
+            border: 1px solid #a5d6a7;
+        }
+
+        .result-item .info .top .status-box.open .status {
+            color: #2ecc71;
+        }
+
+        .result-item .info .top .status-box.closed {
+            background: #fce4ec;
+            border: 1px solid #ef9a9a;
+        }
+
+        .result-item .info .top .status-box.closed .status {
+            color: #d32f2f;
+        }
+
+        .result-item .info .divider {
+            width: 100%;
+            height: 2px;
+            background: #e8ecf4;
+            border: none;
+            flex-shrink: 0;
+        }
+
+        .result-item .info .bottom {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 100%;
+            gap: 10px;
+        }
+
+        .result-item .info .bottom .address-box {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 4px;
+            background: #f8f9fc;
+            border: 1px solid #eef1f6;
+            border-radius: 20px;
+            padding: 4px 14px;
+            flex: 1;
+            min-width: 0;
+            height: 32px;
+        }
+
+        .result-item .info .bottom .address-box i {
+            font-size: 0.6rem;
+            color: #1976d2;
+            flex-shrink: 0;
+        }
+
+        .result-item .info .bottom .address-box span {
+            font-size: 0.7rem;
+            color: #1976d2;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .result-item .info .bottom .phone-box {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 4px;
+            background: #f8f9fc;
+            border: 1px solid #eef1f6;
+            border-radius: 20px;
+            padding: 4px 14px;
+            flex: 1;
+            min-width: 0;
+            height: 32px;
+            cursor: pointer;
+            transition: 0.2s;
+        }
+
+        .result-item .info .bottom .phone-box:hover {
+            background: #e3edfb;
+            border-color: #1976d2;
+        }
+
+        .result-item .info .bottom .phone-box i {
+            font-size: 0.6rem;
+            color: #1976d2;
+            flex-shrink: 0;
+        }
+
+        .result-item .info .bottom .phone-box span {
+            font-size: 0.7rem;
+            color: #1976d2;
+            font-weight: 600;
+            white-space: nowrap;
+        }
+
+        .result-item .arrow {
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            background: #eef1f6;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #1976d2;
+            font-size: 0.9rem;
+            transition: 0.3s;
+            flex-shrink: 0;
+            align-self: center;
+        }
+
+        .result-item:hover .arrow {
+            background: #1976d2;
+            color: #ffffff;
+            transform: translateX(3px);
+        }
+
+        /* ============================================================ */
+        /* ÉTAT VIDE */
+        /* ============================================================ */
+        .empty-state {
+            text-align: center;
+            padding: 60px 20px;
+            color: #8a9aaa;
+            width: 100%;
+        }
+
+        .empty-state i {
+            font-size: 3.5rem;
+            color: #d0d5e0;
+            display: block;
+            margin-bottom: 16px;
+            opacity: 0.5;
+        }
+
+        .empty-state .empty-title {
+            font-size: 1.1rem;
+            font-weight: 600;
+            color: #1a2a5a;
+        }
+
+        .empty-state .empty-sub {
+            font-size: 0.85rem;
+            color: #aab4c8;
+        }
+
+        /* ============================================================ */
+        /* OVERLAY DE REDIRECTION (SNIPPET 8) */
+        /* ============================================================ */
+        .redirect-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.6);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            z-index: 9999;
+            display: none;
+            align-items: center;
+            justify-content: center;
+            flex-direction: column;
+            opacity: 0;
+            transition: opacity 0.4s ease;
+        }
+
+        .redirect-overlay.active {
+            display: flex;
+            opacity: 1;
+        }
+
+        .redirect-overlay .wave-container {
+            display: flex;
+            gap: 6px;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+
+        .redirect-overlay .wave-container .bar {
+            width: 8px;
+            height: 30px;
+            background: #ffffff;
+            border-radius: 4px;
+            animation: waveOverlay 1.2s ease-in-out infinite;
+        }
+
+        .redirect-overlay .wave-container .bar:nth-child(1) { animation-delay: 0s; }
+        .redirect-overlay .wave-container .bar:nth-child(2) { animation-delay: 0.1s; }
+        .redirect-overlay .wave-container .bar:nth-child(3) { animation-delay: 0.2s; }
+        .redirect-overlay .wave-container .bar:nth-child(4) { animation-delay: 0.3s; }
+        .redirect-overlay .wave-container .bar:nth-child(5) { animation-delay: 0.4s; }
+        .redirect-overlay .wave-container .bar:nth-child(6) { animation-delay: 0.5s; }
+        .redirect-overlay .wave-container .bar:nth-child(7) { animation-delay: 0.6s; }
+        .redirect-overlay .wave-container .bar:nth-child(8) { animation-delay: 0.7s; }
+
+        @keyframes waveOverlay {
+            0%, 40%, 100% {
+                transform: scaleY(0.3);
+                opacity: 0.3;
+            }
+            20% {
+                transform: scaleY(1);
+                opacity: 1;
+            }
+        }
+
+        .redirect-overlay .redirect-text {
+            color: #ffffff;
+            font-size: 1.2rem;
+            font-weight: 600;
+            letter-spacing: 0.5px;
+            animation: pulseText 1.5s ease-in-out infinite;
+        }
+
+        @keyframes pulseText {
+            0%, 100% { opacity: 0.7; }
+            50% { opacity: 1; }
+        }
+
+        .redirect-overlay .redirect-text i {
+            margin-right: 8px;
+            opacity: 0.6;
+        }
+
+        /* ============================================================ */
+        /* TOAST */
+        /* ============================================================ */
+        .toast-rech {
+            position: fixed;
+            bottom: 24px;
+            left: 50%;
+            transform: translateX(-50%);
+            padding: 10px 20px;
+            border-radius: 30px;
+            font-size: 0.8rem;
+            font-weight: 600;
+            z-index: 9998;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.3s ease;
+            max-width: 90%;
+            text-align: center;
+            background: #1a2a5a;
+            color: #ffffff;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
+        }
+
+        .toast-rech.show {
+            opacity: 1;
+        }
+
+        .toast-rech.success {
+            background: #2ecc71;
+            color: #fff;
+        }
+
+        .toast-rech.error {
+            background: #d32f2f;
+            color: #fff;
+        }
+
+        .toast-rech.info {
+            background: #1976d2;
+            color: #fff;
+        }
+
+        /* ============================================================ */
+        /* RESPONSIVE */
+        /* ============================================================ */
+        @media (max-width: 500px) {
+            body {
+                padding-top: 68px;
+                padding-bottom: 16px;
+            }
+
+            .header-search {
+                height: 52px;
+                padding: 0 16px;
+                top: 10px;
+                left: 10px;
+                right: 10px;
+                border-radius: 30px;
+                border-width: 2px;
+            }
+
+            .header-search input {
+                font-size: 0.85rem;
+            }
+
+            .result-item,
+            .skeleton-item {
+                padding: 12px 14px;
+                gap: 12px;
+                height: 100px;
+                min-height: 100px;
+                max-height: 100px;
+            }
+
+            .result-item .icon-box,
+            .skeleton-item .skeleton-icon {
+                width: 52px;
+                height: 52px;
+                font-size: 1.5rem;
+                border-radius: 13px;
+            }
+
+            .result-item .info .top .name {
+                font-size: 0.9rem;
+            }
+
+            .result-item .info .top .status-box {
+                padding: 3px 10px;
+            }
+
+            .result-item .info .top .status-box .status {
+                font-size: 0.5rem;
+            }
+
+            .result-item .info .bottom {
+                flex-wrap: wrap;
+                gap: 6px;
+            }
+
+            .result-item .info .bottom .address-box {
+                flex: 1 1 45%;
+                min-width: 80px;
+                height: 28px;
+                padding: 3px 10px;
+            }
+
+            .result-item .info .bottom .address-box span {
+                font-size: 0.6rem;
+            }
+
+            .result-item .info .bottom .phone-box {
+                flex: 1 1 45%;
+                min-width: 80px;
+                height: 28px;
+                padding: 3px 10px;
+            }
+
+            .result-item .info .bottom .phone-box span {
+                font-size: 0.6rem;
+            }
+
+            .result-item .arrow,
+            .skeleton-item .skeleton-arrow {
+                width: 30px;
+                height: 30px;
+                font-size: 0.75rem;
+            }
+
+            .redirect-overlay .wave-container .bar {
+                width: 6px;
+                height: 25px;
+            }
+
+            .redirect-overlay .redirect-text {
+                font-size: 1rem;
+            }
+        }
+
+        @media (max-width: 400px) {
+            .result-item,
+            .skeleton-item {
+                height: 110px;
+                min-height: 110px;
+                max-height: 110px;
+            }
+
+            .result-item .icon-box,
+            .skeleton-item .skeleton-icon {
+                width: 44px;
+                height: 44px;
+                font-size: 1.2rem;
+                border-radius: 11px;
+            }
+
+            .result-item .info .top {
+                flex-wrap: wrap;
+                gap: 6px;
+            }
+
+            .result-item .info .top .name {
+                font-size: 0.8rem;
+                flex: 1 1 100%;
+            }
+
+            .result-item .info .bottom .address-box {
+                flex: 1 1 100%;
+                height: 26px;
+                padding: 2px 10px;
+            }
+
+            .result-item .info .bottom .phone-box {
+                flex: 1 1 100%;
+                height: 26px;
+                padding: 2px 10px;
+            }
+
+            .result-item .arrow,
+            .skeleton-item .skeleton-arrow {
+                width: 26px;
+                height: 26px;
+                font-size: 0.65rem;
+            }
+
+            .redirect-overlay .wave-container .bar {
+                width: 5px;
+                height: 20px;
+            }
+
+            .redirect-overlay .redirect-text {
+                font-size: 0.9rem;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- ============================================================ -->
+    <!-- HEADER FIXE -->
+    <!-- ============================================================ -->
+    <header class="header-search" id="searchHeader">
+        <button class="back-btn" id="backBtn" type="button" aria-label="Retour">
+            <i class="fas fa-arrow-left"></i>
+        </button>
+        <i class="fas fa-search icon"></i>
+        <input type="text" id="searchInput" placeholder="Rechercher un lieu..." autocomplete="off" />
+        <button class="clear-btn" id="clearBtn" type="button" aria-label="Effacer">
+            <i class="fas fa-times-circle"></i>
+        </button>
+    </header>
+
+    <!-- ============================================================ -->
+    <!-- RÉSULTATS -->
+    <!-- ============================================================ -->
+    <div class="results-container" id="resultsContainer">
+        <div class="empty-state">
+            <i class="fas fa-search"></i>
+            <div class="empty-title">Recherchez un lieu</div>
+            <div class="empty-sub">Tapez un mot-clé pour trouver un lieu</div>
+        </div>
+    </div>
+
+    <!-- ============================================================ -->
+    <!-- OVERLAY DE REDIRECTION (SNIPPET 8) -->
+    <!-- ============================================================ -->
+    <div class="redirect-overlay" id="redirectOverlay">
+        <div class="wave-container">
+            <div class="bar"></div>
+            <div class="bar"></div>
+            <div class="bar"></div>
+            <div class="bar"></div>
+            <div class="bar"></div>
+            <div class="bar"></div>
+            <div class="bar"></div>
+            <div class="bar"></div>
+        </div>
+        <div class="redirect-text">
+            <i class="fas fa-spinner"></i> Veuillez patienter...
+        </div>
+    </div>
+
+    <!-- ============================================================ -->
+    <!-- TOAST -->
+    <!-- ============================================================ -->
+    <div class="toast-rech" id="toastRech"></div>
+
+    <!-- ============================================================ -->
+    <!-- SCRIPT -->
+    <!-- ============================================================ -->
+    <script>
+        (function() {
+            'use strict';
+
+            // ============================================================
+            // 🔑 CONFIGURATION SUPABASE
+            // ============================================================
+            var SUPABASE_URL = 'https://slanrdeaxapzfqtuqhbf.supabase.co';
+            var SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InNsYW5yZGVheGFwemZxdHVxaGJmIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODUzMzA3OTcsImV4cCI6MjEwMDkwNjc5N30.pUCb_N-66pjFs-QP2RefsqjAnffC4Rbq-rP9qHfnvK8';
+
+            // ============================================================
+            // CATÉGORIES
+            // ============================================================
+            var CATEGORIES = [
+                { id: 'boutiques', label: 'Boutique', emoji: '🛍️', color: '#1976d2' },
+                { id: 'restaurants', label: 'Restaurant', emoji: '🍽️', color: '#d32f2f' },
+                { id: 'domiciles', label: 'Domicile', emoji: '🏠', color: '#2ecc71' },
+                { id: 'cybercafes', label: 'Cybercafé', emoji: '💻', color: '#e67e22' },
+                { id: 'sante', label: 'Santé', emoji: '🏥', color: '#e74c3c' },
+                { id: 'stations', label: 'Station', emoji: '⛽', color: '#3498db' }
+            ];
+
+            // ============================================================
+            // DOM REFS
+            // ============================================================
+            var searchInput = document.getElementById('searchInput');
+            var clearBtn = document.getElementById('clearBtn');
+            var backBtn = document.getElementById('backBtn');
+            var resultsContainer = document.getElementById('resultsContainer');
+            var redirectOverlay = document.getElementById('redirectOverlay');
+            var toastEl = document.getElementById('toastRech');
+
+            var searchTimeout = null;
+            var redirectTimer = null;
+            var toastTimer = null;
+
+            // ============================================================
+            // ÉTAT
+            // ============================================================
+            var allPlaces = [];
+
+            // ============================================================
+            // TOAST
+            // ============================================================
+            function showToast(message, type) {
+                toastEl.textContent = message;
+                toastEl.className = 'toast-rech show ' + type;
+                if (toastTimer) clearTimeout(toastTimer);
+                toastTimer = setTimeout(function() {
+                    toastEl.classList.remove('show');
+                }, 2500);
+            }
+
+            // ============================================================
+            // API HELPERS
+            // ============================================================
+            function getHeaders() {
+                return {
+                    'apikey': SUPABASE_ANON_KEY,
+                    'Authorization': 'Bearer ' + SUPABASE_ANON_KEY,
+                    'Content-Type': 'application/json'
+                };
+            }
+
+            // ============================================================
+            // CHARGER LES LIEUX DEPUIS SUPABASE
+            // ============================================================
+            async function loadPlaces() {
+                try {
+                    console.log('📥 Chargement des lieux depuis Supabase...');
+
+                    // 1. Récupérer les lieux
+                    var response = await fetch(SUPABASE_URL + '/rest/v1/position?select=*&order=created_at.desc', {
+                        headers: getHeaders()
+                    });
+
+                    if (!response.ok) {
+                        throw new Error('Erreur ' + response.status);
+                    }
+
+                    var places = await response.json();
+
+                    if (!places || places.length === 0) {
+                        console.log('📌 Aucun lieu trouvé');
+                        allPlaces = [];
+                        return;
+                    }
+
+                    console.log('📌 ' + places.length + ' lieu(x) chargé(s)');
+
+                    // 2. Récupérer les photos
+                    var placeIds = places.map(function(p) { return p.id; });
+                    var idsString = placeIds.map(function(id) { return '"' + id + '"'; }).join(',');
+
+                    var photosResponse = await fetch(
+                        SUPABASE_URL + '/rest/v1/photos?select=*&position_id=in.(' + idsString + ')', {
+                            headers: getHeaders()
+                        }
+                    );
+
+                    var photos = photosResponse.ok ? await photosResponse.json() : [];
+
+                    // 3. Associer les photos
+                    var photosByPlace = {};
+                    photos.forEach(function(photo) {
+                        if (!photosByPlace[photo.position_id]) {
+                            photosByPlace[photo.position_id] = [];
+                        }
+                        photosByPlace[photo.position_id].push(photo);
+                    });
+
+                    places.forEach(function(place) {
+                        place.photos = photosByPlace[place.id] || [];
+                    });
+
+                    allPlaces = places;
+                    console.log('📸 ' + photos.length + ' photo(s) chargée(s)');
+
+                } catch (e) {
+                    console.error('❌ Erreur chargement:', e);
+                    showToast('Erreur de chargement des données', 'error');
+                    allPlaces = [];
+                }
+            }
+
+            // ============================================================
+            // REDIRECTION VERS INFO.HTML
+            // ============================================================
+            function redirectToInfo(placeId) {
+                redirectOverlay.classList.add('active');
+
+                if (redirectTimer) clearTimeout(redirectTimer);
+                redirectTimer = setTimeout(function() {
+                    window.location.href = 'info.html?place=' + placeId;
+                }, 1500);
+            }
+
+            // ============================================================
+            // SQUELETTE (SNIPPET 4)
+            // ============================================================
+            function showSkeleton() {
+                var html = '<div class="skeleton-container">';
+                for (var i = 0; i < 5; i++) {
+                    html +=
+                        '<div class="skeleton-item">' +
+                        '<div class="skeleton-icon"></div>' +
+                        '<div class="skeleton-info">' +
+                        '<div class="skeleton-line"></div>' +
+                        '<div class="skeleton-line"></div>' +
+                        '<div class="skeleton-line"></div>' +
+                        '</div>' +
+                        '<div class="skeleton-arrow"></div>' +
+                        '</div>';
+                }
+                html += '</div>';
+                resultsContainer.innerHTML = html;
+            }
+
+            // ============================================================
+            // RENDU DES RÉSULTATS
+            // ============================================================
+            function renderResults(places) {
+                if (!places || places.length === 0) {
+                    resultsContainer.innerHTML =
+                        '<div class="empty-state">' +
+                        '<i class="fas fa-search"></i>' +
+                        '<div class="empty-title">Aucun résultat</div>' +
+                        '<div class="empty-sub">Essayez avec d\'autres mots-clés</div>' +
+                        '</div>';
+                    return;
+                }
+
+                var html = '';
+                places.forEach(function(place) {
+                    var cat = CATEGORIES.find(function(c) { return c.id === place.category; });
+                    var emoji = cat ? cat.emoji : '📍';
+                    var color = cat ? cat.color : '#1976d2';
+                    var statusClass = place.status === 'open' ? 'open' : 'closed';
+                    var statusLabel = place.status === 'open' ? 'Ouvert' : 'Fermé';
+
+                    html +=
+                        '<div class="result-item" data-id="' + place.id + '">' +
+
+                        '<div class="icon-box" style="background:' + color + ';">' +
+                        emoji +
+                        '</div>' +
+
+                        '<div class="info">' +
+
+                        '<div class="top">' +
+                        '<span class="name">' + place.name + '</span>' +
+                        '<span class="status-box ' + statusClass + '">' +
+                        '<span class="status">' + statusLabel + '</span>' +
+                        '</span>' +
+                        '</div>' +
+
+                        '<div class="divider"></div>' +
+
+                        '<div class="bottom">' +
+                        '<div class="address-box">' +
+                        '<i class="fas fa-map-pin"></i>' +
+                        '<span>' + (place.address || 'Adresse non renseignée') + '</span>' +
+                        '</div>' +
+                        '<div class="phone-box" onclick="event.stopPropagation(); window.location.href=\'tel:' + (place.phone || '').replace(/\s/g, '') + '\'">' +
+                        '<i class="fas fa-phone"></i>' +
+                        '<span>' + (place.phone || 'Non renseigné') + '</span>' +
+                        '</div>' +
+                        '</div>' +
+
+                        '</div>' +
+
+                        '<div class="arrow">' +
+                        '<i class="fas fa-chevron-right"></i>' +
+                        '</div>' +
+
+                        '</div>';
+                });
+
+                resultsContainer.innerHTML = html;
+
+                // Clic sur un résultat → OVERLAY + REDIRECTION
+                document.querySelectorAll('.result-item').forEach(function(el) {
+                    el.addEventListener('click', function(e) {
+                        if (e.target.closest('.phone-box')) return;
+                        var id = this.dataset.id;
+                        redirectToInfo(id);
+                    });
+                });
+            }
+
+            // ============================================================
+            // RECHERCHE
+            // ============================================================
+            function searchPlaces(query) {
+                if (!query || query.trim() === '') {
+                    resultsContainer.innerHTML =
+                        '<div class="empty-state">' +
+                        '<i class="fas fa-search"></i>' +
+                        '<div class="empty-title">Recherchez un lieu</div>' +
+                        '<div class="empty-sub">Tapez un mot-clé pour trouver un lieu</div>' +
+                        '</div>';
+                    clearBtn.classList.remove('visible');
+                    return;
+                }
+
+                clearBtn.classList.add('visible');
+
+                // Squelette
+                showSkeleton();
+
+                var q = query.toLowerCase().trim();
+
+                setTimeout(function() {
+                    var results = allPlaces.filter(function(p) {
+                        var cat = CATEGORIES.find(function(c) { return c.id === p.category; });
+                        var catLabel = cat ? cat.label.toLowerCase() : '';
+                        return (p.name || '').toLowerCase().includes(q) ||
+                            (p.address || '').toLowerCase().includes(q) ||
+                            catLabel.includes(q);
+                    });
+                    renderResults(results);
+                }, 600);
+            }
+
+            // ============================================================
+            // ÉVÉNEMENTS
+            // ============================================================
+
+            searchInput.addEventListener('input', function() {
+                var val = this.value;
+                if (searchTimeout) clearTimeout(searchTimeout);
+                searchTimeout = setTimeout(function() {
+                    searchPlaces(val);
+                }, 300);
+            });
+
+            clearBtn.addEventListener('click', function() {
+                searchInput.value = '';
+                this.classList.remove('visible');
+                resultsContainer.innerHTML =
+                    '<div class="empty-state">' +
+                    '<i class="fas fa-search"></i>' +
+                    '<div class="empty-title">Recherchez un lieu</div>' +
+                    '<div class="empty-sub">Tapez un mot-clé pour trouver un lieu</div>' +
+                    '</div>';
+                searchInput.focus();
+            });
+
+            backBtn.addEventListener('click', function() {
+                window.history.back();
+            });
+
+            searchInput.addEventListener('keyup', function(e) {
+                if (e.key === 'Enter') {
+                    searchPlaces(this.value);
+                }
+            });
+
+            // ============================================================
+            // INIT
+            // ============================================================
+            // ============================================================
+// INIT
+// ============================================================
+async function init() {
+    console.log('🔍 Recherche - Connexion Supabase');
+    await loadPlaces();
+    searchInput.focus();
+
+    if (allPlaces.length === 0) {
+        console.log('📌 Aucun lieu trouvé');
+    } else {
+        console.log('📌 ' + allPlaces.length + ' lieu(x) chargé(s)');
+    }
+}
+
+init();
+        })();
+    </script>
+
+</body>
+</html>
