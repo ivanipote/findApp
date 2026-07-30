@@ -7,11 +7,10 @@ var SUPABASE_URL = 'https://slanrdeaxapzfqtuqhbf.supabase.co';
 var SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InNsYW5yZGVheGFwemZxdHVxaGJmIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODUzMzA3OTcsImV4cCI6MjEwMDkwNjc5N30.pUCb_N-66pjFs-QP2RefsqjAnffC4Rbq-rP9qHfnvK8';
 
 // ================================================================
-// 🔑 CONFIGURATION OPENROUTESERVICE (ORS)
+// 🔑 CONFIGURATION OSRM
 // ================================================================
-var ORS_API_KEY = 'eyJvcmciOiI1YjNjZTM1OTc4NTExMTAwMDFjZjYyNDgiLCJpZCI6IjA5N2E1MDIxNmU5ZTQ5NTViMGU5OWM1ZTFmOTFjOTYzIiwiaCI6Im11cm11cjY0In0=';
-var ORS_BASE_URL = 'https://api.openrouteservice.org';  // ✅ Domaine officiel
-var ORS_PROFILE = 'driving-car';
+var OSRM_URL = 'https://router.project-osrm.org';
+var OSRM_PROFILE = 'driving';
 
 // ================================================================
 // 🔌 CLIENT SUPABASE
@@ -68,7 +67,15 @@ var state = {
     trackLayerId: null,
     trackPolyline: null,
     popup: null,
-    routeDrawn: false
+    routeDrawn: false,
+    slideIndex: 0,
+    geoInfo: {
+        display_name: '',
+        road: '',
+        suburb: '',
+        city: '',
+        country: ''
+    }
 };
 
 // ================================================================
@@ -112,6 +119,18 @@ function cacheDom() {
         trackTime: document.getElementById('trackTime'),
         trackActionBtn: document.getElementById('trackActionBtn'),
         trackBtnLabel: document.getElementById('trackBtnLabel'),
+        trackSlides: document.getElementById('trackSlides'),
+        trackDots: document.getElementById('trackDots'),
+        // ✅ Éléments du slide 2 (infos géographiques)
+        geoFullAddress: document.getElementById('geoFullAddress'),
+        geoSuburb: document.getElementById('geoSuburb'),
+        geoCity: document.getElementById('geoCity'),
+        geoCountry: document.getElementById('geoCountry'),
+        geoRoad: document.getElementById('geoRoad'),
+        geoEmail: document.getElementById('geoEmail'),
+        geoCode: document.getElementById('geoCode'),
+        geoLastUpdate: document.getElementById('geoLastUpdate'),
+        btnOpenMaps: document.getElementById('btnOpenMaps'),
         redirectOverlay: document.getElementById('redirectOverlay')
     };
 }
@@ -329,7 +348,6 @@ function initMap() {
         showUserLocation: true
     }));
 
-    // Marqueur utilisateur
     var userEl = document.createElement('div');
     userEl.className = 'user-marker-map';
     userEl.innerHTML = '<div class="user-pulse"><div class="user-dot"></div></div>';
@@ -521,7 +539,8 @@ function saveFollowingState() {
             lat: state.following.lat,
             lng: state.following.lng,
             userId: state.following.userId,
-            timestamp: Date.now()
+            timestamp: Date.now(),
+            geoInfo: state.geoInfo || {}
         };
         localStorage.setItem('following_state', JSON.stringify(data));
         console.log('💾 État du suivi sauvegardé');
@@ -775,7 +794,8 @@ function startFollowing(record) {
         email: record.email,
         lat: record.latitude,
         lng: record.longitude,
-        userId: record.user_id
+        userId: record.user_id,
+        last_update: record.last_update || new Date().toISOString()
     };
 
     DOM.navFollowLabel.textContent = 'Arrêter de suivre';
@@ -819,6 +839,8 @@ function stopFollowing() {
     state.following = null;
     state.isTracking = false;
     state.routeDrawn = false;
+    state.slideIndex = 0;
+    state.geoInfo = { display_name: '', road: '', suburb: '', city: '', country: '' };
 
     DOM.navFollowLabel.textContent = 'Suivre quelqu\'un';
     DOM.navFollow.querySelector('i').className = 'fas fa-eye';
@@ -871,6 +893,7 @@ function subscribeToFollow(recordId) {
                 if (state.following) {
                     state.following.lat = newData.latitude;
                     state.following.lng = newData.longitude;
+                    state.following.last_update = newData.last_update || new Date().toISOString();
                 }
 
                 if (state.trackMarker) {
@@ -878,7 +901,7 @@ function subscribeToFollow(recordId) {
                     updateTrackStats(newData.latitude, newData.longitude);
                 }
 
-                updateTimestamp(newData.last_update);
+                updateTimestamp(state.following ? state.following.last_update : null);
                 saveFollowingState();
                 state.routeDrawn = false;
             }
@@ -920,6 +943,7 @@ async function fetchPosition(recordId) {
         if (state.following) {
             state.following.lat = newData.latitude;
             state.following.lng = newData.longitude;
+            state.following.last_update = newData.last_update || new Date().toISOString();
         }
 
         if (state.trackMarker) {
@@ -927,12 +951,70 @@ async function fetchPosition(recordId) {
             updateTrackStats(newData.latitude, newData.longitude);
         }
 
-        updateTimestamp(newData.last_update);
+        updateTimestamp(state.following ? state.following.last_update : null);
         saveFollowingState();
         state.routeDrawn = false;
 
     } catch (e) {
         console.warn('⚠️ Erreur polling:', e);
+    }
+}
+
+// ================================================================
+// INFOS GÉOGRAPHIQUES (Nominatim - reverse geocoding)
+// ================================================================
+async function getLocationInfo(lat, lng) {
+    try {
+        var url = 'https://nominatim.openstreetmap.org/reverse' +
+            '?lat=' + lat +
+            '&lon=' + lng +
+            '&format=json' +
+            '&zoom=16' +
+            '&addressdetails=1';
+
+        var response = await fetch(url);
+        if (!response.ok) return null;
+
+        var data = await response.json();
+
+        if (data) {
+            return {
+                display_name: data.display_name || 'Adresse non disponible',
+                road: (data.address && data.address.road) || (data.address && data.address.street) || '',
+                suburb: (data.address && data.address.suburb) || (data.address && data.address.neighbourhood) || (data.address && data.address.quarter) || '',
+                city: (data.address && data.address.city) || (data.address && data.address.town) || (data.address && data.address.village) || '',
+                country: (data.address && data.address.country) || ''
+            };
+        }
+        return null;
+    } catch (e) {
+        console.warn('⚠️ Erreur Nominatim:', e);
+        return null;
+    }
+}
+
+// ================================================================
+// METTRE À JOUR LES INFOS GÉOGRAPHIQUES DANS LE SLIDER
+// ================================================================
+function updateGeoInfo(geoInfo, record) {
+    if (!geoInfo) return;
+
+    state.geoInfo = geoInfo;
+
+    if (DOM.geoFullAddress) DOM.geoFullAddress.textContent = geoInfo.display_name || '--';
+    if (DOM.geoSuburb) DOM.geoSuburb.textContent = geoInfo.suburb || '--';
+    if (DOM.geoCity) DOM.geoCity.textContent = geoInfo.city || '--';
+    if (DOM.geoCountry) DOM.geoCountry.textContent = geoInfo.country || '--';
+    if (DOM.geoRoad) DOM.geoRoad.textContent = geoInfo.road || '--';
+
+    if (record) {
+        if (DOM.geoEmail) DOM.geoEmail.textContent = record.email || '--';
+        if (DOM.geoCode) DOM.geoCode.textContent = record.code || '--';
+        if (DOM.geoLastUpdate) {
+            var date = record.last_update ? new Date(record.last_update) : new Date();
+            DOM.geoLastUpdate.textContent = date.toLocaleDateString('fr-FR') + ' ' +
+                date.toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' });
+        }
     }
 }
 
@@ -983,12 +1065,13 @@ async function refreshFollowingPosition() {
 
         state.following.lat = newData.latitude;
         state.following.lng = newData.longitude;
+        state.following.last_update = newData.last_update || new Date().toISOString();
 
         if (state.trackMarker) {
             state.trackMarker.setLngLat([newData.longitude, newData.latitude]);
         }
 
-        updateTimestamp(newData.last_update);
+        updateTimestamp(state.following.last_update);
         updateTrackStats(newData.latitude, newData.longitude);
         
         state.routeDrawn = false;
@@ -996,6 +1079,20 @@ async function refreshFollowingPosition() {
         if (state.trackPolyline) {
             state.trackPolyline.remove();
             state.trackPolyline = null;
+        }
+
+        var geoInfo = await getLocationInfo(newData.latitude, newData.longitude);
+        if (geoInfo) {
+            updateGeoInfo(geoInfo, state.following);
+            console.log('📍 Infos géographiques mises à jour:', geoInfo.display_name);
+        } else {
+            updateGeoInfo({
+                display_name: 'Non disponible',
+                road: 'Non disponible',
+                suburb: 'Non disponible',
+                city: 'Non disponible',
+                country: 'Non disponible'
+            }, state.following);
         }
 
         saveFollowingState();
@@ -1033,8 +1130,13 @@ function restoreFollowing() {
         email: saved.email,
         lat: saved.lat,
         lng: saved.lng,
-        userId: saved.userId
+        userId: saved.userId,
+        last_update: new Date(saved.timestamp).toISOString()
     };
+
+    if (saved.geoInfo) {
+        state.geoInfo = saved.geoInfo;
+    }
 
     DOM.navFollowLabel.textContent = 'Arrêter de suivre';
     DOM.navFollow.querySelector('i').className = 'fas fa-stop-circle';
@@ -1046,11 +1148,16 @@ function restoreFollowing() {
         email: saved.email,
         lat: saved.lat,
         lng: saved.lng,
-        userId: saved.userId
+        userId: saved.userId,
+        last_update: state.following.last_update
     });
 
     subscribeToFollow(saved.id);
-    updateTimestamp();
+    updateTimestamp(state.following.last_update);
+
+    if (saved.geoInfo) {
+        updateGeoInfo(saved.geoInfo, state.following);
+    }
 
     if (DOM.btnCenterFollow) {
         DOM.btnCenterFollow.classList.remove('disabled');
@@ -1072,13 +1179,24 @@ function updateTimestamp(date) {
     if (date) {
         var updateTime = new Date(date);
         timeStr = updateTime.toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' });
-        dateStr = updateTime.toLocaleDateString('fr-FR', { day: '2-digit', month: 'short' });
+        dateStr = updateTime.toLocaleDateString('fr-FR', { day: '2-digit', month: 'short', year: 'numeric' });
     } else {
         timeStr = now.toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' });
-        dateStr = now.toLocaleDateString('fr-FR', { day: '2-digit', month: 'short' });
+        dateStr = now.toLocaleDateString('fr-FR', { day: '2-digit', month: 'short', year: 'numeric' });
     }
 
     timestampEl.textContent = '⏱️ Dernière mise à jour : ' + dateStr + ' ' + timeStr;
+}
+
+// ================================================================
+// FORMATER LE TEMPS (heures/minutes)
+// ================================================================
+function formatTime(minutes) {
+    if (minutes < 60) return minutes + ' min';
+    var hours = Math.floor(minutes / 60);
+    var mins = minutes % 60;
+    if (mins === 0) return hours + 'h';
+    return hours + 'h ' + mins + 'min';
 }
 
 // ================================================================
@@ -1099,7 +1217,7 @@ function calculateDistanceAndTime(lat1, lng1, lat2, lng2) {
 }
 
 // ================================================================
-// TRACER L'ITINÉRAIRE (appel ORS)
+// TRACER L'ITINÉRAIRE (appel OSRM)
 // ================================================================
 async function traceRoute() {
     if (!state.following) {
@@ -1132,87 +1250,63 @@ async function traceRoute() {
         DOM.trackActionBtn.disabled = true;
         DOM.trackBtnLabel.textContent = '⏳ Tracé en cours...';
 
-        // ✅ URL ORS officielle avec le bon domaine
-        var url = ORS_BASE_URL + '/v2/directions/' + ORS_PROFILE + '/geojson' +
-            '?api_key=' + ORS_API_KEY +
-            '&start=' + lng1 + ',' + lat1 +
-            '&end=' + lng2 + ',' + lat2;
+        var url = OSRM_URL + '/route/v1/' + OSRM_PROFILE + '/' +
+            lng1 + ',' + lat1 + ';' + lng2 + ',' + lat2 +
+            '?overview=full&geometries=geojson';
 
-        console.log('🌐 URL ORS:', url);
+        console.log('🌐 URL OSRM:', url);
 
         var response = await fetch(url);
 
-        // ✅ Vérifier la réponse
         if (!response.ok) {
             var errorText = await response.text();
-            console.error('❌ Erreur ORS:', response.status, errorText);
-            
-            // 🔧 Fallback sur OSRM si ORS échoue
-            console.log('🔧 Fallback sur OSRM...');
-            var fallbackUrl = 'https://router.project-osrm.org/route/v1/driving/' +
-                lng1 + ',' + lat1 + ';' + lng2 + ',' + lat2 +
-                '?overview=full&geometries=geojson';
-            
-            var fallbackResponse = await fetch(fallbackUrl);
-            if (!fallbackResponse.ok) {
-                throw new Error('Erreur OSRM: ' + fallbackResponse.status);
-            }
-            var fallbackData = await fallbackResponse.json();
-            
-            if (!fallbackData.routes || fallbackData.routes.length === 0) {
-                throw new Error('Aucun itinéraire trouvé');
-            }
-            
-            var route = fallbackData.routes[0];
-            var distanceRoute = (route.distance / 1000).toFixed(1);
-            var timeRoute = Math.round(route.duration / 60);
-            
-            if (distanceRoute < 1) {
-                DOM.trackDistance.textContent = Math.round(route.distance);
-                document.querySelector('.track-stat:first-child .track-stat-label').textContent = 'Mètres';
-            } else {
-                DOM.trackDistance.textContent = distanceRoute;
-                document.querySelector('.track-stat:first-child .track-stat-label').textContent = 'Km';
-            }
-            DOM.trackTime.textContent = Math.max(1, timeRoute);
-            
-            var coords = route.geometry.coordinates.map(function(coord) {
-                return [coord[0], coord[1]];
-            });
-            drawRoute(coords);
-            toast('✅ Itinéraire tracé (OSRM)', 'success', 2000);
-            DOM.trackActionBtn.disabled = false;
-            DOM.trackBtnLabel.textContent = '🗺️ Tracer l\'itinéraire';
-            return;
+            console.error('❌ Erreur OSRM:', response.status, errorText);
+            throw new Error('Erreur OSRM: ' + response.status);
         }
 
         var data = await response.json();
 
-        if (!data.features || data.features.length === 0) {
+        if (!data.routes || data.routes.length === 0) {
             throw new Error('Aucun itinéraire trouvé');
         }
 
-        var feature = data.features[0];
-        var summary = feature.properties.summary;
-        var distanceRoute = (summary.distance / 1000).toFixed(1);
-        var timeRoute = Math.round(summary.duration / 60);
+        var route = data.routes[0];
+        var distanceRoute = (route.distance / 1000).toFixed(1);
+        var timeRoute = Math.round(route.duration / 60);
 
         if (distanceRoute < 1) {
-            DOM.trackDistance.textContent = Math.round(summary.distance);
+            DOM.trackDistance.textContent = Math.round(route.distance);
             document.querySelector('.track-stat:first-child .track-stat-label').textContent = 'Mètres';
         } else {
             DOM.trackDistance.textContent = distanceRoute;
             document.querySelector('.track-stat:first-child .track-stat-label').textContent = 'Km';
         }
-        DOM.trackTime.textContent = Math.max(1, timeRoute);
+        DOM.trackTime.textContent = formatTime(Math.max(1, timeRoute));
 
-        var coordinates = feature.geometry.coordinates.map(function(coord) {
+        var coordinates = route.geometry.coordinates.map(function(coord) {
             return [coord[0], coord[1]];
         });
 
         drawRoute(coordinates);
 
-        toast('✅ Itinéraire tracé (ORS)', 'success', 2000);
+        var geoInfo = await getLocationInfo(lat2, lng2);
+        if (geoInfo) {
+            updateGeoInfo(geoInfo, state.following);
+            console.log('✅ Infos géographiques:', geoInfo.display_name);
+        } else {
+            console.warn('⚠️ Aucune info géographique trouvée');
+            updateGeoInfo({
+                display_name: 'Non disponible',
+                road: 'Non disponible',
+                suburb: 'Non disponible',
+                city: 'Non disponible',
+                country: 'Non disponible'
+            }, state.following);
+        }
+
+        DOM.trackSlider.classList.remove('active');
+
+        toast('✅ Itinéraire tracé', 'success', 2000);
 
     } catch (e) {
         console.error('❌ Erreur traçage:', e);
@@ -1224,7 +1318,25 @@ async function traceRoute() {
 }
 
 // ================================================================
-// SLIDER DE SUIVI
+// OUVRIR DANS GOOGLE MAPS
+// ================================================================
+function openInMaps() {
+    if (!state.following) {
+        toast('⚠️ Aucune personne suivie', 'error', 3000);
+        return;
+    }
+    var lat = state.following.lat;
+    var lng = state.following.lng;
+    if (isNaN(lat) || isNaN(lng) || lat === 0 || lng === 0) {
+        toast('⚠️ Position non disponible', 'error', 3000);
+        return;
+    }
+    var url = 'https://www.google.com/maps?q=' + lat + ',' + lng;
+    window.open(url, '_blank');
+}
+
+// ================================================================
+// SLIDER DE SUIVI (3 slides)
 // ================================================================
 function openTrackSlider(record) {
     DOM.trackEmail.textContent = '📧 ' + record.email;
@@ -1235,9 +1347,22 @@ function openTrackSlider(record) {
     DOM.trackActionBtn.className = 'track-btn';
     state.isTracking = false;
     state.routeDrawn = false;
+    state.slideIndex = 0;
 
-    updateTimestamp();
+    updateTimestamp(record.last_update || new Date().toISOString());
     DOM.trackSlider.classList.add('active');
+
+    if (state.geoInfo && state.geoInfo.display_name) {
+        updateGeoInfo(state.geoInfo, record);
+    } else {
+        updateGeoInfo({
+            display_name: '--',
+            road: '--',
+            suburb: '--',
+            city: '--',
+            country: '--'
+        }, record);
+    }
 
     var stats = calculateDistanceAndTime(
         state.userLat || 5.3599517,
@@ -1249,7 +1374,7 @@ function openTrackSlider(record) {
     if (stats.distance < 0.01) {
         DOM.trackDistance.textContent = '0';
         document.querySelector('.track-stat:first-child .track-stat-label').textContent = 'Mètres';
-        DOM.trackTime.textContent = '0';
+        DOM.trackTime.textContent = '0 min';
         
         var errorMsg = document.createElement('div');
         errorMsg.style.cssText = 'color:#d32f2f;font-size:0.75rem;text-align:center;padding:4px 0;font-weight:600;';
@@ -1270,7 +1395,7 @@ function openTrackSlider(record) {
             DOM.trackDistance.textContent = stats.distance.toFixed(1);
             document.querySelector('.track-stat:first-child .track-stat-label').textContent = 'Km';
         }
-        DOM.trackTime.textContent = stats.time;
+        DOM.trackTime.textContent = formatTime(stats.time);
         
         var oldMsg = DOM.trackSlider.querySelector('.track-error-msg');
         if (oldMsg) oldMsg.remove();
@@ -1283,6 +1408,30 @@ function openTrackSlider(record) {
     DOM.trackClose.onclick = function() {
         DOM.trackSlider.classList.remove('active');
     };
+
+    if (DOM.btnOpenMaps) {
+        DOM.btnOpenMaps.onclick = function() {
+            openInMaps();
+        };
+    }
+
+    updateTrackDots(0);
+
+    DOM.trackSlides.addEventListener('scroll', function() {
+        var slideWidth = this.offsetWidth || 300;
+        var index = Math.round(this.scrollLeft / slideWidth);
+        var total = DOM.trackDots.querySelectorAll('.dot').length;
+        if (index >= 0 && index < total) {
+            updateTrackDots(index);
+        }
+    });
+}
+
+function updateTrackDots(activeIndex) {
+    var dots = DOM.trackDots.querySelectorAll('.dot');
+    dots.forEach(function(dot, i) {
+        dot.classList.toggle('active', i === activeIndex);
+    });
 }
 
 // ================================================================
@@ -1340,7 +1489,7 @@ async function init() {
 
     registerServiceWorker();
 
-    console.log('🏠 easily by megane — prêt (MapLibre + ORS/OSRM)');
+    console.log('🏠 easily by megane — prêt');
     console.log('🔐 Authentifié:', state.isAuthenticated);
     console.log('📌 Catégories sélectionnées:', [...state.selectedCategories]);
 }

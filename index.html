@@ -129,30 +129,102 @@
     </div>
 
     <!-- ============================================================ -->
-    <!-- SLIDER SUIVI (info de la personne suivie) -->
+    <!-- SLIDER SUIVI (3 SLIDES) -->
     <!-- ============================================================ -->
     <div class="track-slider" id="trackSlider">
         <div class="track-sheet">
+            <div class="track-handle"></div>
+
             <div class="track-header">
                 <span class="track-email" id="trackEmail">📧 email@exemple.com</span>
                 <button class="track-close" id="trackClose"><i class="fas fa-times"></i></button>
             </div>
+
             <div class="track-timestamp" id="trackTimestamp">⏱️ Dernière mise à jour : ...</div>
-            <div class="track-body">
-                <div class="track-info">
-                    <div class="track-stat">
-                        <span class="track-stat-value" id="trackDistance">--</span>
-                        <span class="track-stat-label">Km</span>
+
+            <!-- ========================================================== -->
+            <!-- SLIDES HORIZONTAUX (3) -->
+            <!-- ========================================================== -->
+            <div class="track-slides" id="trackSlides">
+
+                <!-- SLIDE 1 : CALCUL + TRACER -->
+                <div class="track-slide">
+                    <div class="track-info">
+                        <div class="track-stat">
+                            <span class="track-stat-value" id="trackDistance">--</span>
+                            <span class="track-stat-label">Km</span>
+                        </div>
+                        <div class="track-stat">
+                            <span class="track-stat-value" id="trackTime">--</span>
+                            <span class="track-stat-label">Min</span>
+                        </div>
                     </div>
-                    <div class="track-stat">
-                        <span class="track-stat-value" id="trackTime">--</span>
-                        <span class="track-stat-label">Min</span>
+                    <button class="track-btn" id="trackActionBtn">
+                        <i class="fas fa-route"></i> <span id="trackBtnLabel">Tracer l'itinéraire</span>
+                    </button>
+                </div>
+
+                <!-- SLIDE 2 : INFOS GÉOGRAPHIQUES -->
+                <!-- SLIDE 2 : INFOS GÉOGRAPHIQUES (scrollable) -->
+<div class="track-slide">
+    <div class="geo-scrollable" id="geoScrollable">
+        <div class="geo-section">
+            <div class="geo-row">
+                <span class="geo-label">📍 Adresse</span>
+                <span class="geo-value" id="geoFullAddress">--</span>
+            </div>
+            <div class="geo-row">
+                <span class="geo-label">🏘️ Quartier</span>
+                <span class="geo-value" id="geoSuburb">--</span>
+            </div>
+            <div class="geo-row">
+                <span class="geo-label">🏙️ Ville</span>
+                <span class="geo-value" id="geoCity">--</span>
+            </div>
+            <div class="geo-row">
+                <span class="geo-label">🌍 Pays</span>
+                <span class="geo-value" id="geoCountry">--</span>
+            </div>
+            <div class="geo-row">
+                <span class="geo-label">🛣️ Rue</span>
+                <span class="geo-value" id="geoRoad">--</span>
+            </div>
+            <div class="geo-row geo-divider"></div>
+            <div class="geo-row">
+                <span class="geo-label">📧 Email</span>
+                <span class="geo-value" id="geoEmail">--</span>
+            </div>
+            <div class="geo-row">
+                <span class="geo-label">🔑 Code</span>
+                <span class="geo-value" id="geoCode">--</span>
+            </div>
+            <div class="geo-row">
+                <span class="geo-label">📅 Mise à jour</span>
+                <span class="geo-value" id="geoLastUpdate">--</span>
+            </div>
+        </div>
+    </div>
+</div>
+                <!-- SLIDE 3 : OUVRIR DANS MAPS -->
+                <div class="track-slide">
+                    <div class="maps-action">
+                        <i class="fas fa-map-marked-alt"></i>
+                        <p>Ouvrir la position dans Google Maps</p>
+                        <button class="btn-maps-open" id="btnOpenMaps">
+                            <i class="fas fa-external-link-alt"></i> Ouvrir dans Maps
+                        </button>
                     </div>
                 </div>
-                <button class="track-btn" id="trackActionBtn">
-                    <i class="fas fa-route"></i> <span id="trackBtnLabel">Mettre à jour</span>
-                </button>
+
             </div>
+
+            <!-- DOTS -->
+            <div class="track-dots" id="trackDots">
+                <button class="dot active" data-index="0"></button>
+                <button class="dot" data-index="1"></button>
+                <button class="dot" data-index="2"></button>
+            </div>
+
         </div>
     </div>
 
