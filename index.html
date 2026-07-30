@@ -79,6 +79,13 @@
                     <button class="btn-center" id="btnCenterFollow" type="button" title="Centrer sur la personne suivie">
                         <i class="fas fa-user"></i>
                     </button>
+                    <!-- ✅ Boutons transport -->
+                    <button class="btn-transport active" id="btnCar" type="button" title="Itinéraire en voiture">
+                        <i class="fas fa-car"></i>
+                    </button>
+                    <button class="btn-transport" id="btnFoot" type="button" title="Itinéraire à pied">
+                        <i class="fas fa-walking"></i>
+                    </button>
                 </div>
                 <div class="right">
                     <span class="info-item"><i class="fas fa-location-dot"></i> <span id="posStatus">--</span></span>
@@ -165,46 +172,50 @@
                 </div>
 
                 <!-- SLIDE 2 : INFOS GÉOGRAPHIQUES -->
-                <!-- SLIDE 2 : INFOS GÉOGRAPHIQUES (scrollable) -->
-<div class="track-slide">
-    <div class="geo-scrollable" id="geoScrollable">
-        <div class="geo-section">
-            <div class="geo-row">
-                <span class="geo-label">📍 Adresse</span>
-                <span class="geo-value" id="geoFullAddress">--</span>
-            </div>
-            <div class="geo-row">
-                <span class="geo-label">🏘️ Quartier</span>
-                <span class="geo-value" id="geoSuburb">--</span>
-            </div>
-            <div class="geo-row">
-                <span class="geo-label">🏙️ Ville</span>
-                <span class="geo-value" id="geoCity">--</span>
-            </div>
-            <div class="geo-row">
-                <span class="geo-label">🌍 Pays</span>
-                <span class="geo-value" id="geoCountry">--</span>
-            </div>
-            <div class="geo-row">
-                <span class="geo-label">🛣️ Rue</span>
-                <span class="geo-value" id="geoRoad">--</span>
-            </div>
-            <div class="geo-row geo-divider"></div>
-            <div class="geo-row">
-                <span class="geo-label">📧 Email</span>
-                <span class="geo-value" id="geoEmail">--</span>
-            </div>
-            <div class="geo-row">
-                <span class="geo-label">🔑 Code</span>
-                <span class="geo-value" id="geoCode">--</span>
-            </div>
-            <div class="geo-row">
-                <span class="geo-label">📅 Mise à jour</span>
-                <span class="geo-value" id="geoLastUpdate">--</span>
-            </div>
-        </div>
-    </div>
-</div>
+                <div class="track-slide">
+                    <div class="geo-scrollable" id="geoScrollable">
+                        <div class="geo-section">
+                            <div class="geo-row">
+                                <span class="geo-label">📍 Adresse</span>
+                                <span class="geo-value" id="geoFullAddress">--</span>
+                            </div>
+                            <div class="geo-row">
+                                <span class="geo-label">🏘️ Quartier</span>
+                                <span class="geo-value" id="geoSuburb">--</span>
+                            </div>
+                            <div class="geo-row">
+                                <span class="geo-label">🏙️ Ville</span>
+                                <span class="geo-value" id="geoCity">--</span>
+                            </div>
+                            <div class="geo-row">
+                                <span class="geo-label">🌍 Pays</span>
+                                <span class="geo-value" id="geoCountry">--</span>
+                            </div>
+                            <div class="geo-row">
+                                <span class="geo-label">🛣️ Rue</span>
+                                <span class="geo-value" id="geoRoad">--</span>
+                            </div>
+                            <div class="geo-row geo-divider"></div>
+                            <div class="geo-row">
+                                <span class="geo-label">📧 Email</span>
+                                <span class="geo-value" id="geoEmail">--</span>
+                            </div>
+                            <div class="geo-row">
+                                <span class="geo-label">🔑 Code</span>
+                                <span class="geo-value" id="geoCode">--</span>
+                            </div>
+                            <div class="geo-row">
+                                <span class="geo-label">📅 Mise à jour</span>
+                                <span class="geo-value" id="geoLastUpdate">--</span>
+                            </div>
+                        </div>
+                    </div>
+                    <!-- ✅ Bouton pour récupérer les infos du lieu -->
+                    <button class="btn-geo-refresh" id="btnGeoRefresh">
+                        <i class="fas fa-sync-alt"></i> Récupérer les infos du lieu
+                    </button>
+                </div>
+
                 <!-- SLIDE 3 : OUVRIR DANS MAPS -->
                 <div class="track-slide">
                     <div class="maps-action">

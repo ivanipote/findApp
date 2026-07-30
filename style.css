@@ -2521,3 +2521,188 @@ button:focus-visible {
         padding: 6px 10px;
     }
 }
+/* ============================================================ */
+/* BOUTONS TRANSPORT (voiture / pied) */
+/* ============================================================ */
+
+.btn-transport {
+    background: none;
+    border: none;
+    width: 30px;
+    height: 30px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #8a9aaa;
+    font-size: 0.8rem;
+    cursor: pointer;
+    transition: 0.2s;
+    background: #f0f2f5;
+    flex-shrink: 0;
+}
+
+.btn-transport:hover {
+    background: #e3edfb;
+    color: #1976d2;
+}
+
+.btn-transport.active {
+    background: #1976d2;
+    color: #ffffff;
+}
+
+.btn-transport:active {
+    transform: scale(0.9);
+}
+
+@media (max-width: 480px) {
+    .btn-transport {
+        width: 26px;
+        height: 26px;
+        font-size: 0.7rem;
+    }
+}
+
+/* ============================================================ */
+/* BOUTON RÉCUPÉRER LES INFOS DU LIEU (slide 2) */
+/* ============================================================ */
+
+.btn-geo-refresh {
+    width: 100%;
+    padding: 8px;
+    background: #f8f9fc;
+    color: #1976d2;
+    border: 1px solid #eef1f6;
+    border-radius: 10px;
+    font-size: 0.75rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: 0.2s;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    margin-top: 6px;
+}
+
+.btn-geo-refresh:hover {
+    background: #e3edfb;
+    border-color: #1976d2;
+}
+
+.btn-geo-refresh:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+}
+
+.btn-geo-refresh .spinner {
+    display: inline-block;
+    width: 14px;
+    height: 14px;
+    border: 2px solid rgba(25, 118, 210, 0.2);
+    border-top: 2px solid #1976d2;
+    border-radius: 50%;
+    animation: spin 0.8s linear infinite;
+}
+
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+
+/* ============================================================ */
+/* SLIDE 2 : INFOS GÉOGRAPHIQUES - SCROLLABLE */
+/* ============================================================ */
+
+.geo-scrollable {
+    max-height: 180px;
+    overflow-y: auto;
+    width: 100%;
+    padding-right: 4px;
+    scroll-behavior: smooth;
+}
+
+.geo-scrollable::-webkit-scrollbar {
+    width: 3px;
+}
+
+.geo-scrollable::-webkit-scrollbar-track {
+    background: #f0f2f5;
+    border-radius: 4px;
+}
+
+.geo-scrollable::-webkit-scrollbar-thumb {
+    background: #1976d2;
+    border-radius: 4px;
+}
+
+.geo-section {
+    background: #f8f9fc;
+    border-radius: 10px;
+    padding: 8px 12px;
+    border: 1px solid #eef1f6;
+    width: 100%;
+}
+
+.geo-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 4px 0;
+    font-size: 0.75rem;
+    border-bottom: 1px solid rgba(0, 0, 0, 0.04);
+}
+
+.geo-row:last-child {
+    border-bottom: none;
+}
+
+.geo-row.geo-divider {
+    border-bottom: 2px solid #e8ecf4;
+    padding: 2px 0;
+    margin: 2px 0;
+}
+
+.geo-row .geo-label {
+    color: #8a9aaa;
+    font-weight: 600;
+    font-size: 0.6rem;
+    text-transform: uppercase;
+    letter-spacing: 0.3px;
+    flex-shrink: 0;
+}
+
+.geo-row .geo-value {
+    color: #1a2a5a;
+    font-weight: 500;
+    text-align: right;
+    word-break: break-all;
+    max-width: 65%;
+    font-size: 0.75rem;
+}
+
+/* Responsive */
+@media (max-width: 480px) {
+    .geo-scrollable {
+        max-height: 150px;
+    }
+    .geo-row {
+        font-size: 0.68rem;
+        padding: 3px 0;
+    }
+    .geo-row .geo-label {
+        font-size: 0.5rem;
+    }
+    .geo-row .geo-value {
+        font-size: 0.68rem;
+        max-width: 55%;
+    }
+    .geo-section {
+        padding: 6px 10px;
+    }
+    .btn-geo-refresh {
+        font-size: 0.65rem;
+        padding: 6px;
+    }
+}
