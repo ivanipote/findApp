@@ -1,0 +1,1106 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+    <meta name="theme-color" content="#1976d2" />
+    <title>➕ Ajouter un lieu - easily by megane</title>
+
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
+    <link rel="stylesheet" href="style.css" />
+
+    <style>
+        /* ============================================================ */
+        /* PAGE AJOUT - COMPLÈTE                                        */
+        /* ============================================================ */
+        :root {
+            --blue: #1976d2;
+            --blue-dark: #1565c0;
+            --blue-deep: #1a2a5a;
+            --blue-tint: #e3edfb;
+            --grey-bg: #f0f2f5;
+            --field-bg: #f8f9fc;
+            --border: #e8ecf4;
+            --muted: #8a9aaa;
+            --red: #d32f2f;
+            --green: #2ecc71;
+
+            --r-lg: 18px;
+            --r-md: 12px;
+            --r-sm: 9px;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        html, body {
+            height: 100%;
+            overflow: hidden;
+        }
+
+        body {
+            background: var(--grey-bg);
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            display: flex;
+            flex-direction: column;
+            padding-top: 76px;
+        }
+
+        /* ============================================================ */
+        /* HEADER - COMME INDEX.HTML                                    */
+        /* ============================================================ */
+        .header-add {
+            position: fixed;
+            top: 12px;
+            left: 12px;
+            right: 12px;
+            z-index: 1000;
+            height: 60px;
+            background: #ffffff;
+            border-radius: 35px;
+            display: flex;
+            align-items: center;
+            padding: 0 20px;
+            gap: 14px;
+            box-shadow: 0 2px 12px rgba(0, 0, 0, 0.06);
+            border: 3px solid #1976d2;
+            max-width: 480px;
+            margin: 0 auto;
+        }
+
+        @media (min-width: 480px) {
+            .header-add {
+                left: 50%;
+                transform: translateX(-50%);
+                right: auto;
+                top: 12px;
+            }
+        }
+
+        .header-add .back-btn {
+            background: none;
+            border: none;
+            color: #1976d2;
+            font-size: 1.2rem;
+            cursor: pointer;
+            padding: 4px 6px;
+            border-radius: 50%;
+            transition: 0.2s;
+            flex-shrink: 0;
+        }
+
+        .header-add .back-btn:hover {
+            background: #f0f2f5;
+        }
+
+        .header-add .title {
+            flex: 1;
+            font-weight: 700;
+            font-size: 0.95rem;
+            color: #1a2a5a;
+            text-align: center;
+        }
+
+        /* ============================================================ */
+        /* CONTAINER                                                     */
+        /* ============================================================ */
+        .add-container {
+            width: 100%;
+            max-width: 480px;
+            margin: 0 auto;
+            padding: 3vh 12px 2.4vh;
+            display: flex;
+            flex-direction: column;
+            gap: 1.4vh;
+            flex: 1;
+            min-height: 0;
+            overflow: hidden;
+        }
+
+        /* ============================================================ */
+        /* CARDS                                                         */
+        /* ============================================================ */
+        .card {
+            background: #ffffff;
+            border-radius: var(--r-lg);
+            padding: 2vh 4vw;
+            border: 1px solid var(--border);
+            box-shadow: 0 6px 20px -12px rgba(26, 42, 90, 0.18);
+            width: 100%;
+            display: flex;
+            flex-direction: column;
+            min-height: 0;
+            overflow: hidden;
+            position: relative;
+        }
+
+        .card-required {
+            flex: 2.6;
+            border-left: 3px solid var(--blue);
+        }
+
+        .card-optional {
+            flex: 2;
+        }
+
+        .card-photos {
+            flex: 1.25;
+            min-height: 96px;
+        }
+
+        .card .card-title {
+            font-size: 0.62rem;
+            font-weight: 700;
+            color: var(--muted);
+            display: flex;
+            align-items: center;
+            gap: 7px;
+            margin-bottom: 1.1vh;
+            text-transform: uppercase;
+            letter-spacing: 0.6px;
+            flex-shrink: 0;
+        }
+
+        .card .card-title i {
+            color: var(--blue);
+            font-size: 0.68rem;
+        }
+
+        .card .card-title .badge {
+            font-size: 0.5rem;
+            font-weight: 700;
+            padding: 3px 10px;
+            border-radius: 20px;
+            margin-left: auto;
+            color: #ffffff;
+            letter-spacing: 0.4px;
+        }
+
+        .card .card-title .badge.required {
+            background: var(--red);
+        }
+
+        .card .card-title .badge.optional {
+            background: var(--muted);
+        }
+
+        /* ============================================================ */
+        /* FORM GROUP                                                    */
+        /* ============================================================ */
+        .form-group {
+            margin-bottom: 1vh;
+            flex-shrink: 0;
+        }
+
+        .form-group:last-child {
+            margin-bottom: 0;
+        }
+
+        .form-group label {
+            display: block;
+            font-size: 0.58rem;
+            font-weight: 600;
+            color: var(--muted);
+            margin-bottom: 3px;
+            text-transform: uppercase;
+            letter-spacing: 0.4px;
+        }
+
+        .form-group label .required {
+            color: var(--red);
+        }
+
+        .form-group input,
+        .form-group select,
+        .form-group textarea {
+            width: 100%;
+            padding: 0 14px;
+            border: 1.5px solid var(--border);
+            border-radius: var(--r-sm);
+            font-size: 0.85rem;
+            color: var(--blue-deep);
+            background: var(--field-bg);
+            transition: 0.2s;
+            font-family: inherit;
+            height: 46px;
+        }
+
+        .form-group select {
+            appearance: none;
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath fill='%238a9aaa' d='M1 1l5 5 5-5'/%3E%3C/svg%3E");
+            background-repeat: no-repeat;
+            background-position: right 14px center;
+            padding-right: 32px;
+        }
+
+        .form-group textarea {
+            height: auto;
+            min-height: 46px;
+            resize: none;
+            padding: 10px 14px;
+            line-height: 1.4;
+        }
+
+        .form-group input:focus,
+        .form-group select:focus,
+        .form-group textarea:focus {
+            border-color: var(--blue);
+            outline: none;
+            background: #ffffff;
+            box-shadow: 0 0 0 3px rgba(25, 118, 210, 0.1);
+        }
+
+        .form-group input::placeholder,
+        .form-group textarea::placeholder {
+            color: #aab4c8;
+            font-size: 0.8rem;
+        }
+
+        .form-group.grow {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            min-height: 0;
+        }
+
+        .form-group.grow textarea,
+        .form-group.grow input {
+            flex: 1;
+            min-height: 0;
+            height: auto;
+        }
+
+        .form-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 8px;
+        }
+
+        .form-row .form-group {
+            margin-bottom: 0;
+        }
+
+        /* ============================================================ */
+        /* PHOTOS                                                        */
+        /* ============================================================ */
+        .photo-upload-row {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            flex-shrink: 0;
+        }
+
+        .photo-upload-row .photo-btn {
+            padding: 0 16px;
+            background: var(--field-bg);
+            border: 1.5px dashed #c7d3e8;
+            border-radius: var(--r-sm);
+            font-size: 0.75rem;
+            font-weight: 600;
+            color: var(--blue);
+            cursor: pointer;
+            transition: 0.2s;
+            display: flex;
+            align-items: center;
+            gap: 7px;
+            flex-shrink: 0;
+            white-space: nowrap;
+            height: 42px;
+        }
+
+        .photo-upload-row .photo-btn:hover {
+            background: var(--blue-tint);
+            border-color: var(--blue);
+        }
+
+        .photo-upload-row .photo-info {
+            flex: 1;
+            font-size: 0.7rem;
+            color: var(--muted);
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .photo-upload-row .photo-count-badge {
+            font-size: 0.62rem;
+            font-weight: 700;
+            color: var(--blue);
+            background: var(--blue-tint);
+            padding: 0 12px;
+            border-radius: 20px;
+            flex-shrink: 0;
+            height: 26px;
+            display: flex;
+            align-items: center;
+        }
+
+        .photo-upload-row input[type="file"] {
+            display: none;
+        }
+
+        .photo-preview-add {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 7px;
+            margin-top: 1vh;
+            flex-shrink: 0;
+        }
+
+        .photo-preview-add .preview-item {
+            width: 46px;
+            height: 46px;
+            border-radius: 9px;
+            overflow: hidden;
+            border: 1px solid var(--border);
+            position: relative;
+            background: var(--field-bg);
+        }
+
+        .photo-preview-add .preview-item img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .photo-preview-add .preview-item .remove-photo {
+            position: absolute;
+            top: -4px;
+            right: -4px;
+            width: 18px;
+            height: 18px;
+            border-radius: 50%;
+            background: var(--red);
+            color: #ffffff;
+            border: 2px solid #ffffff;
+            font-size: 0.42rem;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: 0.2s;
+        }
+
+        .photo-preview-add .preview-item .remove-photo:hover {
+            background: #b71c1c;
+            transform: scale(1.1);
+        }
+
+        /* ============================================================ */
+        /* BOUTON CRÉER                                                  */
+        /* ============================================================ */
+        .btn-create {
+            width: 100%;
+            background: var(--blue);
+            color: #ffffff;
+            border: none;
+            border-radius: var(--r-md);
+            font-size: 0.9rem;
+            font-weight: 700;
+            cursor: pointer;
+            transition: 0.2s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            flex-shrink: 0;
+            height: 52px;
+            box-shadow: 0 10px 24px -10px rgba(25, 118, 210, 0.55);
+        }
+
+        .btn-create:hover {
+            background: var(--blue-dark);
+            transform: translateY(-1px);
+        }
+
+        .btn-create:active {
+            transform: translateY(0);
+        }
+
+        .btn-create:disabled {
+            opacity: 0.65;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .btn-create i {
+            font-size: 1rem;
+        }
+
+        /* ============================================================ */
+        /* TOAST                                                         */
+        /* ============================================================ */
+        .toast-add {
+            position: fixed;
+            bottom: 18px;
+            left: 50%;
+            transform: translateX(-50%);
+            padding: 10px 18px;
+            border-radius: 30px;
+            font-size: 0.75rem;
+            font-weight: 600;
+            z-index: 9999;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.3s ease;
+            max-width: 90%;
+            text-align: center;
+            background: var(--blue-deep);
+            color: #ffffff;
+            box-shadow: 0 4px 16px rgba(0, 0, 0, 0.15);
+        }
+
+        .toast-add.show {
+            opacity: 1;
+        }
+
+        .toast-add.success { background: var(--green); }
+        .toast-add.error { background: var(--red); }
+        .toast-add.info { background: var(--blue); }
+
+        /* ============================================================ */
+        /* SPINNER                                                       */
+        /* ============================================================ */
+        .spinner {
+            display: inline-block;
+            width: 18px;
+            height: 18px;
+            border: 2px solid rgba(255, 255, 255, 0.3);
+            border-top: 2px solid #ffffff;
+            border-radius: 50%;
+            animation: spin 0.8s linear infinite;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        /* ============================================================ */
+        /* RESPONSIVE                                                    */
+        /* ============================================================ */
+        @media (max-width: 480px) {
+            body {
+                padding-top: 68px;
+            }
+
+            .header-add {
+                height: 52px;
+                padding: 0 16px;
+                top: 10px;
+                left: 10px;
+                right: 10px;
+                border-radius: 30px;
+                border-width: 2px;
+                max-width: 100%;
+            }
+
+            .header-add .title {
+                font-size: 0.85rem;
+            }
+
+            .add-container {
+                padding: 2vh 10px 1.6vh;
+                gap: 1.1vh;
+            }
+
+            .card {
+                padding: 1.6vh 3.6vw;
+                border-radius: 14px;
+            }
+
+            .card-photos {
+                min-height: 82px;
+            }
+
+            .form-group input,
+            .form-group select {
+                height: 40px;
+                font-size: 0.78rem;
+            }
+
+            .form-group textarea {
+                font-size: 0.78rem;
+                min-height: 40px;
+                padding: 8px 12px;
+            }
+
+            .form-group label {
+                font-size: 0.53rem;
+            }
+
+            .photo-upload-row .photo-btn {
+                height: 36px;
+                padding: 0 12px;
+                font-size: 0.65rem;
+            }
+
+            .photo-upload-row .photo-info {
+                font-size: 0.6rem;
+            }
+
+            .photo-upload-row .photo-count-badge {
+                height: 22px;
+                font-size: 0.5rem;
+            }
+
+            .photo-preview-add .preview-item {
+                width: 38px;
+                height: 38px;
+            }
+
+            .btn-create {
+                height: 46px;
+                font-size: 0.82rem;
+                border-radius: 12px;
+            }
+        }
+
+        @media (max-width: 360px) {
+            .form-row {
+                grid-template-columns: 1fr;
+                gap: 6px;
+            }
+
+            .card {
+                padding: 1.4vh 3vw;
+            }
+
+            .card-photos {
+                min-height: 74px;
+            }
+
+            .form-group input,
+            .form-group select {
+                height: 36px;
+                font-size: 0.74rem;
+            }
+
+            .form-group textarea {
+                min-height: 36px;
+                font-size: 0.74rem;
+            }
+        }
+
+        @media (max-height: 700px) {
+            .card-required {
+                flex: 2.1;
+            }
+
+            .card-optional {
+                flex: 1.5;
+            }
+
+            .card-photos {
+                flex: 1;
+                min-height: 72px;
+            }
+
+            .form-group {
+                margin-bottom: 5px;
+            }
+
+            .form-group input,
+            .form-group select {
+                height: 38px;
+                font-size: 0.74rem;
+            }
+
+            .form-group textarea {
+                min-height: 38px;
+                font-size: 0.74rem;
+            }
+
+            .form-group label {
+                font-size: 0.52rem;
+            }
+
+            .btn-create {
+                height: 42px;
+                font-size: 0.78rem;
+            }
+        }
+
+        @media (max-height: 600px) {
+            .card-required {
+                flex: 1.6;
+            }
+
+            .card-optional {
+                flex: 1.2;
+            }
+
+            .card-photos {
+                flex: 0.85;
+                min-height: 62px;
+            }
+
+            .form-group {
+                margin-bottom: 3px;
+            }
+
+            .form-group input,
+            .form-group select {
+                height: 33px;
+                font-size: 0.7rem;
+            }
+
+            .form-group textarea {
+                min-height: 33px;
+                font-size: 0.7rem;
+            }
+
+            .form-group label {
+                font-size: 0.46rem;
+            }
+
+            .btn-create {
+                height: 36px;
+                font-size: 0.7rem;
+            }
+
+            .photo-upload-row .photo-btn {
+                height: 30px;
+                font-size: 0.56rem;
+            }
+
+            .photo-preview-add .preview-item {
+                width: 30px;
+                height: 30px;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- ============================================================ -->
+    <!-- HEADER - ORIGINAL                                             -->
+    <!-- ============================================================ -->
+    <header class="header-add">
+        <button class="back-btn" id="backBtn" type="button" aria-label="Retour">
+            <i class="fas fa-arrow-left"></i>
+        </button>
+        <span class="title">➕ Ajouter un lieu</span>
+        <span style="width:32px;"></span>
+    </header>
+
+    <!-- ============================================================ -->
+    <!-- CONTENU -->
+    <!-- ============================================================ -->
+    <div class="add-container">
+
+        <!-- ============================================================ -->
+        <!-- SECTION OBLIGATOIRE -->
+        <!-- ============================================================ -->
+        <div class="card card-required">
+            <div class="card-title">
+                <i class="fas fa-asterisk"></i> Informations essentielles
+                <span class="badge required">Requis</span>
+            </div>
+
+            <div class="form-row">
+                <div class="form-group">
+                    <label>Nom <span class="required">*</span></label>
+                    <input type="text" id="placeName" placeholder="Ex: Megane Shop" />
+                </div>
+                <div class="form-group">
+                    <label>Catégorie <span class="required">*</span></label>
+                    <select id="placeCategory">
+                        <option value="">Choisir...</option>
+                        <option value="boutiques">🛍️ Boutique</option>
+                        <option value="restaurants">🍽️ Restaurant</option>
+                        <option value="domiciles">🏠 Domicile</option>
+                        <option value="cybercafes">💻 Cybercafé</option>
+                        <option value="sante">🏥 Santé</option>
+                        <option value="stations">⛽ Station</option>
+                    </select>
+                </div>
+            </div>
+
+            <div class="form-group grow">
+                <label>Adresse <span class="required">*</span></label>
+                <input type="text" id="placeAddress" placeholder="Ex: Cocody Angré" style="flex:1;height:auto;" />
+            </div>
+        </div>
+
+        <!-- ============================================================ -->
+        <!-- SECTION FACULTATIVE -->
+        <!-- ============================================================ -->
+        <div class="card card-optional">
+            <div class="card-title">
+                <i class="fas fa-plus-circle"></i> Détails complémentaires
+                <span class="badge optional">Optionnel</span>
+            </div>
+
+            <div class="form-row">
+                <div class="form-group">
+                    <label>Téléphone</label>
+                    <input type="tel" id="placePhone" placeholder="07 00 00 00 00" />
+                </div>
+                <div class="form-group">
+                    <label>Horaires</label>
+                    <input type="text" id="placeHours" placeholder="08:00 - 20:00" />
+                </div>
+            </div>
+
+            <div class="form-group grow">
+                <label>Description</label>
+                <textarea id="placeDescription" placeholder="Décrivez le lieu..."></textarea>
+            </div>
+        </div>
+
+        <!-- ============================================================ -->
+        <!-- SECTION PHOTOS -->
+        <!-- ============================================================ -->
+        <div class="card card-photos">
+            <div class="card-title">
+                <i class="fas fa-image"></i> Photos
+                <span class="badge optional">2 max</span>
+            </div>
+
+            <div class="photo-upload-row">
+                <button class="photo-btn" id="photoBtn" type="button">
+                    <i class="fas fa-cloud-upload-alt"></i> Choisir
+                </button>
+                <span class="photo-info" id="photoInfo">Aucune photo sélectionnée</span>
+                <span class="photo-count-badge" id="photoCount">0 / 2</span>
+                <input type="file" id="placePhotos" accept="image/*" multiple />
+            </div>
+
+            <div class="photo-preview-add" id="photoPreviewAdd">
+                <!-- Rempli par JS -->
+            </div>
+        </div>
+
+        <!-- ============================================================ -->
+        <!-- BOUTON CRÉER -->
+        <!-- ============================================================ -->
+        <button class="btn-create" id="createBtn" type="button">
+            <i class="fas fa-plus-circle"></i> Créer le lieu
+        </button>
+
+    </div>
+
+    <!-- ============================================================ -->
+    <!-- TOAST -->
+    <!-- ============================================================ -->
+    <div class="toast-add" id="toastAdd"></div>
+
+    <!-- ============================================================ -->
+    <!-- SCRIPT -->
+    <!-- ============================================================ -->
+    <script>
+        (function() {
+            'use strict';
+
+            // ============================================================
+            // CONFIGURATION SUPABASE
+            // ============================================================
+            var SUPABASE_URL = 'https://slanrdeaxapzfqtuqhbf.supabase.co';
+            var SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InNsYW5yZGVheGFwemZxdHVxaGJmIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODUzMzA3OTcsImV4cCI6MjEwMDkwNjc5N30.pUCb_N-66pjFs-QP2RefsqjAnffC4Rbq-rP9qHfnvK8';
+
+            // ============================================================
+            // DOM REFS
+            // ============================================================
+            var backBtn = document.getElementById('backBtn');
+            var placeName = document.getElementById('placeName');
+            var placeCategory = document.getElementById('placeCategory');
+            var placeAddress = document.getElementById('placeAddress');
+            var placePhone = document.getElementById('placePhone');
+            var placeHours = document.getElementById('placeHours');
+            var placeDescription = document.getElementById('placeDescription');
+            var placePhotos = document.getElementById('placePhotos');
+            var photoBtn = document.getElementById('photoBtn');
+            var photoInfo = document.getElementById('photoInfo');
+            var photoCount = document.getElementById('photoCount');
+            var photoPreview = document.getElementById('photoPreviewAdd');
+            var createBtn = document.getElementById('createBtn');
+            var toastEl = document.getElementById('toastAdd');
+
+            var toastTimer = null;
+            var selectedFiles = [];
+
+            // ============================================================
+            // SESSION
+            // ============================================================
+            function getSession() {
+                try {
+                    var session = localStorage.getItem('sb_session');
+                    if (session) return JSON.parse(session);
+                } catch (e) {}
+                return null;
+            }
+
+            function getHeaders(token) {
+                var headers = {
+                    'apikey': SUPABASE_ANON_KEY,
+                    'Content-Type': 'application/json'
+                };
+                if (token) {
+                    headers['Authorization'] = 'Bearer ' + token;
+                } else {
+                    headers['Authorization'] = 'Bearer ' + SUPABASE_ANON_KEY;
+                }
+                return headers;
+            }
+
+            function getUserPosition() {
+                return new Promise(function(resolve) {
+                    if (navigator.geolocation) {
+                        navigator.geolocation.getCurrentPosition(
+                            function(pos) {
+                                resolve({ lat: pos.coords.latitude, lng: pos.coords.longitude });
+                            },
+                            function() {
+                                resolve({ lat: 5.3599517, lng: -3.9792253 });
+                            },
+                            { enableHighAccuracy: true, timeout: 5000 }
+                        );
+                    } else {
+                        resolve({ lat: 5.3599517, lng: -3.9792253 });
+                    }
+                });
+            }
+
+            // ============================================================
+            // UPLOAD PHOTO
+            // ============================================================
+            async function uploadPhoto(file, placeId, token) {
+                var parts = file.name.split('.');
+                var ext = parts.length > 1 ? parts.pop() : 'jpg';
+                var fileName = placeId + '_' + Date.now() + '_' + Math.random().toString(36).substring(2, 6) + '.' + ext;
+
+                var formData = new FormData();
+                formData.append('file', file);
+
+                var response = await fetch(SUPABASE_URL + '/storage/v1/object/place-photos/' + fileName, {
+                    method: 'POST',
+                    headers: {
+                        'apikey': SUPABASE_ANON_KEY,
+                        'Authorization': 'Bearer ' + token
+                    },
+                    body: formData
+                });
+
+                if (!response.ok) {
+                    var err = await response.text();
+                    throw new Error('Upload échoué: ' + response.status + ' - ' + err);
+                }
+
+                return SUPABASE_URL + '/storage/v1/object/public/place-photos/' + fileName;
+            }
+
+            // ============================================================
+            // TOAST
+            // ============================================================
+            function showToast(message, type) {
+                toastEl.textContent = message;
+                toastEl.className = 'toast-add show ' + type;
+                if (toastTimer) clearTimeout(toastTimer);
+                toastTimer = setTimeout(function() {
+                    toastEl.classList.remove('show');
+                }, 3000);
+            }
+
+            // ============================================================
+            // PHOTOS
+            // ============================================================
+            function updatePhotoUI() {
+                var count = selectedFiles.length;
+                photoCount.textContent = count + ' / 2';
+
+                if (count === 0) {
+                    photoInfo.textContent = 'Aucune photo sélectionnée';
+                } else if (count === 1) {
+                    photoInfo.textContent = selectedFiles[0].name;
+                } else {
+                    photoInfo.textContent = count + ' photos sélectionnées';
+                }
+            }
+
+            function renderPhotoPreview() {
+                photoPreview.innerHTML = '';
+
+                selectedFiles.forEach(function(file, index) {
+                    if (!file.type.startsWith('image/')) return;
+                    var reader = new FileReader();
+                    reader.onload = function(e) {
+                        var div = document.createElement('div');
+                        div.className = 'preview-item';
+                        div.innerHTML =
+                            '<img src="' + e.target.result + '" />' +
+                            '<button class="remove-photo" data-index="' + index + '" type="button">' +
+                            '<i class="fas fa-times"></i>' +
+                            '</button>';
+                        div.querySelector('.remove-photo').addEventListener('click', function() {
+                            selectedFiles.splice(index, 1);
+                            renderPhotoPreview();
+                            updatePhotoUI();
+                            updateFileInput();
+                        });
+                        photoPreview.appendChild(div);
+                    };
+                    reader.readAsDataURL(file);
+                });
+
+                updatePhotoUI();
+            }
+
+            function updateFileInput() {
+                var dt = new DataTransfer();
+                selectedFiles.forEach(function(f) { dt.items.add(f); });
+                placePhotos.files = dt.files;
+            }
+
+            // ============================================================
+            // PHOTO UPLOAD
+            // ============================================================
+            photoBtn.addEventListener('click', function() {
+                if (selectedFiles.length >= 2) {
+                    showToast('Maximum 2 photos', 'error');
+                    return;
+                }
+                placePhotos.click();
+            });
+
+            placePhotos.addEventListener('change', function(e) {
+                var files = Array.from(e.target.files);
+                var remaining = 2 - selectedFiles.length;
+                var toAdd = files.slice(0, remaining);
+
+                if (toAdd.length < files.length) {
+                    showToast('Maximum 2 photos, ' + (files.length - toAdd.length) + ' ignorée(s)', 'error');
+                }
+
+                selectedFiles = selectedFiles.concat(toAdd);
+                renderPhotoPreview();
+                updatePhotoUI();
+                updateFileInput();
+            });
+
+            // ============================================================
+            // BACK
+            // ============================================================
+            backBtn.addEventListener('click', function() {
+                window.history.back();
+            });
+
+            // ============================================================
+            // CRÉER
+            // ============================================================
+            createBtn.addEventListener('click', async function() {
+                var name = placeName.value.trim();
+                var category = placeCategory.value;
+                var address = placeAddress.value.trim();
+
+                if (!name) { showToast('Le nom est requis', 'error'); return; }
+                if (!category) { showToast('La catégorie est requise', 'error'); return; }
+                if (!address) { showToast('L\'adresse est requise', 'error'); return; }
+
+                var session = getSession();
+                if (!session || !session.access_token) {
+                    showToast('🔐 Veuillez vous connecter', 'error');
+                    return;
+                }
+
+                createBtn.disabled = true;
+                createBtn.innerHTML = '<span class="spinner"></span> Création...';
+
+                try {
+                    // Récupérer la position
+                    var pos = await getUserPosition();
+
+                    var data = {
+                        name: name,
+                        category: category,
+                        address: address,
+                        phone: placePhone.value.trim() || null,
+                        hours: placeHours.value.trim() || null,
+                        description: placeDescription.value.trim() || null,
+                        status: 'open',
+                        lat: String(pos.lat),
+                        lng: String(pos.lng),
+                        user_id: session.user.id
+                    };
+
+                    // Insérer le lieu
+                    var insertResponse = await fetch(SUPABASE_URL + '/rest/v1/position', {
+                        method: 'POST',
+                        headers: {
+                            ...getHeaders(session.access_token),
+                            'Prefer': 'return=representation'
+                        },
+                        body: JSON.stringify(data)
+                    });
+
+                    if (!insertResponse.ok) {
+                        var errText = await insertResponse.text();
+                        throw new Error('Erreur insertion: ' + errText);
+                    }
+
+                    var saved = await insertResponse.json();
+                    var placeId = saved[0] ? saved[0].id : saved.id;
+
+                    if (!placeId) {
+                        throw new Error('ID du lieu non récupéré');
+                    }
+
+                    // Upload des photos
+                    var photoUrls = [];
+                    if (selectedFiles.length > 0) {
+                        for (var i = 0; i < selectedFiles.length; i++) {
+                            try {
+                                var url = await uploadPhoto(selectedFiles[i], placeId, session.access_token);
+                                photoUrls.push(url);
+                            } catch (e) {
+                                console.warn('⚠️ Photo échouée:', e.message);
+                            }
+                        }
+                    }
+
+                    // Enregistrer les photos en base
+                    if (photoUrls.length > 0) {
+                        for (var j = 0; j < photoUrls.length; j++) {
+                            await fetch(SUPABASE_URL + '/rest/v1/photos', {
+                                method: 'POST',
+                                headers: {
+                                    ...getHeaders(session.access_token),
+                                    'Prefer': 'return=representation'
+                                },
+                                body: JSON.stringify({
+                                    position_id: placeId,
+                                    url: photoUrls[j]
+                                })
+                            });
+                        }
+                    }
+
+                    showToast('✅ Lieu créé avec ' + photoUrls.length + ' photo(s) !', 'success');
+
+                    setTimeout(function() {
+                        window.location.href = 'index.html';
+                    }, 1500);
+
+                } catch (error) {
+                    console.error('❌ Erreur:', error);
+                    showToast('❌ Erreur: ' + error.message, 'error');
+                    createBtn.disabled = false;
+                    createBtn.innerHTML = '<i class="fas fa-plus-circle"></i> Créer le lieu';
+                }
+            });
+
+            // ============================================================
+            // INIT
+            // ============================================================
+            renderPhotoPreview();
+            updatePhotoUI();
+            console.log('➕ Page Ajout — Connectée à Supabase');
+
+        })();
+    </script>
+
+</body>
+</html>

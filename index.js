@@ -7,6 +7,29 @@ var SUPABASE_URL = 'https://slanrdeaxapzfqtuqhbf.supabase.co';
 var SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InNsYW5yZGVheGFwemZxdHVxaGJmIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODUzMzA3OTcsImV4cCI6MjEwMDkwNjc5N30.pUCb_N-66pjFs-QP2RefsqjAnffC4Rbq-rP9qHfnvK8';
 
 // ================================================================
+// 🔌 CLIENT SUPABASE
+// ================================================================
+var supabaseClient = null;
+
+if (typeof supabase !== 'undefined' && typeof supabase.createClient === 'function') {
+    supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+    console.log('✅ Supabase client initialisé');
+} else {
+    console.warn('⚠️ SDK Supabase non disponible, fallback activé');
+    supabaseClient = {
+        channel: function() { 
+            return { 
+                on: function() { return this; }, 
+                subscribe: function() { return this; } 
+            }; 
+        },
+        removeChannel: function() { return; }
+    };
+}
+
+console.log('supabaseClient:', typeof supabaseClient);
+
+// ================================================================
 // CATÉGORIES
 // ================================================================
 var CATEGORIES = [
@@ -27,14 +50,13 @@ var state = {
     selectedCategories: new Set(),
     userLat: null,
     userLng: null,
-    photoFiles: [],
     routingControl: null,
     following: null,
     followChannel: null,
     trackMarker: null,
     trackPolyline: null,
     isTracking: false,
-    isFollowingActive: false // Pour le toggle de suivi GPS
+    isFollowingActive: false
 };
 
 // ================================================================
@@ -60,23 +82,6 @@ function cacheDom() {
         toggleFollow: document.getElementById('toggleFollow'),
         posStatus: document.getElementById('posStatus'),
         toast: document.getElementById('toast'),
-        addOverlay: document.getElementById('addOverlay'),
-        closeAdd: document.getElementById('closeAdd'),
-        addForm: document.getElementById('addForm'),
-        placeName: document.getElementById('placeName'),
-        placeCategory: document.getElementById('placeCategory'),
-        placeAddress: document.getElementById('placeAddress'),
-        placePhone: document.getElementById('placePhone'),
-        placeHours: document.getElementById('placeHours'),
-        placeDescription: document.getElementById('placeDescription'),
-        placePhotos: document.getElementById('placePhotos'),
-        photoPreview: document.getElementById('photoPreview'),
-        photoLabel: document.getElementById('photoLabel'),
-        photoBtn: document.getElementById('photoBtn'),
-        placeStatusToggle: document.getElementById('placeStatusToggle'),
-        placeStatusText: document.getElementById('placeStatusText'),
-        placeShare: document.getElementById('placeShare'),
-        submitBtn: document.getElementById('submitBtn'),
         followOverlay: document.getElementById('followOverlay'),
         closeFollow: document.getElementById('closeFollow'),
         followLoader: document.getElementById('followLoader'),
@@ -171,34 +176,6 @@ async function apiFetch(endpoint, options, token) {
 }
 
 // ================================================================
-// UPLOAD PHOTO
-// ================================================================
-async function uploadPhoto(file, placeId, token) {
-    var parts = file.name.split('.');
-    var ext = parts.length > 1 ? parts.pop() : 'jpg';
-    var fileName = placeId + '_' + Date.now() + '_' + Math.random().toString(36).substring(2, 6) + '.' + ext;
-
-    var formData = new FormData();
-    formData.append('file', file);
-
-    var response = await fetch(SUPABASE_URL + '/storage/v1/object/place-photos/' + fileName, {
-        method: 'POST',
-        headers: {
-            'apikey': SUPABASE_ANON_KEY,
-            'Authorization': 'Bearer ' + token
-        },
-        body: formData
-    });
-
-    if (!response.ok) {
-        var err = await response.text();
-        throw new Error('Upload échoué: ' + response.status + ' - ' + err);
-    }
-
-    return SUPABASE_URL + '/storage/v1/object/public/place-photos/' + fileName;
-}
-
-// ================================================================
 // CATÉGORIES
 // ================================================================
 function loadSelectedCategories() {
@@ -267,7 +244,6 @@ function getPosition() {
             state.userLng = pos.coords.longitude;
             if (DOM.posStatus) DOM.posStatus.textContent = '✓';
             updateUserMarker(state.userLat, state.userLng);
-            // ✅ CENTRER LA CARTE SUR LA POSITION DE L'UTILISATEUR
             if (state.isFollowingActive && map) {
                 map.setView([state.userLat, state.userLng], 15);
             }
@@ -328,7 +304,6 @@ function updateUserMarker(lat, lng) {
     state.userLat = lat;
     state.userLng = lng;
     
-    // ✅ CENTRER LA CARTE SI LE SUIVI EST ACTIF
     if (state.isFollowingActive && map) {
         map.setView([lat, lng], 15);
     }
@@ -350,209 +325,82 @@ function redirectToInfo(placeId) {
 }
 
 // ================================================================
-// PHOTO PREVIEW
+// DROPDOWN MENU
 // ================================================================
-function renderPhotoPreview() {
-    var preview = DOM.photoPreview;
-    var label = DOM.photoLabel;
-    if (!preview) return;
-    preview.innerHTML = '';
-    if (state.photoFiles.length === 0) {
-        if (label) label.textContent = 'Aucun fichier';
-        return;
-    }
-    if (label) {
-        label.textContent = state.photoFiles.length === 1 ? state.photoFiles[0].name : state.photoFiles.length + ' photos';
-    }
-
-    state.photoFiles.forEach(function(file, index) {
-        if (!file.type.startsWith('image/')) return;
-        var reader = new FileReader();
-        reader.onload = function(e) {
-            var div = document.createElement('div');
-            div.className = 'preview-item';
-            div.innerHTML =
-                '<img src="' + e.target.result + '" />' +
-                '<button class="remove-photo" data-index="' + index + '" type="button"><i class="fas fa-times"></i></button>';
-            div.querySelector('.remove-photo').addEventListener('click', function() {
-                state.photoFiles.splice(index, 1);
-                renderPhotoPreview();
-                var dt = new DataTransfer();
-                state.photoFiles.forEach(function(f) { dt.items.add(f); });
-                if (DOM.placePhotos) DOM.placePhotos.files = dt.files;
-            });
-            preview.appendChild(div);
-        };
-        reader.readAsDataURL(file);
+function initDropdown() {
+    if (!DOM.menuDots) return;
+    DOM.menuDots.addEventListener('click', function(e) {
+        e.stopPropagation();
+        DOM.dropdownMenu.classList.toggle('active');
     });
-}
 
-// ================================================================
-// OVERLAY AJOUT
-// ================================================================
-function initAddOverlay() {
-    if (DOM.closeAdd) {
-        DOM.closeAdd.addEventListener('click', function() {
-            DOM.addOverlay.classList.remove('active');
-            state.photoFiles = [];
-            renderPhotoPreview();
-        });
-    }
-
-    DOM.addOverlay.addEventListener('click', function(e) {
-        if (e.target === this) {
-            DOM.addOverlay.classList.remove('active');
-            state.photoFiles = [];
-            renderPhotoPreview();
+    document.addEventListener('click', function(e) {
+        if (DOM.dropdownMenu && !DOM.dropdownMenu.contains(e.target) && e.target !== DOM.menuDots) {
+            DOM.dropdownMenu.classList.remove('active');
         }
     });
 
-    if (DOM.photoBtn) {
-        DOM.photoBtn.addEventListener('click', function() {
-            if (DOM.placePhotos) DOM.placePhotos.click();
-        });
-    }
-
-    if (DOM.placePhotos) {
-        DOM.placePhotos.addEventListener('change', function(e) {
-            var files = Array.from(e.target.files);
-            state.photoFiles = state.photoFiles.concat(files);
-            renderPhotoPreview();
-            var dt = new DataTransfer();
-            state.photoFiles.forEach(function(f) { dt.items.add(f); });
-            DOM.placePhotos.files = dt.files;
-        });
-    }
-
-    if (DOM.placeStatusToggle) {
-        DOM.placeStatusToggle.addEventListener('click', function() {
-            var active = this.classList.toggle('active');
-            DOM.placeStatusText.textContent = active ? 'Oui' : 'Non';
-            DOM.placeStatusText.className = 'toggle-status ' + (active ? 'active' : 'inactive');
-        });
-    }
-
-    if (DOM.addForm) {
-        DOM.addForm.addEventListener('submit', async function(e) {
+    // ✅ Add place → redirection vers add.html
+    if (DOM.navAdd) {
+        DOM.navAdd.addEventListener('click', function(e) {
             e.preventDefault();
-
-            var session = getSession();
-            if (!session || !session.access_token) {
-                toast('🔐 Veuillez vous connecter', 'error', 3000);
+            DOM.dropdownMenu.classList.remove('active');
+            if (!state.isAuthenticated) {
+                toast('🔐 Connectez-vous pour ajouter un lieu', 'error', 3000);
                 return;
             }
+            window.location.href = 'add.html';
+        });
+    }
 
-            var token = session.access_token;
-            var name = DOM.placeName.value.trim();
-            var category = DOM.placeCategory.value;
-            var address = DOM.placeAddress.value.trim();
-            var phone = DOM.placePhone.value.trim();
-            var hours = DOM.placeHours.value.trim();
-            var description = DOM.placeDescription.value.trim();
-            var isActive = DOM.placeStatusToggle.classList.contains('active');
-
-            if (!name || !category || !address) {
-                toast('Veuillez remplir tous les champs obligatoires', 'error', 3000);
-                return;
-            }
-
-            if (!DOM.placeShare.checked) {
-                toast('Veuillez accepter de partager', 'error', 3000);
-                return;
-            }
-
-            var data = {
-                name: name,
-                category: category,
-                address: address,
-                phone: phone || null,
-                hours: hours || null,
-                description: description || null,
-                status: isActive ? 'open' : 'closed',
-                lat: String(state.userLat || 5.3599517),
-                lng: String(state.userLng || -3.9792253),
-                user_id: session.user ? session.user.id : null
-            };
-
-            try {
-                DOM.submitBtn.disabled = true;
-                DOM.submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Envoi...';
-
-                var insertResponse = await fetch(SUPABASE_URL + '/rest/v1/position', {
-                    method: 'POST',
-                    headers: {
-                        ...getHeaders(token),
-                        'Prefer': 'return=representation'
-                    },
-                    body: JSON.stringify(data)
-                });
-
-                if (!insertResponse.ok) {
-                    var errText = await insertResponse.text();
-                    throw new Error('Insertion échouée: ' + insertResponse.status + ' - ' + errText);
-                }
-
-                var saved = await insertResponse.json();
-                var placeId = null;
-                if (Array.isArray(saved) && saved.length > 0 && saved[0].id) {
-                    placeId = saved[0].id;
-                } else if (saved && saved.id) {
-                    placeId = saved.id;
-                }
-
-                if (!placeId) {
-                    throw new Error('ID du lieu non récupéré');
-                }
-
-                var photoUrls = [];
-                if (state.photoFiles.length > 0) {
-                    toast('📸 Upload des photos...', 'info', 2000);
-                    for (var i = 0; i < state.photoFiles.length; i++) {
-                        try {
-                            var url = await uploadPhoto(state.photoFiles[i], placeId, token);
-                            photoUrls.push(url);
-                        } catch (e) {
-                            console.warn('⚠️ Photo échouée:', e.message);
-                        }
-                    }
-                }
-
-                if (photoUrls.length > 0) {
-                    for (var j = 0; j < photoUrls.length; j++) {
-                        var photoData = {
-                            position_id: placeId,
-                            url: photoUrls[j]
-                        };
-                        await fetch(SUPABASE_URL + '/rest/v1/photos', {
-                            method: 'POST',
-                            headers: {
-                                ...getHeaders(token),
-                                'Prefer': 'return=representation'
-                            },
-                            body: JSON.stringify(photoData)
-                        });
-                    }
-                }
-
-                DOM.addOverlay.classList.remove('active');
-                DOM.addForm.reset();
-                state.photoFiles = [];
-                renderPhotoPreview();
-                DOM.placeStatusToggle.className = 'toggle-switch active';
-                DOM.placeStatusText.textContent = 'Oui';
-                DOM.placeStatusText.className = 'toggle-status active';
-
-                toast('✅ "' + name + '" ajouté !', 'success', 3000);
-
-            } catch (error) {
-                console.error('❌ Erreur:', error);
-                toast('Erreur: ' + error.message, 'error', 4000);
-            } finally {
-                DOM.submitBtn.disabled = false;
-                DOM.submitBtn.innerHTML = '<i class="fas fa-check"></i> VALIDER';
+    if (DOM.navMe) {
+        DOM.navMe.addEventListener('click', function(e) {
+            e.preventDefault();
+            DOM.dropdownMenu.classList.remove('active');
+            if (state.isAuthenticated) {
+                window.location.href = 'me.html';
+            } else {
+                window.location.href = 'login.html';
             }
         });
     }
+}
+
+// ================================================================
+// SEARCH
+// ================================================================
+function initSearch() {
+    if (DOM.searchHeader) {
+        DOM.searchHeader.addEventListener('click', function(e) {
+            if (e.target.closest('.menu-dots') || e.target.closest('.dropdown-menu')) return;
+            window.location.href = 'rech.html';
+        });
+    }
+}
+
+// ================================================================
+// FOLLOW TOGGLE (GPS)
+// ================================================================
+function initFollowToggle() {
+    if (!DOM.toggleFollow) return;
+    
+    DOM.toggleFollow.classList.remove('active');
+    state.isFollowingActive = false;
+    
+    DOM.toggleFollow.addEventListener('click', function() {
+        this.classList.toggle('active');
+        state.isFollowingActive = this.classList.contains('active');
+        
+        if (state.isFollowingActive) {
+            toast('📍 Suivi GPS activé', 'info', 1500);
+            if (state.userLat && state.userLng && map) {
+                map.setView([state.userLat, state.userLng], 15);
+            }
+            getPosition();
+        } else {
+            toast('📍 Suivi GPS désactivé', 'info', 1500);
+        }
+    });
 }
 
 // ================================================================
@@ -685,7 +533,9 @@ function startFollowing(record) {
 
 function stopFollowing() {
     if (state.followChannel) {
-        state.followChannel.unsubscribe();
+        if (supabaseClient && typeof supabaseClient.removeChannel === 'function') {
+            supabaseClient.removeChannel(state.followChannel);
+        }
         state.followChannel = null;
     }
 
@@ -743,14 +593,24 @@ function showTrackMarker(lat, lng, email) {
 
 function subscribeToFollow(recordId) {
     if (state.followChannel) {
-        state.followChannel.unsubscribe();
+        if (supabaseClient && typeof supabaseClient.removeChannel === 'function') {
+            supabaseClient.removeChannel(state.followChannel);
+        }
         state.followChannel = null;
     }
 
-    var supabaseChannel = new SupabaseChannel();
+    if (!supabaseClient || typeof supabaseClient.channel !== 'function') {
+        console.warn('⚠️ Supabase client non disponible, suivi sans Realtime');
+        // Fallback : polling toutes les 5 secondes
+        if (state._pollInterval) clearInterval(state._pollInterval);
+        state._pollInterval = setInterval(function() {
+            fetchPosition(recordId);
+        }, 5000);
+        return;
+    }
 
-    state.followChannel = supabaseChannel
-        .channel('shared_locations:' + recordId)
+    state.followChannel = supabaseClient
+        .channel('shared_locations_' + recordId)
         .on(
             'postgres_changes',
             {
@@ -767,6 +627,11 @@ function subscribeToFollow(recordId) {
                     return;
                 }
 
+                if (state.following) {
+                    state.following.lat = newData.latitude;
+                    state.following.lng = newData.longitude;
+                }
+
                 if (trackMarker) {
                     trackMarker.setLatLng([newData.latitude, newData.longitude]);
                     if (state.isTracking) {
@@ -775,7 +640,54 @@ function subscribeToFollow(recordId) {
                 }
             }
         )
-        .subscribe();
+        .subscribe(function(status) {
+            if (status === 'SUBSCRIBED') {
+                console.log('📡 Suivi en direct connecté (realtime actif)');
+            } else if (status === 'CHANNEL_ERROR' || status === 'TIMED_OUT') {
+                console.warn('⚠️ Realtime indisponible, statut:', status);
+                toast('⚠️ Connexion temps réel instable', 'error', 2500);
+            }
+        });
+}
+
+// Fallback polling
+async function fetchPosition(recordId) {
+    try {
+        var session = getSession();
+        var token = session ? session.access_token : null;
+
+        var response = await fetch(
+            SUPABASE_URL + '/rest/v1/shared_locations?id=eq.' + recordId + '&select=*&limit=1', {
+                headers: getHeaders(token)
+            }
+        );
+        if (!response.ok) return;
+
+        var data = await response.json();
+        if (!data || data.length === 0) return;
+
+        var newData = data[0];
+
+        if (newData.active === false) {
+            toast('⚠️ La personne a arrêté de partager sa position', 'error', 3000);
+            stopFollowing();
+            return;
+        }
+
+        if (state.following) {
+            state.following.lat = newData.latitude;
+            state.following.lng = newData.longitude;
+        }
+
+        if (trackMarker) {
+            trackMarker.setLatLng([newData.latitude, newData.longitude]);
+            if (state.isTracking) {
+                updateTrackStats(newData.latitude, newData.longitude);
+            }
+        }
+    } catch (e) {
+        console.warn('⚠️ Erreur polling:', e);
+    }
 }
 
 // ================================================================
@@ -970,99 +882,6 @@ function updateRoute() {
 }
 
 // ================================================================
-// DROPDOWN MENU
-// ================================================================
-function initDropdown() {
-    if (!DOM.menuDots) return;
-    DOM.menuDots.addEventListener('click', function(e) {
-        e.stopPropagation();
-        DOM.dropdownMenu.classList.toggle('active');
-    });
-
-    document.addEventListener('click', function(e) {
-        if (DOM.dropdownMenu && !DOM.dropdownMenu.contains(e.target) && e.target !== DOM.menuDots) {
-            DOM.dropdownMenu.classList.remove('active');
-        }
-    });
-
-    if (DOM.navAdd) {
-        DOM.navAdd.addEventListener('click', function(e) {
-            e.preventDefault();
-            if (!state.isAuthenticated) {
-                toast('🔐 Connectez-vous pour ajouter un lieu', 'error', 3000);
-                return;
-            }
-            DOM.dropdownMenu.classList.remove('active');
-            DOM.addOverlay.classList.add('active');
-        });
-    }
-
-    if (DOM.navMe) {
-        DOM.navMe.addEventListener('click', function(e) {
-            e.preventDefault();
-            DOM.dropdownMenu.classList.remove('active');
-            if (state.isAuthenticated) {
-                window.location.href = 'me.html';
-            } else {
-                window.location.href = 'login.html';
-            }
-        });
-    }
-}
-
-// ================================================================
-// SEARCH
-// ================================================================
-function initSearch() {
-    if (DOM.searchHeader) {
-        DOM.searchHeader.addEventListener('click', function(e) {
-            if (e.target.closest('.menu-dots') || e.target.closest('.dropdown-menu')) return;
-            window.location.href = 'rech.html';
-        });
-    }
-}
-
-// ================================================================
-// FOLLOW TOGGLE (GPS)
-// ================================================================
-function initFollowToggle() {
-    if (!DOM.toggleFollow) return;
-    
-    // ✅ État initial : désactivé
-    DOM.toggleFollow.classList.remove('active');
-    state.isFollowingActive = false;
-    
-    DOM.toggleFollow.addEventListener('click', function() {
-        this.classList.toggle('active');
-        state.isFollowingActive = this.classList.contains('active');
-        
-        if (state.isFollowingActive) {
-            toast('📍 Suivi GPS activé', 'info', 1500);
-            // ✅ CENTRER LA CARTE SUR LA POSITION ACTUELLE
-            if (state.userLat && state.userLng && map) {
-                map.setView([state.userLat, state.userLng], 15);
-            }
-            // Forcer une mise à jour de la position
-            getPosition();
-        } else {
-            toast('📍 Suivi GPS désactivé', 'info', 1500);
-        }
-    });
-}
-
-// ================================================================
-// SUPABASE REALTIME (stub)
-// ================================================================
-function SupabaseChannel() {
-    return {
-        channel: function() { return this; },
-        on: function() { return this; },
-        subscribe: function() { return this; },
-        unsubscribe: function() { return this; }
-    };
-}
-
-// ================================================================
 // SERVICE WORKER - PWA
 // ================================================================
 function registerServiceWorker() {
@@ -1093,14 +912,12 @@ async function init() {
     initSearch();
     initFollowToggle();
     initDropdown();
-    initAddOverlay();
     initFollow();
 
     if (DOM.resetCategories) {
         DOM.resetCategories.addEventListener('click', resetCategories);
     }
 
-    // ✅ Enregistrer le Service Worker
     registerServiceWorker();
 
     console.log('🏠 easily by megane — prêt (PWA)');

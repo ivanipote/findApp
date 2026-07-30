@@ -191,7 +191,7 @@
         }
 
         /* ============================================================ */
-        /* RÉSULTAT */
+        /* RÉSULTAT - STYLE 4 FINAL */
         /* ============================================================ */
         .result-item {
             display: flex;
@@ -453,7 +453,7 @@
         }
 
         /* ============================================================ */
-        /* OVERLAY DE REDIRECTION (SNIPPET 8) */
+        /* OVERLAY REDIRECTION */
         /* ============================================================ */
         .redirect-overlay {
             position: fixed;
@@ -529,48 +529,6 @@
         .redirect-overlay .redirect-text i {
             margin-right: 8px;
             opacity: 0.6;
-        }
-
-        /* ============================================================ */
-        /* TOAST */
-        /* ============================================================ */
-        .toast-rech {
-            position: fixed;
-            bottom: 24px;
-            left: 50%;
-            transform: translateX(-50%);
-            padding: 10px 20px;
-            border-radius: 30px;
-            font-size: 0.8rem;
-            font-weight: 600;
-            z-index: 9998;
-            opacity: 0;
-            pointer-events: none;
-            transition: opacity 0.3s ease;
-            max-width: 90%;
-            text-align: center;
-            background: #1a2a5a;
-            color: #ffffff;
-            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
-        }
-
-        .toast-rech.show {
-            opacity: 1;
-        }
-
-        .toast-rech.success {
-            background: #2ecc71;
-            color: #fff;
-        }
-
-        .toast-rech.error {
-            background: #d32f2f;
-            color: #fff;
-        }
-
-        .toast-rech.info {
-            background: #1976d2;
-            color: #fff;
         }
 
         /* ============================================================ */
@@ -753,7 +711,7 @@
     </div>
 
     <!-- ============================================================ -->
-    <!-- OVERLAY DE REDIRECTION (SNIPPET 8) -->
+    <!-- OVERLAY REDIRECTION -->
     <!-- ============================================================ -->
     <div class="redirect-overlay" id="redirectOverlay">
         <div class="wave-container">
@@ -770,11 +728,6 @@
             <i class="fas fa-spinner"></i> Veuillez patienter...
         </div>
     </div>
-
-    <!-- ============================================================ -->
-    <!-- TOAST -->
-    <!-- ============================================================ -->
-    <div class="toast-rech" id="toastRech"></div>
 
     <!-- ============================================================ -->
     <!-- SCRIPT -->
@@ -809,38 +762,47 @@
             var backBtn = document.getElementById('backBtn');
             var resultsContainer = document.getElementById('resultsContainer');
             var redirectOverlay = document.getElementById('redirectOverlay');
-            var toastEl = document.getElementById('toastRech');
 
             var searchTimeout = null;
             var redirectTimer = null;
-            var toastTimer = null;
-
-            // ============================================================
-            // ÉTAT
-            // ============================================================
             var allPlaces = [];
-
-            // ============================================================
-            // TOAST
-            // ============================================================
-            function showToast(message, type) {
-                toastEl.textContent = message;
-                toastEl.className = 'toast-rech show ' + type;
-                if (toastTimer) clearTimeout(toastTimer);
-                toastTimer = setTimeout(function() {
-                    toastEl.classList.remove('show');
-                }, 2500);
-            }
 
             // ============================================================
             // API HELPERS
             // ============================================================
-            function getHeaders() {
-                return {
+            function getSession() {
+                try {
+                    var session = localStorage.getItem('sb_session');
+                    if (session) return JSON.parse(session);
+                } catch (e) {}
+                return null;
+            }
+
+            function getHeaders(token) {
+                var headers = {
                     'apikey': SUPABASE_ANON_KEY,
-                    'Authorization': 'Bearer ' + SUPABASE_ANON_KEY,
                     'Content-Type': 'application/json'
                 };
+                if (token) {
+                    headers['Authorization'] = 'Bearer ' + token;
+                } else {
+                    headers['Authorization'] = 'Bearer ' + SUPABASE_ANON_KEY;
+                }
+                return headers;
+            }
+
+            // ============================================================
+            // CHARGER LES CATÉGORIES DEPUIS localStorage
+            // ============================================================
+            function loadSelectedCategories() {
+                try {
+                    var saved = localStorage.getItem('selectedCategories');
+                    if (saved) {
+                        var parsed = JSON.parse(saved);
+                        return new Set(parsed);
+                    }
+                } catch (e) {}
+                return new Set(CATEGORIES.map(function(c) { return c.id; }));
             }
 
             // ============================================================
@@ -850,7 +812,6 @@
                 try {
                     console.log('📥 Chargement des lieux depuis Supabase...');
 
-                    // 1. Récupérer les lieux
                     var response = await fetch(SUPABASE_URL + '/rest/v1/position?select=*&order=created_at.desc', {
                         headers: getHeaders()
                     });
@@ -869,7 +830,7 @@
 
                     console.log('📌 ' + places.length + ' lieu(x) chargé(s)');
 
-                    // 2. Récupérer les photos
+                    // Récupérer les photos
                     var placeIds = places.map(function(p) { return p.id; });
                     var idsString = placeIds.map(function(id) { return '"' + id + '"'; }).join(',');
 
@@ -881,7 +842,6 @@
 
                     var photos = photosResponse.ok ? await photosResponse.json() : [];
 
-                    // 3. Associer les photos
                     var photosByPlace = {};
                     photos.forEach(function(photo) {
                         if (!photosByPlace[photo.position_id]) {
@@ -899,7 +859,6 @@
 
                 } catch (e) {
                     console.error('❌ Erreur chargement:', e);
-                    showToast('Erreur de chargement des données', 'error');
                     allPlaces = [];
                 }
             }
@@ -909,11 +868,10 @@
             // ============================================================
             function redirectToInfo(placeId) {
                 redirectOverlay.classList.add('active');
-
                 if (redirectTimer) clearTimeout(redirectTimer);
                 redirectTimer = setTimeout(function() {
                     window.location.href = 'info.html?place=' + placeId;
-                }, 1500);
+                }, 1200);
             }
 
             // ============================================================
@@ -999,7 +957,7 @@
 
                 resultsContainer.innerHTML = html;
 
-                // Clic sur un résultat → OVERLAY + REDIRECTION
+                // Clic sur un résultat
                 document.querySelectorAll('.result-item').forEach(function(el) {
                     el.addEventListener('click', function(e) {
                         if (e.target.closest('.phone-box')) return;
@@ -1010,7 +968,7 @@
             }
 
             // ============================================================
-            // RECHERCHE
+            // RECHERCHE AVEC FILTRAGE CATÉGORIES
             // ============================================================
             function searchPlaces(query) {
                 if (!query || query.trim() === '') {
@@ -1026,19 +984,25 @@
 
                 clearBtn.classList.add('visible');
 
-                // Squelette
+                // ✅ Afficher le squelette
                 showSkeleton();
 
                 var q = query.toLowerCase().trim();
+                var selectedCategories = loadSelectedCategories();
 
                 setTimeout(function() {
                     var results = allPlaces.filter(function(p) {
+                        // ✅ Filtrer par catégorie
+                        if (!selectedCategories.has(p.category)) return false;
+
+                        // ✅ Recherche textuelle
                         var cat = CATEGORIES.find(function(c) { return c.id === p.category; });
                         var catLabel = cat ? cat.label.toLowerCase() : '';
                         return (p.name || '').toLowerCase().includes(q) ||
                             (p.address || '').toLowerCase().includes(q) ||
                             catLabel.includes(q);
                     });
+
                     renderResults(results);
                 }, 600);
             }
@@ -1080,22 +1044,21 @@
             // ============================================================
             // INIT
             // ============================================================
-            // ============================================================
-// INIT
-// ============================================================
-async function init() {
-    console.log('🔍 Recherche - Connexion Supabase');
-    await loadPlaces();
-    searchInput.focus();
+            async function init() {
+                console.log('🔍 Recherche - Connexion Supabase');
+                await loadPlaces();
+                searchInput.focus();
 
-    if (allPlaces.length === 0) {
-        console.log('📌 Aucun lieu trouvé');
-    } else {
-        console.log('📌 ' + allPlaces.length + ' lieu(x) chargé(s)');
-    }
-}
+                if (allPlaces.length === 0) {
+                    console.log('📌 Aucun lieu trouvé');
+                } else {
+                    console.log('📌 ' + allPlaces.length + ' lieu(x) chargé(s)');
+                    console.log('📌 Catégories sélectionnées:', [...loadSelectedCategories()]);
+                }
+            }
 
-init();
+            init();
+
         })();
     </script>
 

@@ -78,94 +78,6 @@
     </main>
 
     <!-- ============================================================ -->
-    <!-- OVERLAY AJOUT AVEC PHOTOS -->
-    <!-- ============================================================ -->
-    <div class="add-overlay" id="addOverlay">
-        <div class="add-sheet">
-            <span class="add-handle"></span>
-
-            <div class="add-header">
-                <h2><i class="fas fa-plus-circle"></i> Ajouter un lieu</h2>
-                <button class="close-add" id="closeAdd"><i class="fas fa-times"></i></button>
-            </div>
-
-            <form class="add-form" id="addForm">
-                <div class="form-row">
-                    <div class="form-group">
-                        <label>Nom <span class="required">*</span></label>
-                        <input type="text" id="placeName" placeholder="Ex: Megane Shop" required />
-                    </div>
-                    <div class="form-group">
-                        <label>Catégorie <span class="required">*</span></label>
-                        <select id="placeCategory" required>
-                            <option value="">Choisir...</option>
-                            <option value="boutiques">🛍️ Boutique</option>
-                            <option value="restaurants">🍽️ Restaurant</option>
-                            <option value="domiciles">🏠 Domicile</option>
-                            <option value="cybercafes">💻 Cybercafé</option>
-                            <option value="sante">🏥 Santé</option>
-                            <option value="stations">⛽ Station</option>
-                        </select>
-                    </div>
-                </div>
-
-                <div class="form-row">
-                    <div class="form-group">
-                        <label>Adresse <span class="required">*</span></label>
-                        <input type="text" id="placeAddress" placeholder="Ex: Cocody Angré" required />
-                    </div>
-                    <div class="form-group">
-                        <label>Téléphone</label>
-                        <input type="tel" id="placePhone" placeholder="07 00 00 00 00" />
-                    </div>
-                </div>
-
-                <div class="form-row">
-                    <div class="form-group">
-                        <label>Horaires</label>
-                        <input type="text" id="placeHours" placeholder="08:00 - 20:00" />
-                    </div>
-                    <div class="form-group">
-                        <label>Description</label>
-                        <input type="text" id="placeDescription" placeholder="Vente de vêtements..." />
-                    </div>
-                </div>
-
-                <div class="form-row">
-                    <div class="form-group" style="flex:1;">
-                        <label>Photos</label>
-                        <div class="file-input-wrapper" id="photoInputWrapper">
-                            <i class="fas fa-image"></i>
-                            <span class="file-label" id="photoLabel">Aucun fichier</span>
-                            <button class="file-btn" type="button" id="photoBtn">Choisir</button>
-                            <input type="file" id="placePhotos" accept="image/*" multiple style="display:none;" />
-                        </div>
-                        <div class="photo-preview" id="photoPreview"></div>
-                    </div>
-                </div>
-
-                <div class="form-actions">
-                    <div class="toggle-item">
-                        <div class="toggle-switch active" id="placeStatusToggle">
-                            <span class="toggle-thumb"></span>
-                        </div>
-                        <span class="toggle-label">Actif</span>
-                        <span class="toggle-status active" id="placeStatusText">Oui</span>
-                    </div>
-                    <div class="checkbox-item">
-                        <input type="checkbox" id="placeShare" checked />
-                        <label for="placeShare">Partager <span class="required">*</span></label>
-                    </div>
-                </div>
-
-                <button type="submit" class="btn-submit" id="submitBtn">
-                    <i class="fas fa-check"></i> VALIDER
-                </button>
-            </form>
-        </div>
-    </div>
-
-    <!-- ============================================================ -->
     <!-- OVERLAY SUIVRE QUELQU'UN -->
     <!-- ============================================================ -->
     <div class="follow-overlay" id="followOverlay">
@@ -260,6 +172,10 @@
     <!-- ============================================================ -->
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
     <script src="https://unpkg.com/leaflet-routing-machine@3.2.12/dist/leaflet-routing-machine.js"></script>
+    <!-- Avant -->
+
+<!-- Après -->
+<script src="https://unpkg.com/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
     <script src="index.js"></script>
 
 </body>
