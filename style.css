@@ -1951,3 +1951,111 @@ body {
         font-size: 1.1rem;
     }
 }
+/* ============================================================ */
+/* MARQUEUR UTILISATEUR - POINT AVEC HALO */
+/* ============================================================ */
+
+.user-marker {
+    position: relative;
+}
+
+.user-pulse {
+    width: 20px;
+    height: 20px;
+    position: relative;
+}
+
+.user-pulse .user-dot {
+    width: 12px;
+    height: 12px;
+    background: #1976d2;
+    border-radius: 50%;
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    border: 2px solid #ffffff;
+    box-shadow: 0 0 0 4px rgba(25, 118, 210, 0.3);
+    animation: pulse-blue 2s ease-in-out infinite;
+}
+
+@keyframes pulse-blue {
+    0% {
+        box-shadow: 0 0 0 0 rgba(25, 118, 210, 0.4);
+    }
+    70% {
+        box-shadow: 0 0 0 10px rgba(25, 118, 210, 0);
+    }
+    100% {
+        box-shadow: 0 0 0 0 rgba(25, 118, 210, 0);
+    }
+}
+
+/* ============================================================ */
+/* MARQUEUR SUIVI - PIN CLASSIQUE */
+/* ============================================================ */
+
+.track-marker {
+    position: relative;
+}
+
+.track-pin {
+    position: relative;
+}
+
+.track-pin i {
+    filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.2));
+}
+
+/* ============================================================ */
+/* BOUTONS CENTRAGE */
+/* ============================================================ */
+
+.btn-center {
+    background: none;
+    border: none;
+    width: 30px;
+    height: 30px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #1a2a5a;
+    font-size: 0.8rem;
+    cursor: pointer;
+    transition: 0.2s;
+    background: #f0f2f5;
+    flex-shrink: 0;
+}
+
+.btn-center:hover {
+    background: #e3edfb;
+    color: #1976d2;
+}
+
+.btn-center:active {
+    transform: scale(0.9);
+}
+
+.btn-center i {
+    font-size: 0.85rem;
+}
+
+/* Disabled state */
+.btn-center.disabled {
+    opacity: 0.4;
+    cursor: not-allowed;
+    pointer-events: none;
+}
+
+/* Responsive */
+@media (max-width: 480px) {
+    .btn-center {
+        width: 26px;
+        height: 26px;
+        font-size: 0.7rem;
+    }
+    .btn-center i {
+        font-size: 0.7rem;
+    }
+}

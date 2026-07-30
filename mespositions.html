@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+    <meta name="theme-color" content="#1976d2" />
+    <title>📍 Mes positions - easily by megane</title>
+
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
+    <link rel="stylesheet" href="style.css" />
+    <link rel="stylesheet" href="mespositions.css" />
+</head>
+<body>
+
+    <!-- ============================================================ -->
+    <!-- HEADER -->
+    <!-- ============================================================ -->
+    <header class="header-mespos">
+        <button class="back-btn" id="backBtn" type="button" aria-label="Retour">
+            <i class="fas fa-arrow-left"></i>
+        </button>
+        <span class="title">📍 Mes positions</span>
+        <span style="width:32px;"></span>
+    </header>
+
+    <!-- ============================================================ -->
+    <!-- CONTENU -->
+    <!-- ============================================================ -->
+    <div class="mespos-container" id="placesContainer">
+        <!-- Rempli par JS -->
+    </div>
+
+    <!-- ============================================================ -->
+    <!-- SLIDER OVERLAY -->
+    <!-- ============================================================ -->
+    <div class="slider-overlay" id="sliderOverlay">
+        <div class="slider-handle"></div>
+
+        <div class="slider-header">
+            <span class="slider-title" id="sliderTitle">
+                <i class="fas fa-store"></i> Chargement...
+            </span>
+            <button class="slider-close" id="sliderClose"><i class="fas fa-times"></i></button>
+        </div>
+
+        <div class="slider-slides" id="sliderSlides">
+
+            <!-- SLIDE 1 : Toggle -->
+            <div class="slider-slide" style="justify-content:center;align-items:center;text-align:center;">
+                <div class="slide-toggle" style="width:100%;max-width:280px;margin:0 auto;">
+                    <span class="toggle-label">Actif / Inactif</span>
+                    <div class="toggle-switch active" id="placeToggle">
+                        <span class="thumb"></span>
+                    </div>
+                </div>
+                <p style="font-size:0.7rem;color:#8a9aaa;margin-top:4px;">
+                    <i class="fas fa-info-circle"></i> Si vous désactivez ce lieu, vos visiteurs le verront comme fermé
+                </p>
+                <p style="font-size:0.6rem;color:#aab4c8;margin-top:8px;">Glissez pour voir les photos</p>
+            </div>
+
+            <!-- SLIDE 2 : Photo 1 -->
+            <div class="slider-slide">
+                <div class="slide-photo" id="photo1">
+                    <div class="no-photo">
+                        <i class="fas fa-image"></i>
+                        Aucune photo
+                    </div>
+                </div>
+            </div>
+
+            <!-- SLIDE 3 : Photo 2 -->
+            <div class="slider-slide">
+                <div class="slide-photo" id="photo2">
+                    <div class="no-photo">
+                        <i class="fas fa-image"></i>
+                        Aucune photo
+                    </div>
+                </div>
+            </div>
+
+            <!-- SLIDE 4 : Supprimer -->
+            <div class="slider-slide" style="justify-content:center;">
+                <button class="btn-delete-definitive" id="btnDelete">
+                    <i class="fas fa-trash"></i> Supprimer définitivement
+                </button>
+                <p style="font-size:0.65rem;color:#8a9aaa;text-align:center;margin-top:4px;">
+                    Cette action est irréversible
+                </p>
+            </div>
+
+        </div>
+
+        <div class="slider-dots" id="sliderDots">
+            <button class="dot active" data-index="0"></button>
+            <button class="dot" data-index="1"></button>
+            <button class="dot" data-index="2"></button>
+            <button class="dot" data-index="3"></button>
+        </div>
+    </div>
+
+    <!-- ============================================================ -->
+    <!-- TOAST -->
+    <!-- ============================================================ -->
+    <div class="toast-mespos" id="toastMespos"></div>
+
+    <!-- ============================================================ -->
+    <!-- SCRIPTS -->
+    <!-- ============================================================ -->
+    <script src="mespositions.js"></script>
+
+</body>
+</html>

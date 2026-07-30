@@ -1,0 +1,702 @@
+/* ============================================================ */
+/* MESPOSITIONS.CSS - STYLES DÉDIÉS */
+/* ============================================================ */
+
+/* ============================================================ */
+/* HEADER */
+/* ============================================================ */
+.header-mespos {
+    position: fixed;
+    top: 12px;
+    left: 12px;
+    right: 12px;
+    z-index: 1000;
+    height: 60px;
+    background: #ffffff;
+    border-radius: 35px;
+    display: flex;
+    align-items: center;
+    padding: 0 20px;
+    gap: 14px;
+    box-shadow: 0 2px 12px rgba(0, 0, 0, 0.06);
+    border: 3px solid #1976d2;
+    max-width: 480px;
+    margin: 0 auto;
+}
+
+@media (min-width: 480px) {
+    .header-mespos {
+        left: 50%;
+        transform: translateX(-50%);
+        right: auto;
+        top: 12px;
+    }
+}
+
+.header-mespos .back-btn {
+    background: none;
+    border: none;
+    color: #1976d2;
+    font-size: 1.2rem;
+    cursor: pointer;
+    padding: 4px 6px;
+    border-radius: 50%;
+    transition: 0.2s;
+}
+
+.header-mespos .back-btn:hover {
+    background: #f0f2f5;
+}
+
+.header-mespos .title {
+    flex: 1;
+    font-weight: 700;
+    font-size: 0.95rem;
+    color: #1a2a5a;
+    text-align: center;
+}
+
+/* ============================================================ */
+/* CONTAINER - PLEINE LARGEUR */
+/* ============================================================ */
+.mespos-container {
+    width: 100%;
+    max-width: 100%;
+    margin: 0 auto;
+    padding: 0 16px;
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+}
+
+@media (max-width: 480px) {
+    .mespos-container {
+        padding: 0 10px;
+        gap: 12px;
+    }
+}
+
+/* ============================================================ */
+/* CARTE STYLE 9 - BORDURE BLANCHE */
+/* ============================================================ */
+.place-card-wrapper {
+    background: #ffffff;
+    border-radius: 16px;
+    padding: 8px;
+    border: 1px solid #e8ecf4;      /* ✅ Bordure blanche/gris clair */
+    box-shadow: 0 6px 24px rgba(0, 0, 0, 0.06);
+    transition: box-shadow 0.3s ease, transform 0.3s ease;
+    cursor: pointer;
+    width: 100%;
+}
+
+.place-card-wrapper:hover {
+    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.10);
+    transform: translateY(-3px);
+}
+
+.place-card {
+    background: #ffffff;
+    border-radius: 12px;
+    padding: 18px 20px 14px 20px;
+    position: relative;
+    overflow: hidden;
+    min-height: 120px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    text-align: center;
+    width: 100%;
+}
+
+.place-card .place-top {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+    padding: 0 30px;
+}
+
+.place-card .place-name {
+    font-size: 1.1rem;
+    font-weight: 700;
+    color: #1a2a5a;
+    background: transparent;
+    padding: 0 10px;
+    display: inline-block;
+}
+
+.place-card .place-name i {
+    color: #1976d2;
+    margin-right: 6px;
+}
+
+.place-card .place-arrow {
+    position: absolute;
+    right: 0;
+    top: 50%;
+    transform: translateY(-50%);
+    color: #d32f2f;
+    font-size: 1.1rem;
+    transition: transform 0.2s ease;
+}
+
+.place-card-wrapper:hover .place-arrow {
+    transform: translateY(-50%) translateX(3px);
+}
+
+.place-card .place-address {
+    font-size: 0.8rem;
+    color: #8a9aaa;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 4px;
+    margin-top: 2px;
+}
+
+.place-card .place-address i {
+    color: #aab4c8;
+}
+
+.place-card .place-footer {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-top: 10px;
+    flex-wrap: wrap;
+    gap: 8px;
+}
+
+.place-card .place-footer .footer-item {
+    font-size: 0.7rem;
+    font-weight: 600;
+    padding: 6px 16px;
+    border-radius: 20px;
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    min-height: 34px;
+}
+
+.place-card .place-footer .footer-item i {
+    font-size: 0.6rem;
+}
+
+.place-card .place-footer .badge-category {
+    background: #f0f2f5;
+    color: #6b7a9a;
+}
+
+.place-card .place-footer .status {
+    background: #e8f5e9;
+    color: #2ecc71;
+}
+
+.place-card .place-footer .status.closed {
+    background: #fce4ec;
+    color: #d32f2f;
+}
+
+.place-card .place-footer .date-box {
+    background: #e3edfb;
+    color: #1976d2;
+    border: 1px solid #dbeafe;
+}
+
+/* ============================================================ */
+/* EMPTY STATE */
+/* ============================================================ */
+.empty-state {
+    text-align: center;
+    padding: 60px 20px;
+    color: #8a9aaa;
+}
+
+.empty-state i {
+    font-size: 3.5rem;
+    color: #d0d5e0;
+    display: block;
+    margin-bottom: 16px;
+    opacity: 0.5;
+}
+
+.empty-state .empty-title {
+    font-size: 1.1rem;
+    font-weight: 600;
+    color: #1a2a5a;
+}
+
+.empty-state .empty-sub {
+    font-size: 0.85rem;
+    color: #aab4c8;
+}
+
+/* ============================================================ */
+/* SLIDER OVERLAY */
+/* ============================================================ */
+.slider-overlay {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    z-index: 3000;
+    background: #ffffff;
+    border-radius: 24px 24px 0 0;
+    transform: translateY(100%);
+    transition: transform 0.4s cubic-bezier(0.22, 1, 0.36, 1);
+    max-width: 480px;
+    margin: 0 auto;
+    max-height: 70vh;
+    display: flex;
+    flex-direction: column;
+    box-shadow: 0 -10px 40px rgba(0, 0, 0, 0.15);
+}
+
+.slider-overlay.active {
+    transform: translateY(0);
+}
+
+.slider-overlay .slider-handle {
+    width: 40px;
+    height: 4px;
+    background: #d0d5e0;
+    border-radius: 4px;
+    margin: 12px auto 8px auto;
+    flex-shrink: 0;
+}
+
+.slider-overlay .slider-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0 18px 12px 18px;
+    border-bottom: 1px solid #eef1f6;
+    flex-shrink: 0;
+}
+
+.slider-overlay .slider-header .slider-title {
+    font-size: 0.95rem;
+    font-weight: 700;
+    color: #1a2a5a;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.slider-overlay .slider-header .slider-title i {
+    color: #1976d2;
+}
+
+.slider-overlay .slider-header .slider-close {
+    background: none;
+    border: none;
+    font-size: 1.2rem;
+    color: #8a9aaa;
+    cursor: pointer;
+    padding: 4px 8px;
+    border-radius: 50%;
+    transition: 0.2s;
+}
+
+.slider-overlay .slider-header .slider-close:hover {
+    background: #f0f2f5;
+    color: #1a2a5a;
+}
+
+/* ============================================================ */
+/* SLIDES - SCROLL DOUX */
+/* ============================================================ */
+.slider-slides {
+    display: flex;
+    overflow-x: auto;
+    scroll-snap-type: x mandatory;
+    scroll-snap-stop: always;
+    -webkit-overflow-scrolling: touch;
+    scroll-behavior: smooth;
+    flex: 1;
+    padding: 12px 0;
+    gap: 0;
+    min-height: 200px;
+}
+
+.slider-slides::-webkit-scrollbar {
+    height: 3px;
+}
+
+.slider-slides::-webkit-scrollbar-track {
+    background: #f0f2f5;
+}
+
+.slider-slides::-webkit-scrollbar-thumb {
+    background: #1976d2;
+    border-radius: 4px;
+}
+
+.slider-slide {
+    flex: 0 0 100%;
+    scroll-snap-align: start;
+    padding: 0 18px;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    min-height: 150px;
+}
+
+/* ============================================================ */
+/* DOTS - PLUS GROS ET SÉPARÉS */
+/* ============================================================ */
+.slider-dots {
+    display: flex;
+    justify-content: center;
+    gap: 12px;
+    padding: 12px 0 16px 0;
+    flex-shrink: 0;
+}
+
+.slider-dots .dot {
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+    background: #d0d5e0;
+    transition: 0.3s;
+    cursor: pointer;
+    border: none;
+    padding: 0;
+}
+
+.slider-dots .dot.active {
+    background: #1976d2;
+    width: 32px;
+    border-radius: 6px;
+}
+
+/* ============================================================ */
+/* SLIDE TOGGLE */
+/* ============================================================ */
+.slide-toggle {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 14px;
+    padding: 12px 16px;
+    background: #f8f9fc;
+    border-radius: 12px;
+    border: 1px solid #eef1f6;
+    width: 100%;
+    max-width: 280px;
+    margin: 0 auto;
+}
+
+.slide-toggle .toggle-label {
+    font-size: 0.85rem;
+    font-weight: 600;
+    color: #1a2a5a;
+}
+
+.slide-toggle .toggle-switch {
+    width: 48px;
+    height: 26px;
+    background: #b0b8c8;
+    border-radius: 30px;
+    position: relative;
+    cursor: pointer;
+    transition: 0.3s;
+    flex-shrink: 0;
+}
+
+.slide-toggle .toggle-switch .thumb {
+    width: 20px;
+    height: 20px;
+    background: #ffffff;
+    border-radius: 50%;
+    position: absolute;
+    top: 3px;
+    left: 3px;
+    transition: 0.3s;
+    box-shadow: 0 1px 4px rgba(0, 0, 0, 0.15);
+}
+
+.slide-toggle .toggle-switch.active {
+    background: #1976d2;
+}
+
+.slide-toggle .toggle-switch.active .thumb {
+    left: 25px;
+}
+
+/* ============================================================ */
+/* SLIDE PHOTOS - RÉDUITES DE 40% */
+/* ============================================================ */
+.slide-photo {
+    flex: 1;
+    border-radius: 12px;
+    overflow: hidden;
+    background: #f8f9fc;
+    border: 1px solid #eef1f6;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 72px;
+    max-height: 72px;
+}
+
+.slide-photo img {
+    width: 100%;
+    height: 350%;
+    object-fit: cover;
+}
+
+.slide-photo .no-photo {
+    color: #aab4c8;
+    font-size: 0.85rem;
+    text-align: center;
+}
+
+.slide-photo .no-photo i {
+    display: block;
+    font-size: 2rem;
+    color: #d0d5e0;
+    margin-bottom: 4px;
+}
+
+/* ============================================================ */
+/* SLIDE SUPPRIMER */
+/* ============================================================ */
+.btn-delete-definitive {
+    width: 100%;
+    padding: 14px;
+    background: #fce4ec;
+    color: #d32f2f;
+    border: 2px solid #ef9a9a;
+    border-radius: 12px;
+    font-size: 0.9rem;
+    font-weight: 700;
+    cursor: pointer;
+    transition: 0.2s;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+}
+
+.btn-delete-definitive:hover {
+    background: #f8bbd0;
+    border-color: #d32f2f;
+}
+
+.btn-delete-definitive:active {
+    transform: scale(0.97);
+}
+
+/* ============================================================ */
+/* TOAST */
+/* ============================================================ */
+.toast-mespos {
+    position: fixed;
+    bottom: 24px;
+    left: 50%;
+    transform: translateX(-50%);
+    padding: 10px 20px;
+    border-radius: 30px;
+    font-size: 0.8rem;
+    font-weight: 600;
+    z-index: 9999;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.3s ease;
+    max-width: 90%;
+    text-align: center;
+    background: #1a2a5a;
+    color: #ffffff;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
+}
+
+.toast-mespos.show {
+    opacity: 1;
+}
+
+.toast-mespos.success {
+    background: #2ecc71;
+    color: #fff;
+}
+
+.toast-mespos.error {
+    background: #d32f2f;
+    color: #fff;
+}
+
+.toast-mespos.info {
+    background: #1976d2;
+    color: #fff;
+}
+
+/* ============================================================ */
+/* RESPONSIVE */
+/* ============================================================ */
+@media (max-width: 480px) {
+    body {
+        padding-top: 68px;
+    }
+
+    .header-mespos {
+        height: 52px;
+        padding: 0 16px;
+        top: 10px;
+        left: 10px;
+        right: 10px;
+        border-radius: 30px;
+        border-width: 2px;
+        max-width: 100%;
+    }
+
+    .header-mespos .title {
+        font-size: 0.85rem;
+    }
+
+    .mespos-container {
+        padding: 0 10px;
+        gap: 12px;
+    }
+
+    .place-card {
+        padding: 14px 14px 10px 14px;
+        min-height: 100px;
+    }
+
+    .place-card .place-top {
+        padding: 0 24px;
+    }
+
+    .place-card .place-name {
+        font-size: 0.95rem;
+    }
+
+    .place-card .place-address {
+        font-size: 0.7rem;
+    }
+
+    .place-card .place-arrow {
+        font-size: 0.95rem;
+    }
+
+    .place-card .place-footer .footer-item {
+        font-size: 0.6rem;
+        padding: 4px 12px;
+        min-height: 28px;
+    }
+
+    .place-card .place-footer .footer-item i {
+        font-size: 0.5rem;
+    }
+
+    .slider-overlay {
+        max-height: 75vh;
+        border-radius: 20px 20px 0 0;
+    }
+
+    .slider-slides {
+        min-height: 160px;
+    }
+
+    .slider-slide {
+        padding: 0 14px;
+    }
+
+    .slide-toggle .toggle-label {
+        font-size: 0.75rem;
+    }
+
+    .btn-delete-definitive {
+        font-size: 0.8rem;
+        padding: 12px;
+    }
+
+    .slider-dots {
+        gap: 10px;
+        padding: 10px 0 14px 0;
+    }
+
+    .slider-dots .dot {
+        width: 10px;
+        height: 10px;
+    }
+
+    .slider-dots .dot.active {
+        width: 26px;
+    }
+}
+
+@media (max-width: 380px) {
+    .place-card .place-footer {
+        flex-direction: column;
+        align-items: center;
+        gap: 4px;
+    }
+
+    .place-card .place-top {
+        padding: 0 20px;
+    }
+
+    .place-card .place-name {
+        font-size: 0.85rem;
+    }
+
+    .place-card .place-address {
+        font-size: 0.65rem;
+    }
+
+    .place-card .place-footer .footer-item {
+        font-size: 0.55rem;
+        padding: 3px 10px;
+        min-height: 24px;
+    }
+
+    .slider-dots {
+        gap: 8px;
+    }
+
+    .slider-dots .dot {
+        width: 8px;
+        height: 8px;
+    }
+
+    .slider-dots .dot.active {
+        width: 20px;
+    }
+}
+/* ✅ Le slide a une hauteur fixe */
+.slider-slide {
+    flex: 0 0 100%;
+    scroll-snap-align: start;
+    padding: 0 18px;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    min-height: 150px;      /* Hauteur fixe */
+    height: 150px;          /* ✅ Hauteur fixe */
+    box-sizing: border-box;
+}
+
+/* ✅ La photo prend tout l'espace sans agrandir */
+.slide-photo {
+    flex: 1;
+    border-radius: 12px;
+    overflow: hidden;
+    background: #f8f9fc;
+    border: 1px solid #eef1f6;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 0;
+    height: 100%;           /* ✅ Prend la hauteur disponible */
+    max-height: 100%;       /* ✅ Ne dépasse pas */
+    width: 100%;
+}
+
+/* ✅ La photo s'adapte au cadre */
+.slide-photo img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;      /* ✅ Remplit sans déformer */
+}

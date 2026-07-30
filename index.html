@@ -40,6 +40,9 @@
             <button class="dropdown-item" id="navFollow" type="button">
                 <i class="fas fa-eye"></i> <span id="navFollowLabel">Suivre quelqu'un</span>
             </button>
+            <button class="dropdown-item" id="navMesPositions" type="button">
+                <i class="fas fa-map-pin"></i> Mes positions
+            </button>
         </div>
     </header>
 
@@ -66,6 +69,12 @@
                     <button class="toggle-btn" id="toggleFollow" type="button">
                         <span class="toggle-track"><span class="toggle-thumb"></span></span>
                         Suivre
+                    </button>
+                    <button class="btn-center" id="btnCenterMe" type="button" title="Centrer sur ma position">
+                        <i class="fas fa-location-dot"></i>
+                    </button>
+                    <button class="btn-center" id="btnCenterFollow" type="button" title="Centrer sur la personne suivie">
+                        <i class="fas fa-user"></i>
                     </button>
                 </div>
                 <div class="right">
@@ -125,6 +134,7 @@
                 <span class="track-email" id="trackEmail">📧 email@exemple.com</span>
                 <button class="track-close" id="trackClose"><i class="fas fa-times"></i></button>
             </div>
+            <div class="track-timestamp" id="trackTimestamp">⏱️ Dernière mise à jour : ...</div>
             <div class="track-body">
                 <div class="track-info">
                     <div class="track-stat">
@@ -137,7 +147,7 @@
                     </div>
                 </div>
                 <button class="track-btn" id="trackActionBtn">
-                    <i class="fas fa-route"></i> <span id="trackBtnLabel">Calculer l'itinéraire</span>
+                    <i class="fas fa-route"></i> <span id="trackBtnLabel">Mettre à jour</span>
                 </button>
             </div>
         </div>
@@ -172,10 +182,7 @@
     <!-- ============================================================ -->
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
     <script src="https://unpkg.com/leaflet-routing-machine@3.2.12/dist/leaflet-routing-machine.js"></script>
-    <!-- Avant -->
-
-<!-- Après -->
-<script src="https://unpkg.com/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+    <script src="https://unpkg.com/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
     <script src="index.js"></script>
 
 </body>

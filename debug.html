@@ -1,0 +1,1263 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>🐛 Debug - easily by megane</title>
+
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
+    <link rel="stylesheet" href="style.css" />
+
+    <style>
+        /* ============================================================ */
+        /* PAGE DEBUG */
+        /* ============================================================ */
+        body {
+            background: #0d1117;
+            color: #e6edf3;
+            padding: 20px;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            min-height: 100vh;
+        }
+
+        .debug-container {
+            max-width: 900px;
+            margin: 0 auto;
+        }
+
+        .debug-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 24px;
+            padding-bottom: 16px;
+            border-bottom: 2px solid #30363d;
+        }
+
+        .debug-header h1 {
+            font-size: 1.5rem;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .debug-header h1 i {
+            color: #f0883e;
+        }
+
+        .debug-header .status-badge {
+            padding: 6px 16px;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            font-weight: 600;
+        }
+
+        .status-badge.online {
+            background: #238636;
+            color: #fff;
+        }
+
+        .status-badge.offline {
+            background: #da3633;
+            color: #fff;
+        }
+
+        .status-badge.checking {
+            background: #d29922;
+            color: #fff;
+        }
+
+        /* ============================================================ */
+        /* GRILLE : FORMULAIRE + LOGS */
+        /* ============================================================ */
+        .debug-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+        }
+
+        @media (max-width: 768px) {
+            .debug-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        /* ============================================================ */
+        /* FORMULAIRE */
+        /* ============================================================ */
+        .debug-card {
+            background: #161b22;
+            border-radius: 16px;
+            padding: 20px;
+            border: 1px solid #30363d;
+        }
+
+        .debug-card .card-title {
+            font-size: 0.9rem;
+            font-weight: 600;
+            margin-bottom: 16px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            color: #8b949e;
+        }
+
+        .debug-card .card-title i {
+            color: #58a6ff;
+        }
+
+        .debug-form .form-group {
+            margin-bottom: 12px;
+        }
+
+        .debug-form .form-group label {
+            display: block;
+            font-size: 0.7rem;
+            font-weight: 600;
+            color: #8b949e;
+            margin-bottom: 3px;
+            text-transform: uppercase;
+            letter-spacing: 0.3px;
+        }
+
+        .debug-form .form-group input,
+        .debug-form .form-group select {
+            width: 100%;
+            padding: 8px 12px;
+            background: #0d1117;
+            border: 1px solid #30363d;
+            border-radius: 8px;
+            color: #e6edf3;
+            font-size: 0.85rem;
+            transition: 0.2s;
+        }
+
+        .debug-form .form-group input:focus,
+        .debug-form .form-group select:focus {
+            border-color: #58a6ff;
+            outline: none;
+            box-shadow: 0 0 0 3px rgba(88, 166, 255, 0.15);
+        }
+
+        .debug-form .form-group input::placeholder {
+            color: #484f58;
+        }
+
+        .debug-form .form-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+        }
+
+        @media (max-width: 480px) {
+            .debug-form .form-row {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        /* ============================================================ */
+        /* PHOTOS */
+        /* ============================================================ */
+        .file-upload-area {
+            border: 2px dashed #30363d;
+            border-radius: 8px;
+            padding: 16px;
+            text-align: center;
+            cursor: pointer;
+            transition: 0.2s;
+            background: #0d1117;
+        }
+
+        .file-upload-area:hover {
+            border-color: #58a6ff;
+            background: #161b22;
+        }
+
+        .file-upload-area i {
+            font-size: 1.5rem;
+            color: #484f58;
+            display: block;
+            margin-bottom: 4px;
+        }
+
+        .file-upload-area .upload-text {
+            font-size: 0.75rem;
+            color: #8b949e;
+        }
+
+        .file-upload-area .upload-text .highlight {
+            color: #58a6ff;
+        }
+
+        .file-upload-area .file-count {
+            font-size: 0.7rem;
+            color: #3fb950;
+            margin-top: 4px;
+        }
+
+        .file-upload-area input[type="file"] {
+            display: none;
+        }
+
+        .photo-preview-debug {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            margin-top: 8px;
+        }
+
+        .photo-preview-debug .preview-item {
+            width: 60px;
+            height: 60px;
+            border-radius: 8px;
+            overflow: hidden;
+            border: 1px solid #30363d;
+            position: relative;
+            background: #0d1117;
+        }
+
+        .photo-preview-debug .preview-item img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .photo-preview-debug .preview-item .remove-photo {
+            position: absolute;
+            top: -4px;
+            right: -4px;
+            width: 18px;
+            height: 18px;
+            border-radius: 50%;
+            background: #da3633;
+            color: #fff;
+            border: none;
+            font-size: 0.5rem;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: 0.2s;
+        }
+
+        .photo-preview-debug .preview-item .remove-photo:hover {
+            background: #f85149;
+            transform: scale(1.1);
+        }
+
+        /* ============================================================ */
+        /* FORM ACTIONS */
+        /* ============================================================ */
+        .debug-form .form-actions {
+            display: flex;
+            gap: 10px;
+            margin-top: 16px;
+        }
+
+        .btn-debug {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 8px;
+            font-size: 0.85rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: 0.2s;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            flex: 1;
+            justify-content: center;
+        }
+
+        .btn-debug.primary {
+            background: #238636;
+            color: #fff;
+        }
+
+        .btn-debug.primary:hover {
+            background: #2ea043;
+            transform: translateY(-1px);
+        }
+
+        .btn-debug.primary:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .btn-debug.secondary {
+            background: #21262d;
+            color: #c9d1d9;
+            border: 1px solid #30363d;
+        }
+
+        .btn-debug.secondary:hover {
+            background: #30363d;
+        }
+
+        .btn-debug.danger {
+            background: #da3633;
+            color: #fff;
+        }
+
+        .btn-debug.danger:hover {
+            background: #f85149;
+        }
+
+        /* ============================================================ */
+        /* LOGS */
+        /* ============================================================ */
+        .logs-container {
+            background: #0d1117;
+            border-radius: 8px;
+            padding: 12px;
+            max-height: 400px;
+            overflow-y: auto;
+            font-family: 'Consolas', 'Courier New', monospace;
+            font-size: 0.75rem;
+            line-height: 1.6;
+            border: 1px solid #30363d;
+        }
+
+        .logs-container::-webkit-scrollbar {
+            width: 6px;
+        }
+
+        .logs-container::-webkit-scrollbar-track {
+            background: #0d1117;
+        }
+
+        .logs-container::-webkit-scrollbar-thumb {
+            background: #30363d;
+            border-radius: 3px;
+        }
+
+        .log-entry {
+            padding: 2px 0;
+            border-bottom: 1px solid #161b22;
+        }
+
+        .log-entry .log-time {
+            color: #484f58;
+            margin-right: 8px;
+        }
+
+        .log-entry .log-level {
+            font-weight: 600;
+            margin-right: 8px;
+        }
+
+        .log-entry .log-level.info {
+            color: #58a6ff;
+        }
+
+        .log-entry .log-level.success {
+            color: #3fb950;
+        }
+
+        .log-entry .log-level.error {
+            color: #f85149;
+        }
+
+        .log-entry .log-level.warning {
+            color: #d29922;
+        }
+
+        .log-entry .log-level.debug {
+            color: #8b949e;
+        }
+
+        .log-entry .log-message {
+            color: #e6edf3;
+            word-break: break-all;
+        }
+
+        .log-entry .log-message .highlight {
+            color: #f0883e;
+        }
+
+        .log-entry .log-message .string {
+            color: #a5d6ff;
+        }
+
+        .log-entry .log-message .number {
+            color: #f0883e;
+        }
+
+        .log-entry .log-message .boolean {
+            color: #f0883e;
+        }
+
+        .log-entry .log-message .null {
+            color: #8b949e;
+        }
+
+        .log-entry .log-message .key {
+            color: #ff7b72;
+        }
+
+        /* ============================================================ */
+        /* BOUTON COPIER */
+        /* ============================================================ */
+        .logs-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 8px;
+        }
+
+        .logs-header .logs-count {
+            font-size: 0.7rem;
+            color: #8b949e;
+        }
+
+        .btn-copy {
+            background: #21262d;
+            border: 1px solid #30363d;
+            color: #c9d1d9;
+            padding: 4px 12px;
+            border-radius: 6px;
+            font-size: 0.7rem;
+            cursor: pointer;
+            transition: 0.2s;
+            display: flex;
+            align-items: center;
+            gap: 4px;
+        }
+
+        .btn-copy:hover {
+            background: #30363d;
+        }
+
+        .btn-copy.copied {
+            background: #238636;
+            border-color: #238636;
+            color: #fff;
+        }
+
+        /* ============================================================ */
+        /* SESSION INFO */
+        /* ============================================================ */
+        .session-info {
+            background: #0d1117;
+            border-radius: 8px;
+            padding: 12px;
+            border: 1px solid #30363d;
+            margin-bottom: 16px;
+            font-size: 0.8rem;
+        }
+
+        .session-info .info-row {
+            display: flex;
+            justify-content: space-between;
+            padding: 2px 0;
+        }
+
+        .session-info .info-row .label {
+            color: #8b949e;
+        }
+
+        .session-info .info-row .value {
+            color: #e6edf3;
+            font-weight: 500;
+        }
+
+        .session-info .info-row .value.valid {
+            color: #3fb950;
+        }
+
+        .session-info .info-row .value.invalid {
+            color: #f85149;
+        }
+
+        /* ============================================================ */
+        /* RESPONSE PREVIEW */
+        /* ============================================================ */
+        .response-preview {
+            background: #0d1117;
+            border-radius: 8px;
+            padding: 12px;
+            border: 1px solid #30363d;
+            margin-top: 12px;
+            max-height: 150px;
+            overflow-y: auto;
+            font-family: 'Consolas', 'Courier New', monospace;
+            font-size: 0.7rem;
+            display: none;
+        }
+
+        .response-preview.visible {
+            display: block;
+        }
+
+        .response-preview .preview-title {
+            color: #8b949e;
+            margin-bottom: 4px;
+            font-size: 0.65rem;
+            text-transform: uppercase;
+            letter-spacing: 0.3px;
+        }
+
+        .response-preview pre {
+            margin: 0;
+            white-space: pre-wrap;
+            word-break: break-all;
+            color: #e6edf3;
+        }
+
+        /* ============================================================ */
+        /* TOAST */
+        /* ============================================================ */
+        .toast-debug {
+            position: fixed;
+            bottom: 24px;
+            left: 50%;
+            transform: translateX(-50%);
+            padding: 10px 20px;
+            border-radius: 12px;
+            font-size: 0.85rem;
+            font-weight: 600;
+            z-index: 9999;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.3s ease;
+            max-width: 90%;
+            text-align: center;
+        }
+
+        .toast-debug.show {
+            opacity: 1;
+        }
+
+        .toast-debug.success {
+            background: #238636;
+            color: #fff;
+        }
+
+        .toast-debug.error {
+            background: #da3633;
+            color: #fff;
+        }
+
+        .toast-debug.info {
+            background: #1f6feb;
+            color: #fff;
+        }
+
+        .spinner {
+            display: inline-block;
+            width: 16px;
+            height: 16px;
+            border: 2px solid rgba(255, 255, 255, 0.3);
+            border-top: 2px solid #ffffff;
+            border-radius: 50%;
+            animation: spin 0.8s linear infinite;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="debug-container">
+
+        <!-- HEADER -->
+        <div class="debug-header">
+            <h1><i class="fas fa-bug"></i> Debug — easily by megane</h1>
+            <span class="status-badge checking" id="statusBadge">
+                <i class="fas fa-spinner fa-spin"></i> Vérification...
+            </span>
+        </div>
+
+        <!-- SESSION INFO -->
+        <div class="session-info" id="sessionInfo">
+            <div class="info-row">
+                <span class="label">🔐 Session</span>
+                <span class="value" id="sessionStatus">Vérification...</span>
+            </div>
+            <div class="info-row">
+                <span class="label">👤 Utilisateur</span>
+                <span class="value" id="userEmail">-</span>
+            </div>
+            <div class="info-row">
+                <span class="label">🆔 User ID</span>
+                <span class="value" id="userId">-</span>
+            </div>
+            <div class="info-row">
+                <span class="label">🔑 Token</span>
+                <span class="value" id="tokenStatus">-</span>
+            </div>
+        </div>
+
+        <!-- GRILLE -->
+        <div class="debug-grid">
+
+            <!-- FORMULAIRE -->
+            <div class="debug-card">
+                <div class="card-title">
+                    <i class="fas fa-plus-circle"></i> Ajouter un lieu + photos
+                </div>
+
+                <form class="debug-form" id="debugForm">
+                    <div class="form-group">
+                        <label>Nom <span style="color:#f85149;">*</span></label>
+                        <input type="text" id="placeName" placeholder="Ex: Megane Shop" required />
+                    </div>
+
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label>Catégorie <span style="color:#f85149;">*</span></label>
+                            <select id="placeCategory" required>
+                                <option value="">Choisir...</option>
+                                <option value="boutiques">🛍️ Boutique</option>
+                                <option value="restaurants">🍽️ Restaurant</option>
+                                <option value="domiciles">🏠 Domicile</option>
+                                <option value="cybercafes">💻 Cybercafé</option>
+                                <option value="sante">🏥 Santé</option>
+                                <option value="stations">⛽ Station</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label>Statut</label>
+                            <select id="placeStatus">
+                                <option value="open">✅ Ouvert</option>
+                                <option value="closed">❌ Fermé</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label>Adresse <span style="color:#f85149;">*</span></label>
+                        <input type="text" id="placeAddress" placeholder="Ex: Cocody Angré" required />
+                    </div>
+
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label>Téléphone</label>
+                            <input type="text" id="placePhone" placeholder="07 00 00 00 00" />
+                        </div>
+                        <div class="form-group">
+                            <label>Horaires</label>
+                            <input type="text" id="placeHours" placeholder="08:00 - 20:00" />
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label>Description</label>
+                        <input type="text" id="placeDescription" placeholder="Vente de vêtements..." />
+                    </div>
+
+                    <!-- ========================================================== -->
+                    <!-- PHOTOS -->
+                    <!-- ========================================================== -->
+                    <div class="form-group">
+                        <label>📸 Photos</label>
+                        <div class="file-upload-area" id="uploadArea">
+                            <i class="fas fa-cloud-upload-alt"></i>
+                            <div class="upload-text">
+                                Cliquez pour sélectionner <span class="highlight">une ou plusieurs</span> photos
+                            </div>
+                            <div class="file-count" id="fileCount">Aucun fichier sélectionné</div>
+                            <input type="file" id="placePhotos" accept="image/*" multiple />
+                        </div>
+                        <div class="photo-preview-debug" id="photoPreview"></div>
+                    </div>
+
+                    <div class="form-actions">
+                        <button type="submit" class="btn-debug primary" id="submitBtn">
+                            <i class="fas fa-check"></i> Tester l'insertion
+                        </button>
+                        <button type="button" class="btn-debug secondary" id="clearLogsBtn">
+                            <i class="fas fa-trash"></i>
+                        </button>
+                    </div>
+                </form>
+            </div>
+
+            <!-- LOGS -->
+            <div class="debug-card">
+                <div class="card-title" style="justify-content:space-between;">
+                    <span><i class="fas fa-list-ul"></i> Logs</span>
+                    <span class="logs-count" id="logCount">0 entrées</span>
+                </div>
+
+                <div class="logs-header">
+                    <span style="font-size:0.7rem;color:#8b949e;">
+                        <i class="fas fa-circle" style="color:#3fb950;font-size:0.5rem;"></i> Live
+                    </span>
+                    <button class="btn-copy" id="copyLogsBtn">
+                        <i class="fas fa-copy"></i> Copier
+                    </button>
+                </div>
+
+                <div class="logs-container" id="logsContainer">
+                    <div class="log-entry">
+                        <span class="log-time">[--:--:--]</span>
+                        <span class="log-level info">INFO</span>
+                        <span class="log-message">🐛 Debug initialisé — en attente d'actions...</span>
+                    </div>
+                </div>
+
+                <!-- RESPONSE PREVIEW -->
+                <div class="response-preview" id="responsePreview">
+                    <div class="preview-title">📦 Dernière réponse</div>
+                    <pre id="responseContent"></pre>
+                </div>
+            </div>
+
+        </div>
+
+    </div>
+
+    <!-- TOAST -->
+    <div class="toast-debug" id="toastDebug"></div>
+
+    <!-- ============================================================ -->
+    <!-- SCRIPT -->
+    <!-- ============================================================ -->
+    <script>
+        (function() {
+            'use strict';
+
+            // ============================================================
+            // 🔑 CONFIGURATION SUPABASE - CLÉS CORRECTES
+            // ============================================================
+            var SUPABASE_URL = 'https://slanrdeaxapzfqtuqhbf.supabase.co';
+            var SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InNsYW5yZGVheGFwemZxdHVxaGJmIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODUzMzA3OTcsImV4cCI6MjEwMDkwNjc5N30.pUCb_N-66pjFs-QP2RefsqjAnffC4Rbq-rP9qHfnvK8';
+
+            console.log('🐛 Debug initialisé avec les nouvelles clés');
+
+            // ============================================================
+            // DOM REFS
+            // ============================================================
+            var form = document.getElementById('debugForm');
+            var submitBtn = document.getElementById('submitBtn');
+            var logsContainer = document.getElementById('logsContainer');
+            var logCount = document.getElementById('logCount');
+            var copyLogsBtn = document.getElementById('copyLogsBtn');
+            var clearLogsBtn = document.getElementById('clearLogsBtn');
+            var responsePreview = document.getElementById('responsePreview');
+            var responseContent = document.getElementById('responseContent');
+            var toastEl = document.getElementById('toastDebug');
+            var statusBadge = document.getElementById('statusBadge');
+            var sessionStatus = document.getElementById('sessionStatus');
+            var userEmail = document.getElementById('userEmail');
+            var userId = document.getElementById('userId');
+            var tokenStatus = document.getElementById('tokenStatus');
+
+            // Champs du formulaire
+            var placeName = document.getElementById('placeName');
+            var placeCategory = document.getElementById('placeCategory');
+            var placeStatus = document.getElementById('placeStatus');
+            var placeAddress = document.getElementById('placeAddress');
+            var placePhone = document.getElementById('placePhone');
+            var placeHours = document.getElementById('placeHours');
+            var placeDescription = document.getElementById('placeDescription');
+            var placePhotos = document.getElementById('placePhotos');
+            var photoPreview = document.getElementById('photoPreview');
+            var fileCount = document.getElementById('fileCount');
+            var uploadArea = document.getElementById('uploadArea');
+
+            // ============================================================
+            // ÉTAT PHOTOS
+            // ============================================================
+            var selectedFiles = [];
+
+            // ============================================================
+            // UPLOAD AREA
+            // ============================================================
+            uploadArea.addEventListener('click', function() {
+                placePhotos.click();
+            });
+
+            placePhotos.addEventListener('change', function(e) {
+                var files = Array.from(e.target.files);
+                selectedFiles = files;
+                renderPhotoPreview();
+                updateFileCount();
+                addLog('debug', '📸 ' + files.length + ' photo(s) sélectionnée(s)');
+            });
+
+            function updateFileCount() {
+                if (selectedFiles.length === 0) {
+                    fileCount.textContent = 'Aucun fichier sélectionné';
+                } else if (selectedFiles.length === 1) {
+                    fileCount.textContent = '1 fichier sélectionné';
+                } else {
+                    fileCount.textContent = selectedFiles.length + ' fichiers sélectionnés';
+                }
+            }
+
+            function renderPhotoPreview() {
+                photoPreview.innerHTML = '';
+                selectedFiles.forEach(function(file, index) {
+                    if (!file.type.startsWith('image/')) return;
+                    var reader = new FileReader();
+                    reader.onload = function(e) {
+                        var div = document.createElement('div');
+                        div.className = 'preview-item';
+                        div.innerHTML =
+                            '<img src="' + e.target.result + '" />' +
+                            '<button class="remove-photo" data-index="' + index + '" type="button"><i class="fas fa-times"></i></button>';
+                        div.querySelector('.remove-photo').addEventListener('click', function() {
+                            selectedFiles.splice(index, 1);
+                            renderPhotoPreview();
+                            updateFileCount();
+                            // Mettre à jour l'input
+                            var dt = new DataTransfer();
+                            selectedFiles.forEach(function(f) { dt.items.add(f); });
+                            placePhotos.files = dt.files;
+                            addLog('debug', '🗑️ Photo supprimée, reste ' + selectedFiles.length + ' photo(s)');
+                        });
+                        photoPreview.appendChild(div);
+                    };
+                    reader.readAsDataURL(file);
+                });
+            }
+
+            // ============================================================
+            // LOGS
+            // ============================================================
+            var logs = [];
+            var logCounter = 0;
+
+            function addLog(level, message, data) {
+                var time = new Date().toLocaleTimeString();
+                var entry = {
+                    id: ++logCounter,
+                    time: time,
+                    level: level,
+                    message: message,
+                    data: data || null
+                };
+                logs.push(entry);
+
+                var div = document.createElement('div');
+                div.className = 'log-entry';
+                var levelClass = 'log-level ' + level;
+                var levelIcon = {
+                    'info': 'ℹ️',
+                    'success': '✅',
+                    'error': '❌',
+                    'warning': '⚠️',
+                    'debug': '🔍'
+                }[level] || '•';
+
+                var msg = message;
+                if (data) {
+                    try {
+                        var json = typeof data === 'string' ? data : JSON.stringify(data, null, 2);
+                        msg += ' <span style="color:#8b949e;">→</span> <span class="string">' + json + '</span>';
+                    } catch (e) {
+                        msg += ' → ' + String(data);
+                    }
+                }
+
+                div.innerHTML =
+                    '<span class="log-time">[' + time + ']</span>' +
+                    '<span class="' + levelClass + '">' + levelIcon + ' ' + level.toUpperCase() + '</span>' +
+                    '<span class="log-message">' + msg + '</span>';
+
+                logsContainer.appendChild(div);
+                logsContainer.scrollTop = logsContainer.scrollHeight;
+                logCount.textContent = logs.length + ' entrées';
+
+                console.log('[' + time + '] [' + level.toUpperCase() + '] ' + message, data || '');
+            }
+
+            function clearLogs() {
+                logs = [];
+                logCounter = 0;
+                logsContainer.innerHTML = '';
+                logCount.textContent = '0 entrées';
+                responsePreview.classList.remove('visible');
+                addLog('info', '🧹 Logs effacés');
+            }
+
+            // ============================================================
+            // TOAST
+            // ============================================================
+            var toastTimer = null;
+
+            function showToast(message, type) {
+                toastEl.textContent = message;
+                toastEl.className = 'toast-debug show ' + type;
+                if (toastTimer) clearTimeout(toastTimer);
+                toastTimer = setTimeout(function() {
+                    toastEl.classList.remove('show');
+                }, 4000);
+            }
+
+            // ============================================================
+            // SESSION
+            // ============================================================
+            function getSession() {
+                try {
+                    var session = localStorage.getItem('sb_session');
+                    if (session) return JSON.parse(session);
+                } catch (e) {
+                    addLog('error', 'Erreur lecture session', e.message);
+                }
+                return null;
+            }
+
+            function checkSession() {
+                addLog('debug', 'Vérification de la session...');
+                var session = getSession();
+
+                if (session && session.access_token) {
+                    sessionStatus.textContent = '✅ Connecté';
+                    sessionStatus.className = 'value valid';
+                    userEmail.textContent = session.user ? session.user.email : 'Email non disponible';
+                    userId.textContent = session.user ? session.user.id : 'ID non disponible';
+                    tokenStatus.textContent = '✅ Valide (' + session.access_token.substring(0, 20) + '...)';
+                    tokenStatus.className = 'value valid';
+                    statusBadge.className = 'status-badge online';
+                    statusBadge.innerHTML = '<i class="fas fa-check-circle"></i> Connecté';
+                    addLog('success', 'Session valide - Utilisateur: ' + (session.user ? session.user.email : 'Inconnu'));
+                    return session;
+                } else {
+                    sessionStatus.textContent = '❌ Non connecté';
+                    sessionStatus.className = 'value invalid';
+                    userEmail.textContent = '-';
+                    userId.textContent = '-';
+                    tokenStatus.textContent = '❌ Aucun token';
+                    tokenStatus.className = 'value invalid';
+                    statusBadge.className = 'status-badge offline';
+                    statusBadge.innerHTML = '<i class="fas fa-times-circle"></i> Non connecté';
+                    addLog('warning', 'Aucune session valide trouvée');
+                    return null;
+                }
+            }
+
+            // ============================================================
+            // GEOLOCALISATION
+            // ============================================================
+            function getPosition() {
+                return new Promise(function(resolve) {
+                    if (!navigator.geolocation) {
+                        addLog('warning', 'Géolocalisation non disponible');
+                        resolve({ lat: '5.3599517', lng: '-3.9792253' });
+                        return;
+                    }
+                    navigator.geolocation.getCurrentPosition(
+                        function(pos) {
+                            var lat = pos.coords.latitude.toFixed(7);
+                            var lng = pos.coords.longitude.toFixed(7);
+                            addLog('info', '📍 Position GPS: ' + lat + ', ' + lng);
+                            resolve({ lat: String(lat), lng: String(lng) });
+                        },
+                        function(err) {
+                            addLog('warning', 'Erreur GPS: ' + err.message + ' — position par défaut');
+                            resolve({ lat: '5.3599517', lng: '-3.9792253' });
+                        }, {
+                            enableHighAccuracy: true,
+                            timeout: 10000
+                        }
+                    );
+                });
+            }
+
+            // ============================================================
+            // UPLOAD PHOTO
+            // ============================================================
+            async function uploadPhoto(file, placeId, token) {
+                var parts = file.name.split('.');
+                var ext = parts.length > 1 ? parts.pop() : 'jpg';
+                var fileName = placeId + '_' + Date.now() + '_' + Math.random().toString(36).substring(2, 6) + '.' + ext;
+
+                addLog('debug', '📸 Upload: ' + fileName + ' (' + file.size + ' bytes)');
+
+                var formData = new FormData();
+                formData.append('file', file);
+
+                var response = await fetch(SUPABASE_URL + '/storage/v1/object/place-photos/' + fileName, {
+                    method: 'POST',
+                    headers: {
+                        'apikey': SUPABASE_ANON_KEY,
+                        'Authorization': 'Bearer ' + token
+                    },
+                    body: formData
+                });
+
+                if (!response.ok) {
+                    var err = await response.text();
+                    throw new Error('Upload échoué: ' + response.status + ' - ' + err);
+                }
+
+                var url = SUPABASE_URL + '/storage/v1/object/public/place-photos/' + fileName;
+                addLog('success', '✅ Photo uploadée: ' + fileName);
+                return url;
+            }
+
+            // ============================================================
+            // API HELPERS
+            // ============================================================
+            function getHeaders(token) {
+                var headers = {
+                    'apikey': SUPABASE_ANON_KEY,
+                    'Content-Type': 'application/json'
+                };
+                if (token) {
+                    headers['Authorization'] = 'Bearer ' + token;
+                } else {
+                    headers['Authorization'] = 'Bearer ' + SUPABASE_ANON_KEY;
+                }
+                return headers;
+            }
+
+            // ============================================================
+            // SUBMIT - CORRIGÉ AVEC Prefer: return=representation
+            // ============================================================
+            form.addEventListener('submit', async function(e) {
+                e.preventDefault();
+
+                // 1. Vérifier la session
+                var session = getSession();
+                if (!session || !session.access_token) {
+                    addLog('error', '❌ Aucune session valide. Connectez-vous d\'abord.');
+                    showToast('Veuillez vous connecter d\'abord', 'error');
+                    return;
+                }
+
+                var token = session.access_token;
+
+                // 2. Récupérer les données
+                var name = placeName.value.trim();
+                var category = placeCategory.value;
+                var status = placeStatus.value;
+                var address = placeAddress.value.trim();
+                var phone = placePhone.value.trim();
+                var hours = placeHours.value.trim();
+                var description = placeDescription.value.trim();
+
+                // 3. Valider
+                if (!name) { showToast('Le nom est requis', 'error'); return; }
+                if (!category) { showToast('La catégorie est requise', 'error'); return; }
+                if (!address) { showToast('L\'adresse est requise', 'error'); return; }
+
+                // 4. Géolocalisation
+                var pos = await getPosition();
+                var lat = pos.lat;
+                var lng = pos.lng;
+
+                // 5. Préparer les données
+                var data = {
+                    name: name,
+                    category: category,
+                    address: address,
+                    phone: phone || null,
+                    hours: hours || null,
+                    description: description || null,
+                    status: status,
+                    lat: lat,
+                    lng: lng,
+                    user_id: session.user ? session.user.id : null
+                };
+
+                addLog('info', '📝 Préparation insertion:', data);
+
+                // 6. Désactiver le bouton
+                submitBtn.disabled = true;
+                submitBtn.innerHTML = '<span class="spinner"></span> Insertion...';
+
+                try {
+                    addLog('debug', '🔑 Token utilisé: ' + token.substring(0, 20) + '...');
+
+                    // ============================================================
+                    // 7. Insérer le lieu AVEC retour de l'ID
+                    // ============================================================
+                    var response = await fetch(SUPABASE_URL + '/rest/v1/position', {
+                        method: 'POST',
+                        headers: {
+                            ...getHeaders(token),
+                            'Prefer': 'return=representation'  // ← CLÉ ! Récupère l'ID
+                        },
+                        body: JSON.stringify(data)
+                    });
+
+                    var responseText = await response.text();
+                    var responseData = null;
+                    try {
+                        responseData = JSON.parse(responseText);
+                    } catch (e) {
+                        responseData = responseText;
+                    }
+
+                    if (!response.ok) {
+                        throw new Error('Insertion échouée: ' + response.status + ' - ' + responseText);
+                    }
+
+                    // ============================================================
+                    // 8. Récupérer l'ID du lieu créé
+                    // ============================================================
+                    var placeId = null;
+                    if (Array.isArray(responseData) && responseData.length > 0 && responseData[0].id) {
+                        placeId = responseData[0].id;
+                    } else if (responseData && responseData.id) {
+                        placeId = responseData.id;
+                    }
+
+                    if (!placeId) {
+                        // Dernier recours : chercher dans la réponse brute
+                        try {
+                            var parsed = JSON.parse(responseText);
+                            if (Array.isArray(parsed) && parsed.length > 0 && parsed[0].id) {
+                                placeId = parsed[0].id;
+                            }
+                        } catch (e) {}
+                    }
+
+                    if (!placeId) {
+                        throw new Error('Impossible de récupérer l\'ID du lieu créé. Réponse: ' + responseText);
+                    }
+
+                    addLog('success', '✅ Lieu inséré avec ID: ' + placeId);
+
+                    // ============================================================
+                    // 9. Upload des photos
+                    // ============================================================
+                    var photoUrls = [];
+                    if (selectedFiles.length > 0) {
+                        addLog('info', '📸 Upload de ' + selectedFiles.length + ' photo(s)...');
+                        showToast('📸 Upload des photos...', 'info');
+
+                        for (var i = 0; i < selectedFiles.length; i++) {
+                            try {
+                                var url = await uploadPhoto(selectedFiles[i], placeId, token);
+                                photoUrls.push(url);
+                            } catch (uploadError) {
+                                addLog('error', '❌ Échec upload photo ' + (i+1), uploadError.message);
+                            }
+                        }
+
+                        addLog('info', '📸 ' + photoUrls.length + '/' + selectedFiles.length + ' photos uploadées');
+
+                        // ============================================================
+                        // 10. Insérer les URLs dans la table photos
+                        // ============================================================
+                        if (photoUrls.length > 0) {
+                            addLog('debug', '💾 Insertion des photos dans la table...');
+                            for (var j = 0; j < photoUrls.length; j++) {
+                                var photoData = {
+                                    position_id: placeId,  // ← MAINTENANT C'EST UN UUID VALIDE
+                                    url: photoUrls[j]
+                                };
+                                var photoResponse = await fetch(SUPABASE_URL + '/rest/v1/photos', {
+                                    method: 'POST',
+                                    headers: {
+                                        ...getHeaders(token),
+                                        'Prefer': 'return=representation'
+                                    },
+                                    body: JSON.stringify(photoData)
+                                });
+                                if (!photoResponse.ok) {
+                                    var errText = await photoResponse.text();
+                                    addLog('warning', '⚠️ Photo ' + (j+1) + ' non enregistrée en BDD', errText);
+                                } else {
+                                    var photoResult = await photoResponse.json();
+                                    addLog('success', '✅ Photo ' + (j+1) + ' enregistrée en BDD ID: ' + (photoResult[0] ? photoResult[0].id : 'OK'));
+                                }
+                            }
+                        }
+                    }
+
+                    // Afficher la réponse finale
+                    var finalData = {
+                        place: responseData,
+                        place_id: placeId,
+                        photos_uploaded: photoUrls.length,
+                        photo_urls: photoUrls
+                    };
+                    responseContent.textContent = JSON.stringify(finalData, null, 2);
+                    responsePreview.classList.add('visible');
+
+                    addLog('success', '✅ Insertion terminée ! ' + photoUrls.length + ' photo(s) attachée(s)');
+                    showToast('✅ Lieu + ' + photoUrls.length + ' photo(s) ajouté(s) !', 'success');
+
+                    // Réinitialiser
+                    form.reset();
+                    placeStatus.value = 'open';
+                    selectedFiles = [];
+                    renderPhotoPreview();
+                    updateFileCount();
+                    var dt = new DataTransfer();
+                    placePhotos.files = dt.files;
+                    checkSession();
+
+                } catch (error) {
+                    addLog('error', '❌ Exception:', error.message);
+                    showToast('❌ Erreur: ' + error.message, 'error');
+                    responseContent.textContent = error.stack || error.message;
+                    responsePreview.classList.add('visible');
+                } finally {
+                    submitBtn.disabled = false;
+                    submitBtn.innerHTML = '<i class="fas fa-check"></i> Tester l\'insertion';
+                }
+            });
+
+            // ============================================================
+            // COPIER LES LOGS
+            // ============================================================
+            copyLogsBtn.addEventListener('click', function() {
+                var text = logs.map(function(log) {
+                    return '[' + log.time + '] [' + log.level.toUpperCase() + '] ' + log.message +
+                        (log.data ? ' → ' + JSON.stringify(log.data, null, 2) : '');
+                }).join('\n');
+
+                var session = getSession();
+                if (session) {
+                    text += '\n\n--- SESSION ---';
+                    text += '\nEmail: ' + (session.user ? session.user.email : 'N/A');
+                    text += '\nUser ID: ' + (session.user ? session.user.id : 'N/A');
+                    text += '\nToken: ' + session.access_token.substring(0, 30) + '...';
+                }
+
+                text += '\n\n--- CONFIG ---';
+                text += '\nURL: ' + SUPABASE_URL;
+                text += '\nAnon Key: ' + SUPABASE_ANON_KEY.substring(0, 30) + '...';
+
+                navigator.clipboard.writeText(text).then(function() {
+                    copyLogsBtn.classList.add('copied');
+                    copyLogsBtn.innerHTML = '<i class="fas fa-check"></i> Copié !';
+                    showToast('📋 Logs copiés dans le presse-papier', 'info');
+                    setTimeout(function() {
+                        copyLogsBtn.classList.remove('copied');
+                        copyLogsBtn.innerHTML = '<i class="fas fa-copy"></i> Copier';
+                    }, 2000);
+                }).catch(function() {
+                    var textarea = document.createElement('textarea');
+                    textarea.value = text;
+                    document.body.appendChild(textarea);
+                    textarea.select();
+                    document.execCommand('copy');
+                    document.body.removeChild(textarea);
+                    showToast('📋 Logs copiés (fallback)', 'info');
+                });
+            });
+
+            // ============================================================
+            // EFFACER LES LOGS
+            // ============================================================
+            clearLogsBtn.addEventListener('click', clearLogs);
+
+            // ============================================================
+            // INIT
+            // ============================================================
+            addLog('info', '🐛 Debug initialisé avec les nouvelles clés');
+            checkSession();
+
+            setInterval(function() {
+                checkSession();
+            }, 30000);
+
+            console.log('🐛 Debug ready — ' + SUPABASE_URL);
+
+        })();
+    </script>
+
+</body>
+</html>

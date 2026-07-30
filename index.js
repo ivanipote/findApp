@@ -7,6 +7,13 @@ var SUPABASE_URL = 'https://slanrdeaxapzfqtuqhbf.supabase.co';
 var SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InNsYW5yZGVheGFwemZxdHVxaGJmIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODUzMzA3OTcsImV4cCI6MjEwMDkwNjc5N30.pUCb_N-66pjFs-QP2RefsqjAnffC4Rbq-rP9qHfnvK8';
 
 // ================================================================
+// 🔑 CONFIGURATION OPENROUTESERVICE
+// ================================================================
+var ORS_API_KEY = 'eyJvcmciOiI1YjNjZTM1OTc4NTExMTAwMDFjZjYyNDgiLCJpZCI6IjA5N2E1MDIxNmU5ZTQ5NTViMGU5OWM1ZTFmOTFjOTYzIiwiaCI6Im11cm11cjY0In0=';
+var ORS_BASE_URL = 'https://api.openrouteservice.org';
+var ORS_PROFILE = 'driving-car';
+
+// ================================================================
 // 🔌 CLIENT SUPABASE
 // ================================================================
 var supabaseClient = null;
@@ -75,6 +82,7 @@ function cacheDom() {
         navMeLabel: document.getElementById('navMeLabel'),
         navFollow: document.getElementById('navFollow'),
         navFollowLabel: document.getElementById('navFollowLabel'),
+        navMesPositions: document.getElementById('navMesPositions'),
         categoriesGrid: document.getElementById('categoriesGrid'),
         resetCategories: document.getElementById('resetCategories'),
         categoriesSection: document.getElementById('categoriesSection'),
@@ -82,6 +90,8 @@ function cacheDom() {
         toggleFollow: document.getElementById('toggleFollow'),
         posStatus: document.getElementById('posStatus'),
         toast: document.getElementById('toast'),
+        btnCenterMe: document.getElementById('btnCenterMe'),
+        btnCenterFollow: document.getElementById('btnCenterFollow'),
         followOverlay: document.getElementById('followOverlay'),
         closeFollow: document.getElementById('closeFollow'),
         followLoader: document.getElementById('followLoader'),
@@ -92,6 +102,7 @@ function cacheDom() {
         trackSlider: document.getElementById('trackSlider'),
         trackClose: document.getElementById('trackClose'),
         trackEmail: document.getElementById('trackEmail'),
+        trackTimestamp: document.getElementById('trackTimestamp'),
         trackDistance: document.getElementById('trackDistance'),
         trackTime: document.getElementById('trackTime'),
         trackActionBtn: document.getElementById('trackActionBtn'),
@@ -284,12 +295,13 @@ function initMap() {
         attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>'
     }).addTo(map);
 
+    // Marqueur utilisateur : point avec halo
     userMarker = L.marker([state.userLat || 5.3599517, state.userLng || -3.9792253], {
         icon: L.divIcon({
             className: 'user-marker',
-            html: '<i class="fas fa-circle" style="color:#1976d2;font-size:16px;"></i>',
-            iconSize: [16, 16],
-            iconAnchor: [8, 8]
+            html: '<div class="user-pulse"><div class="user-dot"></div></div>',
+            iconSize: [20, 20],
+            iconAnchor: [10, 10]
         })
     }).addTo(map);
     userMarker.bindPopup('📍 Ma position');
@@ -325,6 +337,77 @@ function redirectToInfo(placeId) {
 }
 
 // ================================================================
+// CENTRER LA CARTE
+// ================================================================
+function centerOnMe() {
+    if (!state.userLat || !state.userLng) {
+        toast('📍 Position non disponible', 'error', 3000);
+        return;
+    }
+    if (map) {
+        map.setView([state.userLat, state.userLng], 15);
+        toast('📍 Centré sur votre position', 'info', 1500);
+    }
+}
+
+function centerOnFollow() {
+    if (!state.following) {
+        toast('👤 Aucune personne suivie', 'error', 3000);
+        return;
+    }
+    if (!state.following.lat || !state.following.lng) {
+        toast('👤 Position non disponible', 'error', 3000);
+        return;
+    }
+    if (map) {
+        map.setView([state.following.lat, state.following.lng], 15);
+        toast('👤 Centré sur la personne suivie', 'info', 1500);
+    }
+}
+
+// ================================================================
+// SUIVI - SAUVEGARDE D'ÉTAT
+// ================================================================
+function saveFollowingState() {
+    if (state.following) {
+        var data = {
+            id: state.following.id,
+            code: state.following.code,
+            email: state.following.email,
+            lat: state.following.lat,
+            lng: state.following.lng,
+            userId: state.following.userId,
+            timestamp: Date.now()
+        };
+        localStorage.setItem('following_state', JSON.stringify(data));
+        console.log('💾 État du suivi sauvegardé');
+    } else {
+        localStorage.removeItem('following_state');
+        console.log('🗑️ État du suivi supprimé');
+    }
+}
+
+function loadFollowingState() {
+    try {
+        var saved = localStorage.getItem('following_state');
+        if (saved) {
+            var data = JSON.parse(saved);
+            if (data.id && data.email && data.lat && data.lng) {
+                console.log('📂 État du suivi restauré:', data.email);
+                return data;
+            }
+        }
+    } catch (e) {
+        console.warn('⚠️ Erreur chargement état du suivi:', e);
+    }
+    return null;
+}
+
+function clearFollowingState() {
+    localStorage.removeItem('following_state');
+}
+
+// ================================================================
 // DROPDOWN MENU
 // ================================================================
 function initDropdown() {
@@ -340,7 +423,7 @@ function initDropdown() {
         }
     });
 
-    // ✅ Add place → redirection vers add.html
+    // Add place → redirection vers add.html
     if (DOM.navAdd) {
         DOM.navAdd.addEventListener('click', function(e) {
             e.preventDefault();
@@ -353,6 +436,7 @@ function initDropdown() {
         });
     }
 
+    // Mon compte → me.html / login.html
     if (DOM.navMe) {
         DOM.navMe.addEventListener('click', function(e) {
             e.preventDefault();
@@ -362,6 +446,38 @@ function initDropdown() {
             } else {
                 window.location.href = 'login.html';
             }
+        });
+    }
+
+    // ✅ Mes positions → mespositions.html
+    if (DOM.navMesPositions) {
+        DOM.navMesPositions.addEventListener('click', function(e) {
+            e.preventDefault();
+            DOM.dropdownMenu.classList.remove('active');
+            if (!state.isAuthenticated) {
+                toast('🔐 Connectez-vous pour voir vos positions', 'error', 3000);
+                return;
+            }
+            window.location.href = 'mespositions.html';
+        });
+    }
+}
+
+// ================================================================
+// BOUTONS CENTRAGE
+// ================================================================
+function initCenterButtons() {
+    if (DOM.btnCenterMe) {
+        DOM.btnCenterMe.addEventListener('click', function(e) {
+            e.stopPropagation();
+            centerOnMe();
+        });
+    }
+
+    if (DOM.btnCenterFollow) {
+        DOM.btnCenterFollow.addEventListener('click', function(e) {
+            e.stopPropagation();
+            centerOnFollow();
         });
     }
 }
@@ -529,6 +645,11 @@ function startFollowing(record) {
     showTrackMarker(record.latitude, record.longitude, record.email);
     subscribeToFollow(record.id);
     openTrackSlider(record);
+    saveFollowingState();
+
+    if (DOM.btnCenterFollow) {
+        DOM.btnCenterFollow.classList.remove('disabled');
+    }
 }
 
 function stopFollowing() {
@@ -539,9 +660,9 @@ function stopFollowing() {
         state.followChannel = null;
     }
 
-    if (trackMarker) {
-        map.removeLayer(trackMarker);
-        trackMarker = null;
+    if (state._pollInterval) {
+        clearInterval(state._pollInterval);
+        state._pollInterval = null;
     }
 
     if (state.trackPolyline) {
@@ -556,12 +677,23 @@ function stopFollowing() {
         state.routingControl = null;
     }
 
+    if (trackMarker) {
+        map.removeLayer(trackMarker);
+        trackMarker = null;
+    }
+
     state.following = null;
     state.isTracking = false;
 
     DOM.navFollowLabel.textContent = 'Suivre quelqu\'un';
     DOM.navFollow.querySelector('i').className = 'fas fa-eye';
     DOM.trackSlider.classList.remove('active');
+
+    clearFollowingState();
+
+    if (DOM.btnCenterFollow) {
+        DOM.btnCenterFollow.classList.add('disabled');
+    }
 
     toast('🛑 Suivi arrêté', 'info', 2000);
 }
@@ -572,11 +704,12 @@ function showTrackMarker(lat, lng, email) {
         trackMarker = null;
     }
 
+    // Marqueur de suivi : pin classique
     var icon = L.divIcon({
         className: 'track-marker',
-        html: '<i class="fas fa-user" style="color:#e74c3c;font-size:28px;text-shadow:0 2px 8px rgba(0,0,0,0.3);"></i>',
-        iconSize: [28, 28],
-        iconAnchor: [14, 28]
+        html: '<div class="track-pin"><i class="fas fa-map-pin" style="color:#e74c3c;font-size:32px;text-shadow:0 2px 8px rgba(0,0,0,0.3);"></i></div>',
+        iconSize: [32, 32],
+        iconAnchor: [16, 32]
     });
 
     trackMarker = L.marker([lat, lng], { icon: icon }).addTo(map);
@@ -601,7 +734,6 @@ function subscribeToFollow(recordId) {
 
     if (!supabaseClient || typeof supabaseClient.channel !== 'function') {
         console.warn('⚠️ Supabase client non disponible, suivi sans Realtime');
-        // Fallback : polling toutes les 5 secondes
         if (state._pollInterval) clearInterval(state._pollInterval);
         state._pollInterval = setInterval(function() {
             fetchPosition(recordId);
@@ -638,6 +770,9 @@ function subscribeToFollow(recordId) {
                         updateTrackStats(newData.latitude, newData.longitude);
                     }
                 }
+
+                updateTimestamp(newData.last_update);
+                saveFollowingState();
             }
         )
         .subscribe(function(status) {
@@ -685,9 +820,165 @@ async function fetchPosition(recordId) {
                 updateTrackStats(newData.latitude, newData.longitude);
             }
         }
+
+        updateTimestamp(newData.last_update);
+        saveFollowingState();
+
     } catch (e) {
         console.warn('⚠️ Erreur polling:', e);
     }
+}
+
+// ================================================================
+// RAFRAÎCHIR LA POSITION SUIVIE
+// ================================================================
+async function refreshFollowingPosition() {
+    if (!state.following) {
+        toast('⚠️ Aucune personne suivie', 'error', 3000);
+        return;
+    }
+
+    try {
+        DOM.trackActionBtn.disabled = true;
+        DOM.trackBtnLabel.textContent = '⏳ Mise à jour...';
+
+        var session = getSession();
+        var token = session ? session.access_token : null;
+
+        var response = await fetch(
+            SUPABASE_URL + '/rest/v1/shared_locations?id=eq.' + state.following.id + '&select=*&limit=1', {
+                headers: getHeaders(token)
+            }
+        );
+
+        if (!response.ok) {
+            if (response.status === 401) {
+                toast('🔐 Session expirée, veuillez restaurer votre session', 'error', 3000);
+                return;
+            }
+            throw new Error('Erreur ' + response.status);
+        }
+
+        var data = await response.json();
+
+        if (!data || data.length === 0) {
+            toast('⚠️ Position non trouvée', 'error', 3000);
+            return;
+        }
+
+        var newData = data[0];
+
+        if (newData.active === false) {
+            toast('⚠️ La personne a arrêté de partager sa position', 'error', 3000);
+            stopFollowing();
+            return;
+        }
+
+        state.following.lat = newData.latitude;
+        state.following.lng = newData.longitude;
+
+        if (trackMarker) {
+            trackMarker.setLatLng([newData.latitude, newData.longitude]);
+        }
+
+        updateTimestamp(newData.last_update);
+        updateTrackStats(newData.latitude, newData.longitude);
+
+        // Effacer l'ancien itinéraire
+        if (state.trackPolyline) {
+            map.removeLayer(state.trackPolyline);
+            state.trackPolyline = null;
+        }
+
+        if (state.routingControl) {
+            if (typeof state.routingControl.remove === 'function') {
+                state.routingControl.remove();
+            }
+            state.routingControl = null;
+        }
+
+        calculateRoute();
+        saveFollowingState();
+
+        toast('✅ Position mise à jour', 'success', 2000);
+
+    } catch (e) {
+        console.error('❌ Erreur rafraîchissement:', e);
+        toast('❌ Erreur: ' + e.message, 'error', 3000);
+    } finally {
+        DOM.trackActionBtn.disabled = false;
+        DOM.trackBtnLabel.textContent = 'Mettre à jour';
+    }
+}
+
+// ================================================================
+// RESTAURER LE SUIVI
+// ================================================================
+function restoreFollowing() {
+    var saved = loadFollowingState();
+    if (!saved) return;
+
+    console.log('🔄 Restauration du suivi:', saved.email);
+
+    if (!map) {
+        setTimeout(function() {
+            restoreFollowing();
+        }, 500);
+        return;
+    }
+
+    state.following = {
+        id: saved.id,
+        code: saved.code,
+        email: saved.email,
+        lat: saved.lat,
+        lng: saved.lng,
+        userId: saved.userId
+    };
+
+    DOM.navFollowLabel.textContent = 'Arrêter de suivre';
+    DOM.navFollow.querySelector('i').className = 'fas fa-stop-circle';
+
+    showTrackMarker(saved.lat, saved.lng, saved.email);
+    openTrackSlider({
+        id: saved.id,
+        code: saved.code,
+        email: saved.email,
+        lat: saved.lat,
+        lng: saved.lng,
+        userId: saved.userId
+    });
+
+    subscribeToFollow(saved.id);
+    updateTimestamp();
+
+    if (DOM.btnCenterFollow) {
+        DOM.btnCenterFollow.classList.remove('disabled');
+    }
+
+    toast('📍 Suivi restauré : ' + saved.email, 'info', 3000);
+}
+
+// ================================================================
+// METTRE À JOUR L'HORODATAGE
+// ================================================================
+function updateTimestamp(date) {
+    var timestampEl = DOM.trackTimestamp;
+    if (!timestampEl) return;
+
+    var now = new Date();
+    var timeStr, dateStr;
+
+    if (date) {
+        var updateTime = new Date(date);
+        timeStr = updateTime.toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' });
+        dateStr = updateTime.toLocaleDateString('fr-FR', { day: '2-digit', month: 'short' });
+    } else {
+        timeStr = now.toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' });
+        dateStr = now.toLocaleDateString('fr-FR', { day: '2-digit', month: 'short' });
+    }
+
+    timestampEl.textContent = '⏱️ Dernière mise à jour : ' + dateStr + ' ' + timeStr;
 }
 
 // ================================================================
@@ -697,20 +988,17 @@ function openTrackSlider(record) {
     DOM.trackEmail.textContent = '📧 ' + record.email;
     DOM.trackDistance.textContent = '--';
     DOM.trackTime.textContent = '--';
-    DOM.trackBtnLabel.textContent = 'Calculer l\'itinéraire';
-    DOM.trackActionBtn.className = 'track-btn';
+    DOM.trackBtnLabel.textContent = 'Mettre à jour';
+    DOM.trackActionBtn.className = 'track-btn tracking';
     state.isTracking = false;
 
+    updateTimestamp();
     DOM.trackSlider.classList.add('active');
 
     updateTrackStats(record.lat, record.lng);
 
     DOM.trackActionBtn.onclick = function() {
-        if (!state.isTracking) {
-            calculateRoute();
-        } else {
-            updateRoute();
-        }
+        refreshFollowingPosition();
     };
 
     DOM.trackClose.onclick = function() {
@@ -761,6 +1049,19 @@ function calculateRoute() {
         return;
     }
 
+    // Nettoyer l'ancien itinéraire
+    if (state.trackPolyline) {
+        map.removeLayer(state.trackPolyline);
+        state.trackPolyline = null;
+    }
+
+    if (state.routingControl) {
+        if (typeof state.routingControl.remove === 'function') {
+            state.routingControl.remove();
+        }
+        state.routingControl = null;
+    }
+
     var R = 6371;
     var dLat = (lat2 - lat1) * Math.PI / 180;
     var dLng = (lng2 - lng1) * Math.PI / 180;
@@ -788,43 +1089,34 @@ function calculateRoute() {
         DOM.trackActionBtn.className = 'track-btn tracking';
         DOM.trackActionBtn.disabled = false;
         state.isTracking = true;
-
-        if (state.trackPolyline) {
-            map.removeLayer(state.trackPolyline);
-            state.trackPolyline = null;
-        }
-        if (state.routingControl) {
-            if (typeof state.routingControl.remove === 'function') {
-                state.routingControl.remove();
-            }
-            state.routingControl = null;
-        }
         return;
     }
 
-    var url = 'https://router.project-osrm.org/route/v1/driving/' +
-        lng1 + ',' + lat1 + ';' + lng2 + ',' + lat2 +
-        '?overview=full&geometries=geojson';
+    var url = ORS_BASE_URL + '/v2/directions/' + ORS_PROFILE + '/geojson' +
+        '?api_key=' + ORS_API_KEY +
+        '&start=' + lng1 + ',' + lat1 +
+        '&end=' + lng2 + ',' + lat2;
 
     DOM.trackActionBtn.disabled = true;
     DOM.trackBtnLabel.textContent = 'Calcul...';
 
     fetch(url)
         .then(function(response) {
-            if (!response.ok) throw new Error('Erreur OSM: ' + response.status);
+            if (!response.ok) throw new Error('Erreur ORS: ' + response.status);
             return response.json();
         })
         .then(function(data) {
-            if (!data.routes || data.routes.length === 0) {
+            if (!data.features || data.features.length === 0) {
                 throw new Error('Aucun itinéraire trouvé');
             }
 
-            var route = data.routes[0];
-            var distanceRoute = (route.distance / 1000).toFixed(1);
-            var timeRoute = Math.round(route.duration / 60);
+            var feature = data.features[0];
+            var summary = feature.properties.summary;
+            var distanceRoute = (summary.distance / 1000).toFixed(1);
+            var timeRoute = Math.round(summary.duration / 60);
 
             if (distanceRoute < 1) {
-                DOM.trackDistance.textContent = Math.round(route.distance);
+                DOM.trackDistance.textContent = Math.round(summary.distance);
                 document.querySelector('.track-stat:first-child .track-stat-label').textContent = 'Mètres';
             } else {
                 DOM.trackDistance.textContent = distanceRoute;
@@ -832,19 +1124,7 @@ function calculateRoute() {
             }
             DOM.trackTime.textContent = Math.max(1, timeRoute);
 
-            if (state.trackPolyline) {
-                map.removeLayer(state.trackPolyline);
-                state.trackPolyline = null;
-            }
-
-            if (state.routingControl) {
-                if (typeof state.routingControl.remove === 'function') {
-                    state.routingControl.remove();
-                }
-                state.routingControl = null;
-            }
-
-            var coordinates = route.geometry.coordinates.map(function(coord) {
+            var coordinates = feature.geometry.coordinates.map(function(coord) {
                 return [coord[1], coord[0]];
             });
 
@@ -870,15 +1150,11 @@ function calculateRoute() {
             toast('✅ Itinéraire tracé', 'success', 2000);
         })
         .catch(function(error) {
-            console.warn('⚠️ Erreur OSRM:', error);
+            console.warn('⚠️ Erreur OpenRouteService:', error);
             toast('❌ Erreur: ' + error.message, 'error', 3000);
             DOM.trackActionBtn.disabled = false;
-            DOM.trackBtnLabel.textContent = 'Calculer l\'itinéraire';
+            DOM.trackBtnLabel.textContent = 'Mettre à jour';
         });
-}
-
-function updateRoute() {
-    calculateRoute();
 }
 
 // ================================================================
@@ -913,10 +1189,19 @@ async function init() {
     initFollowToggle();
     initDropdown();
     initFollow();
+    initCenterButtons();
 
     if (DOM.resetCategories) {
         DOM.resetCategories.addEventListener('click', resetCategories);
     }
+
+    if (DOM.btnCenterFollow) {
+        DOM.btnCenterFollow.classList.add('disabled');
+    }
+
+    setTimeout(function() {
+        restoreFollowing();
+    }, 1000);
 
     registerServiceWorker();
 
