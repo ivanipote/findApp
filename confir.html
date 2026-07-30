@@ -1,0 +1,945 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>✅ Confirmation - easily by megane</title>
+
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
+    <link rel="stylesheet" href="style.css" />
+
+    <style>
+        /* ============================================================ */
+        /* PAGE CONFIRMATION */
+        /* ============================================================ */
+        body {
+            background: #0d1117;
+            color: #e6edf3;
+            padding: 20px;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            min-height: 100vh;
+        }
+
+        .confirm-container {
+            max-width: 900px;
+            margin: 0 auto;
+        }
+
+        .confirm-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 24px;
+            padding-bottom: 16px;
+            border-bottom: 2px solid #30363d;
+        }
+
+        .confirm-header h1 {
+            font-size: 1.5rem;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .confirm-header h1 i {
+            color: #3fb950;
+        }
+
+        .confirm-header .status-badge {
+            padding: 6px 16px;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            font-weight: 600;
+        }
+
+        .status-badge.online {
+            background: #238636;
+            color: #fff;
+        }
+
+        .status-badge.offline {
+            background: #da3633;
+            color: #fff;
+        }
+
+        .status-badge.checking {
+            background: #d29922;
+            color: #fff;
+        }
+
+        .status-badge.loading {
+            background: #1f6feb;
+            color: #fff;
+        }
+
+        /* ============================================================ */
+        /* SESSION INFO */
+        /* ============================================================ */
+        .session-info {
+            background: #161b22;
+            border-radius: 12px;
+            padding: 16px;
+            border: 1px solid #30363d;
+            margin-bottom: 20px;
+        }
+
+        .session-info .info-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr 1fr;
+            gap: 12px;
+        }
+
+        @media (max-width: 600px) {
+            .session-info .info-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .session-info .info-item {
+            display: flex;
+            flex-direction: column;
+            gap: 2px;
+        }
+
+        .session-info .info-item .label {
+            font-size: 0.65rem;
+            text-transform: uppercase;
+            letter-spacing: 0.3px;
+            color: #8b949e;
+        }
+
+        .session-info .info-item .value {
+            font-size: 0.85rem;
+            font-weight: 600;
+            color: #e6edf3;
+            word-break: break-all;
+        }
+
+        .session-info .info-item .value.valid {
+            color: #3fb950;
+        }
+
+        .session-info .info-item .value.invalid {
+            color: #f85149;
+        }
+
+        /* ============================================================ */
+        /* STATS */
+        /* ============================================================ */
+        .stats-bar {
+            display: flex;
+            gap: 16px;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+        }
+
+        .stats-bar .stat-item {
+            background: #161b22;
+            border: 1px solid #30363d;
+            border-radius: 10px;
+            padding: 10px 16px;
+            flex: 1;
+            min-width: 120px;
+            text-align: center;
+        }
+
+        .stats-bar .stat-item .stat-number {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: #58a6ff;
+        }
+
+        .stats-bar .stat-item .stat-label {
+            font-size: 0.7rem;
+            color: #8b949e;
+            text-transform: uppercase;
+            letter-spacing: 0.3px;
+        }
+
+        /* ============================================================ */
+        /* LISTE DES LIEUX */
+        /* ============================================================ */
+        .places-grid {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .place-card {
+            background: #161b22;
+            border: 1px solid #30363d;
+            border-radius: 12px;
+            padding: 16px;
+            transition: 0.2s;
+        }
+
+        .place-card:hover {
+            border-color: #58a6ff;
+        }
+
+        .place-card .place-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 8px;
+        }
+
+        .place-card .place-name {
+            font-size: 1.05rem;
+            font-weight: 700;
+            color: #e6edf3;
+        }
+
+        .place-card .place-name i {
+            color: #58a6ff;
+            margin-right: 8px;
+        }
+
+        .place-card .place-category {
+            font-size: 0.7rem;
+            padding: 2px 12px;
+            border-radius: 20px;
+            background: #1f6feb;
+            color: #fff;
+            font-weight: 600;
+        }
+
+        .place-card .place-details {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 4px 16px;
+            font-size: 0.8rem;
+            color: #8b949e;
+            margin-bottom: 8px;
+        }
+
+        @media (max-width: 480px) {
+            .place-card .place-details {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .place-card .place-details .detail-item {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .place-card .place-details .detail-item i {
+            width: 16px;
+            color: #484f58;
+        }
+
+        .place-card .place-status {
+            font-size: 0.65rem;
+            font-weight: 600;
+            padding: 2px 10px;
+            border-radius: 20px;
+        }
+
+        .place-card .place-status.open {
+            background: #23863633;
+            color: #3fb950;
+            border: 1px solid #238636;
+        }
+
+        .place-card .place-status.closed {
+            background: #da363333;
+            color: #f85149;
+            border: 1px solid #da3633;
+        }
+
+        .place-card .place-photos {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 6px;
+            margin-top: 8px;
+            padding-top: 8px;
+            border-top: 1px solid #30363d;
+        }
+
+        .place-card .place-photos .photo-thumb {
+            width: 60px;
+            height: 60px;
+            border-radius: 8px;
+            overflow: hidden;
+            border: 1px solid #30363d;
+            cursor: pointer;
+            transition: 0.2s;
+        }
+
+        .place-card .place-photos .photo-thumb:hover {
+            transform: scale(1.05);
+            border-color: #58a6ff;
+        }
+
+        .place-card .place-photos .photo-thumb img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .place-card .place-photos .photo-thumb .no-photo {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 100%;
+            height: 100%;
+            background: #0d1117;
+            color: #484f58;
+            font-size: 1.2rem;
+        }
+
+        .place-card .place-meta {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-top: 6px;
+            font-size: 0.65rem;
+            color: #484f58;
+        }
+
+        .place-card .place-meta .place-id {
+            font-family: monospace;
+            font-size: 0.6rem;
+        }
+
+        /* ============================================================ */
+        /* TOAST */
+        /* ============================================================ */
+        .toast-confirm {
+            position: fixed;
+            bottom: 24px;
+            left: 50%;
+            transform: translateX(-50%);
+            padding: 10px 20px;
+            border-radius: 12px;
+            font-size: 0.85rem;
+            font-weight: 600;
+            z-index: 9999;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.3s ease;
+            max-width: 90%;
+            text-align: center;
+        }
+
+        .toast-confirm.show {
+            opacity: 1;
+        }
+
+        .toast-confirm.success {
+            background: #238636;
+            color: #fff;
+        }
+
+        .toast-confirm.error {
+            background: #da3633;
+            color: #fff;
+        }
+
+        .toast-confirm.info {
+            background: #1f6feb;
+            color: #fff;
+        }
+
+        .spinner {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 2px solid rgba(255, 255, 255, 0.3);
+            border-top: 2px solid #ffffff;
+            border-radius: 50%;
+            animation: spin 0.8s linear infinite;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 60px 20px;
+            color: #8b949e;
+        }
+
+        .empty-state i {
+            font-size: 3rem;
+            color: #30363d;
+            display: block;
+            margin-bottom: 16px;
+        }
+
+        .empty-state .empty-title {
+            font-size: 1.2rem;
+            font-weight: 600;
+            color: #e6edf3;
+        }
+
+        .empty-state .empty-sub {
+            font-size: 0.9rem;
+            color: #484f58;
+        }
+
+        /* ============================================================ */
+        /* BOUTON COPIER LOGS */
+        /* ============================================================ */
+        .logs-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 8px;
+            margin-top: 20px;
+        }
+
+        .logs-header .logs-count {
+            font-size: 0.7rem;
+            color: #8b949e;
+        }
+
+        .btn-copy {
+            background: #21262d;
+            border: 1px solid #30363d;
+            color: #c9d1d9;
+            padding: 4px 12px;
+            border-radius: 6px;
+            font-size: 0.7rem;
+            cursor: pointer;
+            transition: 0.2s;
+            display: flex;
+            align-items: center;
+            gap: 4px;
+        }
+
+        .btn-copy:hover {
+            background: #30363d;
+        }
+
+        .btn-copy.copied {
+            background: #238636;
+            border-color: #238636;
+            color: #fff;
+        }
+
+        .logs-container {
+            background: #0d1117;
+            border-radius: 8px;
+            padding: 12px;
+            max-height: 200px;
+            overflow-y: auto;
+            font-family: 'Consolas', 'Courier New', monospace;
+            font-size: 0.7rem;
+            line-height: 1.6;
+            border: 1px solid #30363d;
+        }
+
+        .logs-container::-webkit-scrollbar {
+            width: 6px;
+        }
+
+        .logs-container::-webkit-scrollbar-track {
+            background: #0d1117;
+        }
+
+        .logs-container::-webkit-scrollbar-thumb {
+            background: #30363d;
+            border-radius: 3px;
+        }
+
+        .log-entry {
+            padding: 2px 0;
+            border-bottom: 1px solid #161b22;
+        }
+
+        .log-entry .log-time {
+            color: #484f58;
+            margin-right: 8px;
+        }
+
+        .log-entry .log-level {
+            font-weight: 600;
+            margin-right: 8px;
+        }
+
+        .log-entry .log-level.info {
+            color: #58a6ff;
+        }
+
+        .log-entry .log-level.success {
+            color: #3fb950;
+        }
+
+        .log-entry .log-level.error {
+            color: #f85149;
+        }
+
+        .log-entry .log-level.warning {
+            color: #d29922;
+        }
+
+        .log-entry .log-level.debug {
+            color: #8b949e;
+        }
+
+        .log-entry .log-message {
+            color: #e6edf3;
+            word-break: break-all;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="confirm-container">
+
+        <!-- HEADER -->
+        <div class="confirm-header">
+            <h1><i class="fas fa-check-circle"></i> Confirmation</h1>
+            <span class="status-badge checking" id="statusBadge">
+                <i class="fas fa-spinner fa-spin"></i> Vérification...
+            </span>
+        </div>
+
+        <!-- SESSION INFO -->
+        <div class="session-info" id="sessionInfo">
+            <div class="info-grid">
+                <div class="info-item">
+                    <span class="label">🔐 Session</span>
+                    <span class="value" id="sessionStatus">Vérification...</span>
+                </div>
+                <div class="info-item">
+                    <span class="label">👤 Utilisateur</span>
+                    <span class="value" id="userEmail">-</span>
+                </div>
+                <div class="info-item">
+                    <span class="label">🆔 User ID</span>
+                    <span class="value" id="userId">-</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- STATS -->
+        <div class="stats-bar" id="statsBar">
+            <div class="stat-item">
+                <div class="stat-number" id="totalPlaces">-</div>
+                <div class="stat-label">📍 Lieux</div>
+            </div>
+            <div class="stat-item">
+                <div class="stat-number" id="totalPhotos">-</div>
+                <div class="stat-label">📸 Photos</div>
+            </div>
+            <div class="stat-item">
+                <div class="stat-number" id="totalCategories">-</div>
+                <div class="stat-label">🏷️ Catégories</div>
+            </div>
+        </div>
+
+        <!-- LISTE DES LIEUX -->
+        <div id="placesContainer">
+            <div style="text-align:center;padding:40px;">
+                <div class="spinner"></div>
+                <p style="color:#8b949e;margin-top:12px;">Chargement des lieux...</p>
+            </div>
+        </div>
+
+        <!-- LOGS -->
+        <div class="logs-header">
+            <span class="logs-count" id="logCount">0 entrées</span>
+            <button class="btn-copy" id="copyLogsBtn">
+                <i class="fas fa-copy"></i> Copier les logs
+            </button>
+        </div>
+        <div class="logs-container" id="logsContainer">
+            <div class="log-entry">
+                <span class="log-time">[--:--:--]</span>
+                <span class="log-level info">INFO</span>
+                <span class="log-message">✅ Confirm initialisé — chargement des données...</span>
+            </div>
+        </div>
+
+    </div>
+
+    <!-- TOAST -->
+    <div class="toast-confirm" id="toastConfirm"></div>
+
+    <!-- ============================================================ -->
+    <!-- SCRIPT -->
+    <!-- ============================================================ -->
+    <script>
+        (function() {
+            'use strict';
+
+            // ============================================================
+            // 🔑 CONFIGURATION SUPABASE
+            // ============================================================
+            var SUPABASE_URL = 'https://slanrdeaxapzfqtuqhbf.supabase.co';
+            var SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InNsYW5yZGVheGFwemZxdHVxaGJmIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODUzMzA3OTcsImV4cCI6MjEwMDkwNjc5N30.pUCb_N-66pjFs-QP2RefsqjAnffC4Rbq-rP9qHfnvK8';
+
+            console.log('✅ Confirm initialisé');
+
+            // ============================================================
+            // DOM REFS
+            // ============================================================
+            var sessionStatus = document.getElementById('sessionStatus');
+            var userEmail = document.getElementById('userEmail');
+            var userId = document.getElementById('userId');
+            var statusBadge = document.getElementById('statusBadge');
+            var placesContainer = document.getElementById('placesContainer');
+            var totalPlaces = document.getElementById('totalPlaces');
+            var totalPhotos = document.getElementById('totalPhotos');
+            var totalCategories = document.getElementById('totalCategories');
+            var logsContainer = document.getElementById('logsContainer');
+            var logCount = document.getElementById('logCount');
+            var copyLogsBtn = document.getElementById('copyLogsBtn');
+            var toastEl = document.getElementById('toastConfirm');
+
+            // ============================================================
+            // LOGS
+            // ============================================================
+            var logs = [];
+            var logCounter = 0;
+
+            function addLog(level, message, data) {
+                var time = new Date().toLocaleTimeString();
+                var entry = {
+                    id: ++logCounter,
+                    time: time,
+                    level: level,
+                    message: message,
+                    data: data || null
+                };
+                logs.push(entry);
+
+                var div = document.createElement('div');
+                div.className = 'log-entry';
+                var levelClass = 'log-level ' + level;
+                var levelIcon = {
+                    'info': 'ℹ️',
+                    'success': '✅',
+                    'error': '❌',
+                    'warning': '⚠️',
+                    'debug': '🔍'
+                }[level] || '•';
+
+                var msg = message;
+                if (data) {
+                    try {
+                        var json = typeof data === 'string' ? data : JSON.stringify(data, null, 2);
+                        if (json.length > 200) json = json.substring(0, 200) + '...';
+                        msg += ' → ' + json;
+                    } catch (e) {
+                        msg += ' → ' + String(data);
+                    }
+                }
+
+                div.innerHTML =
+                    '<span class="log-time">[' + time + ']</span>' +
+                    '<span class="' + levelClass + '">' + levelIcon + ' ' + level.toUpperCase() + '</span>' +
+                    '<span class="log-message">' + msg + '</span>';
+
+                logsContainer.appendChild(div);
+                logsContainer.scrollTop = logsContainer.scrollHeight;
+                logCount.textContent = logs.length + ' entrées';
+
+                console.log('[' + time + '] [' + level.toUpperCase() + '] ' + message, data || '');
+            }
+
+            // ============================================================
+            // TOAST
+            // ============================================================
+            var toastTimer = null;
+
+            function showToast(message, type) {
+                toastEl.textContent = message;
+                toastEl.className = 'toast-confirm show ' + type;
+                if (toastTimer) clearTimeout(toastTimer);
+                toastTimer = setTimeout(function() {
+                    toastEl.classList.remove('show');
+                }, 4000);
+            }
+
+            // ============================================================
+            // SESSION
+            // ============================================================
+            function getSession() {
+                try {
+                    var session = localStorage.getItem('sb_session');
+                    if (session) return JSON.parse(session);
+                } catch (e) {
+                    addLog('error', 'Erreur lecture session', e.message);
+                }
+                return null;
+            }
+
+            function checkSession() {
+                addLog('debug', 'Vérification de la session...');
+                var session = getSession();
+
+                if (session && session.access_token) {
+                    sessionStatus.textContent = '✅ Connecté';
+                    sessionStatus.className = 'value valid';
+                    userEmail.textContent = session.user ? session.user.email : 'Email non disponible';
+                    userId.textContent = session.user ? session.user.id : 'ID non disponible';
+                    statusBadge.className = 'status-badge online';
+                    statusBadge.innerHTML = '<i class="fas fa-check-circle"></i> Connecté';
+                    addLog('success', 'Session valide - Utilisateur: ' + (session.user ? session.user.email : 'Inconnu'));
+                    return session;
+                } else {
+                    sessionStatus.textContent = '❌ Non connecté';
+                    sessionStatus.className = 'value invalid';
+                    userEmail.textContent = '-';
+                    userId.textContent = '-';
+                    statusBadge.className = 'status-badge offline';
+                    statusBadge.innerHTML = '<i class="fas fa-times-circle"></i> Non connecté';
+                    addLog('warning', 'Aucune session valide trouvée');
+                    return null;
+                }
+            }
+
+            // ============================================================
+            // API HELPERS
+            // ============================================================
+            function getHeaders(token) {
+                var headers = {
+                    'apikey': SUPABASE_ANON_KEY,
+                    'Content-Type': 'application/json'
+                };
+                if (token) {
+                    headers['Authorization'] = 'Bearer ' + token;
+                } else {
+                    headers['Authorization'] = 'Bearer ' + SUPABASE_ANON_KEY;
+                }
+                return headers;
+            }
+
+            // ============================================================
+            // RÉCUPÉRER LES LIEUX AVEC LEURS PHOTOS
+            // ============================================================
+            async function fetchPlacesWithPhotos() {
+                var session = getSession();
+                var token = session ? session.access_token : null;
+
+                addLog('info', '📥 Récupération des lieux...');
+
+                try {
+                    // 1. Récupérer tous les lieux
+                    var placesResponse = await fetch(SUPABASE_URL + '/rest/v1/position?select=*&order=created_at.desc', {
+                        headers: getHeaders(token)
+                    });
+
+                    if (!placesResponse.ok) {
+                        throw new Error('Erreur récupération lieux: ' + placesResponse.status);
+                    }
+
+                    var places = await placesResponse.json();
+                    addLog('success', '📌 ' + places.length + ' lieu(x) récupéré(s)');
+
+                    if (places.length === 0) {
+                        return [];
+                    }
+
+                    // 2. Récupérer les photos pour chaque lieu
+                    var placeIds = places.map(function(p) { return p.id; });
+                    var idsString = placeIds.map(function(id) { return '"' + id + '"'; }).join(',');
+
+                    var photosResponse = await fetch(
+                        SUPABASE_URL + '/rest/v1/photos?select=*&position_id=in.(' + idsString + ')', {
+                            headers: getHeaders(token)
+                        }
+                    );
+
+                    if (!photosResponse.ok) {
+                        addLog('warning', '⚠️ Erreur récupération photos: ' + photosResponse.status);
+                        return places.map(function(p) {
+                            p.photos = [];
+                            return p;
+                        });
+                    }
+
+                    var photos = await photosResponse.json();
+                    addLog('success', '📸 ' + photos.length + ' photo(s) récupérée(s)');
+
+                    // 3. Associer les photos aux lieux
+                    var photosByPlace = {};
+                    photos.forEach(function(photo) {
+                        if (!photosByPlace[photo.position_id]) {
+                            photosByPlace[photo.position_id] = [];
+                        }
+                        photosByPlace[photo.position_id].push(photo);
+                    });
+
+                    places.forEach(function(place) {
+                        place.photos = photosByPlace[place.id] || [];
+                    });
+
+                    return places;
+
+                } catch (error) {
+                    addLog('error', '❌ Erreur:', error.message);
+                    showToast('Erreur: ' + error.message, 'error');
+                    return [];
+                }
+            }
+
+            // ============================================================
+            // AFFICHER LES LIEUX
+            // ============================================================
+            function renderPlaces(places) {
+                if (!places || places.length === 0) {
+                    placesContainer.innerHTML =
+                        '<div class="empty-state">' +
+                        '<i class="fas fa-map-marker-alt"></i>' +
+                        '<div class="empty-title">Aucun lieu trouvé</div>' +
+                        '<div class="empty-sub">Ajoutez votre premier lieu via le formulaire</div>' +
+                        '</div>';
+                    totalPlaces.textContent = '0';
+                    totalPhotos.textContent = '0';
+                    totalCategories.textContent = '0';
+                    return;
+                }
+
+                // Statistiques
+                var totalPhotosCount = places.reduce(function(sum, p) { return sum + (p.photos ? p.photos.length : 0); }, 0);
+                var categories = {};
+                places.forEach(function(p) {
+                    if (p.category) categories[p.category] = (categories[p.category] || 0) + 1;
+                });
+
+                totalPlaces.textContent = places.length;
+                totalPhotos.textContent = totalPhotosCount;
+                totalCategories.textContent = Object.keys(categories).length;
+
+                // Rendu des cartes
+                var html = '<div class="places-grid">';
+                places.forEach(function(place) {
+                    var categoryEmoji = {
+                        'boutiques': '🛍️',
+                        'restaurants': '🍽️',
+                        'domiciles': '🏠',
+                        'cybercafes': '💻',
+                        'sante': '🏥',
+                        'stations': '⛽'
+                    }[place.category] || '📍';
+
+                    var statusClass = place.status === 'open' ? 'open' : 'closed';
+                    var statusLabel = place.status === 'open' ? '✅ Ouvert' : '❌ Fermé';
+
+                    var photosHtml = '';
+                    if (place.photos && place.photos.length > 0) {
+                        place.photos.slice(0, 6).forEach(function(photo) {
+                            photosHtml +=
+                                '<div class="photo-thumb" onclick="window.open(\'' + photo.url + '\',\'_blank\')">' +
+                                '<img src="' + photo.url + '" alt="Photo" />' +
+                                '</div>';
+                        });
+                        if (place.photos.length > 6) {
+                            photosHtml +=
+                                '<div class="photo-thumb"><div class="no-photo">+' + (place.photos.length - 6) +
+                                '</div></div>';
+                        }
+                    } else {
+                        photosHtml =
+                            '<div class="photo-thumb"><div class="no-photo"><i class="fas fa-image"></i></div></div>';
+                    }
+
+                    html +=
+                        '<div class="place-card">' +
+                        '<div class="place-header">' +
+                        '<span class="place-name"><i class="fas fa-store"></i> ' + place.name + '</span>' +
+                        '<span class="place-category">' + categoryEmoji + ' ' + (place.category || 'Non défini') +
+                        '</span>' +
+                        '</div>' +
+                        '<div class="place-details">' +
+                        '<span class="detail-item"><i class="fas fa-map-pin"></i> ' + (place.address || 'N/A') +
+                        '</span>' +
+                        '<span class="detail-item"><i class="fas fa-phone"></i> ' + (place.phone || 'N/A') +
+                        '</span>' +
+                        '<span class="detail-item"><i class="fas fa-clock"></i> ' + (place.hours || 'N/A') +
+                        '</span>' +
+                        '<span class="detail-item"><span class="place-status ' + statusClass + '">' + statusLabel +
+                        '</span></span>' +
+                        '</div>' +
+                        '<div class="place-photos">' + photosHtml + '</div>' +
+                        '<div class="place-meta">' +
+                        '<span><i class="fas fa-calendar"></i> ' + (place.created_at ? new Date(place.created_at)
+                            .toLocaleDateString() : 'N/A') + '</span>' +
+                        '<span class="place-id">🆔 ' + place.id.substring(0, 8) + '...</span>' +
+                        '</div>' +
+                        '</div>';
+                });
+                html += '</div>';
+
+                placesContainer.innerHTML = html;
+                addLog('success', '✅ ' + places.length + ' lieu(x) affiché(s)');
+            }
+
+            // ============================================================
+            // COPIER LES LOGS
+            // ============================================================
+            copyLogsBtn.addEventListener('click', function() {
+                var text = logs.map(function(log) {
+                    return '[' + log.time + '] [' + log.level.toUpperCase() + '] ' + log.message +
+                        (log.data ? ' → ' + JSON.stringify(log.data, null, 2) : '');
+                }).join('\n');
+
+                var session = getSession();
+                if (session) {
+                    text += '\n\n--- SESSION ---';
+                    text += '\nEmail: ' + (session.user ? session.user.email : 'N/A');
+                    text += '\nUser ID: ' + (session.user ? session.user.id : 'N/A');
+                }
+
+                text += '\n\n--- CONFIG ---';
+                text += '\nURL: ' + SUPABASE_URL;
+
+                navigator.clipboard.writeText(text).then(function() {
+                    copyLogsBtn.classList.add('copied');
+                    copyLogsBtn.innerHTML = '<i class="fas fa-check"></i> Copié !';
+                    showToast('📋 Logs copiés', 'info');
+                    setTimeout(function() {
+                        copyLogsBtn.classList.remove('copied');
+                        copyLogsBtn.innerHTML = '<i class="fas fa-copy"></i> Copier les logs';
+                    }, 2000);
+                }).catch(function() {
+                    var textarea = document.createElement('textarea');
+                    textarea.value = text;
+                    document.body.appendChild(textarea);
+                    textarea.select();
+                    document.execCommand('copy');
+                    document.body.removeChild(textarea);
+                    showToast('📋 Logs copiés (fallback)', 'info');
+                });
+            });
+
+            // ============================================================
+            // INIT
+            // ============================================================
+            async function init() {
+                addLog('info', '✅ Confirm initialisé — chargement des données...');
+
+                var session = checkSession();
+
+                if (!session) {
+                    addLog('warning', '⚠️ Non connecté — affichage public');
+                    statusBadge.className = 'status-badge offline';
+                    statusBadge.innerHTML = '<i class="fas fa-times-circle"></i> Non connecté';
+                }
+
+                // Charger les lieux
+                var places = await fetchPlacesWithPhotos();
+                renderPlaces(places);
+
+                addLog('success', '✅ Chargement terminé');
+                showToast('✅ ' + places.length + ' lieu(x) chargé(s)', 'success');
+            }
+
+            // ============================================================
+            // LANCER
+            // ============================================================
+            init();
+
+        })();
+    </script>
+
+</body>
+</html>

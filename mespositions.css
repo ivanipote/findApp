@@ -700,3 +700,39 @@
     height: 100%;
     object-fit: cover;      /* ✅ Remplit sans déformer */
 }
+/* ============================================================ */
+/* DÉSACTIVER LES EFFETS DE CLIC SUR LES ÉLÉMENTS */
+/* ============================================================ */
+
+/* Supprimer le highlight bleu sur mobile */
+* {
+    -webkit-tap-highlight-color: transparent !important;
+    -webkit-touch-callout: none !important;
+    -webkit-user-select: none !important;
+    user-select: none !important;
+}
+
+/* Supprimer le contour de focus sur les boutons et éléments cliquables */
+button:focus,
+input:focus,
+textarea:focus,
+select:focus,
+div:focus {
+    outline: none !important;
+    box-shadow: none !important;
+}
+
+/* Pour les éléments cliquables qui gardent un contour */
+a:focus,
+a:active,
+button:active,
+.btn:active {
+    outline: none !important;
+    border-color: transparent !important;
+    box-shadow: none !important;
+}
+
+/* Safari mobile - désactiver le grey highlight */
+* {
+    -webkit-touch-callout: none;
+}
