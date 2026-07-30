@@ -24,6 +24,9 @@
     --r-md: 14px;
     --r-sm: 10px;
     --r-pill: 999px;
+
+    --gutter: 14px;
+    --content-max: 480px;
 }
 
 * {
@@ -42,43 +45,6 @@ body {
 }
 
 /* ============================================================ */
-/* TOAST NOTIFICATION */
-/* ============================================================ */
-.toast-notification {
-    position: fixed;
-    top: 84px;
-    left: 50%;
-    transform: translateX(-50%) translateY(-16px);
-    z-index: 9999;
-    max-width: 440px;
-    width: 90%;
-    padding: 12px 18px;
-    border-radius: var(--r-md);
-    font-size: 0.85rem;
-    font-weight: 600;
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    opacity: 0;
-    pointer-events: none;
-    transition: opacity 0.3s ease, transform 0.3s ease;
-    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15);
-}
-
-.toast-notification.show {
-    opacity: 1;
-    transform: translateX(-50%) translateY(0);
-    pointer-events: auto;
-}
-
-.toast-notification.success { background: var(--green); color: #fff; }
-.toast-notification.error { background: var(--red); color: #fff; }
-.toast-notification.info { background: var(--blue); color: #fff; }
-
-.toast-notification .toast-icon { font-size: 1.1rem; flex-shrink: 0; }
-.toast-notification .toast-message { flex: 1; }
-
-/* ============================================================ */
 /* HEADER */
 /* ============================================================ */
 .header-profile {
@@ -95,7 +61,7 @@ body {
     padding: 0 8px 0 6px;
     gap: 10px;
     box-shadow: 0 2px 14px rgba(0, 0, 0, 0.07);
-    max-width: 480px;
+    max-width: var(--content-max);
     margin: 0 auto;
 }
 
@@ -138,6 +104,64 @@ body {
     overflow: hidden;
     text-overflow: ellipsis;
     min-width: 0;
+    transition: color 0.2s ease;
+}
+
+/* ============================================================ */
+/* PSEUDO BARRE — même gouttière que le reste du contenu */
+/* ============================================================ */
+.pseudo-bar {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    background: var(--surface);
+    border-radius: var(--r-lg);
+    padding: 12px 16px;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.04);
+    width: calc(100% - (var(--gutter) * 2));
+    max-width: calc(var(--content-max) - (var(--gutter) * 2));
+    margin: 0 auto 14px auto;
+    flex-wrap: wrap;
+}
+
+.pseudo-bar .pseudo-label {
+    font-size: 0.7rem;
+    font-weight: 700;
+    color: var(--muted);
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    flex-shrink: 0;
+}
+
+.pseudo-bar .pseudo-value {
+    flex: 1;
+    min-width: 60px;
+    font-family: 'Courier New', monospace;
+    font-weight: 700;
+    font-size: 0.95rem;
+    color: var(--blue);
+    letter-spacing: 0.5px;
+}
+
+.pseudo-bar .pseudo-reset {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    background: var(--surface-soft);
+    border: none;
+    border-radius: var(--r-sm);
+    padding: 7px 12px;
+    font-size: 0.75rem;
+    font-weight: 600;
+    color: var(--muted);
+    cursor: pointer;
+    transition: 0.2s;
+    flex-shrink: 0;
+}
+
+.pseudo-bar .pseudo-reset:hover {
+    color: var(--red);
+    background: var(--red-light);
 }
 
 /* ============================================================ */
@@ -200,16 +224,16 @@ body {
 /* CONTAINER */
 /* ============================================================ */
 .profile-container {
-    max-width: 480px;
+    max-width: var(--content-max);
     margin: 0 auto;
-    padding: 0 14px;
+    padding: 0 var(--gutter);
     display: flex;
     flex-direction: column;
     gap: 14px;
 }
 
 /* ============================================================ */
-/* CARDS — arrondies partout, plus de version "pleine largeur" */
+/* CARDS — arrondies partout, aucune version "pleine largeur" */
 /* ============================================================ */
 .card {
     background: var(--surface);
@@ -284,6 +308,17 @@ body {
     margin-left: auto;
 }
 
+/* Réglage qui doit s'étaler sur toute la largeur, sous le label */
+.settings-item:has(.send-area) {
+    flex-direction: column;
+    align-items: stretch;
+}
+
+.settings-item:has(.send-area) .right {
+    width: 100%;
+    margin-left: 0;
+}
+
 /* ============================================================ */
 /* TOGGLE */
 /* ============================================================ */
@@ -354,7 +389,7 @@ body {
 .code-samsung .btn-copy:hover { background: var(--blue-light); }
 
 /* ============================================================ */
-/* BOUTON RÉINITIALISER */
+/* BOUTON RÉINITIALISER (code) */
 /* ============================================================ */
 .btn-reset-samsung {
     padding: 8px 10px;
@@ -373,9 +408,21 @@ body {
 .btn-reset-samsung:hover { color: var(--red); background: var(--red-light); }
 
 /* ============================================================ */
-/* ENVOYER — INPUT + BOUTON */
+/* ENVOYER — zone Email / Pseudo */
 /* ============================================================ */
-.settings-item .right input[type="email"] {
+.send-area {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    width: 100%;
+    margin-top: 4px;
+}
+
+.send-mode {
+    flex: 1 1 100%;
+}
+
+.settings-item input[type="email"] {
     padding: 9px 12px;
     border: 1.5px solid var(--border);
     border-radius: var(--r-sm);
@@ -384,17 +431,80 @@ body {
     background: var(--surface-soft);
     transition: 0.2s;
     width: 100%;
-    flex: 1;
-    min-width: 0;
 }
 
-.settings-item .right input[type="email"]:focus {
+.settings-item input[type="email"]:focus {
     border-color: var(--blue);
     outline: none;
     background: #ffffff;
 }
 
-.settings-item .right .btn-send {
+/* Groupe de champs pseudo : IP-23-M */
+.pseudo-input-group {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    background: var(--surface-soft);
+    border: 1.5px solid var(--border);
+    border-radius: var(--r-sm);
+    padding: 0 10px;
+    height: 38px;
+    transition: 0.2s;
+}
+
+.pseudo-input-group:focus-within {
+    border-color: var(--blue);
+    background: #ffffff;
+}
+
+.pseudo-input-group .pseudo-part {
+    width: 32px;
+    border: none;
+    background: transparent;
+    outline: none;
+    text-align: center;
+    font-family: 'Courier New', monospace;
+    font-weight: 700;
+    font-size: 0.85rem;
+    color: var(--ink);
+    text-transform: uppercase;
+}
+
+.pseudo-input-group .pseudo-part.pseudo-letter {
+    width: 22px;
+}
+
+.pseudo-input-group .pseudo-part::placeholder {
+    color: var(--muted-light);
+    font-weight: 500;
+}
+
+.pseudo-input-group .pseudo-separator {
+    color: var(--muted-light);
+    font-weight: 700;
+    flex-shrink: 0;
+}
+
+.btn-toggle-mode {
+    flex: 0 0 auto;
+    width: 38px;
+    height: 38px;
+    border-radius: var(--r-sm);
+    background: var(--surface-soft);
+    border: none;
+    color: var(--blue);
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: background 0.2s ease;
+}
+
+.btn-toggle-mode:hover { background: var(--blue-light); }
+
+.btn-send {
+    flex: 1 1 auto;
     padding: 9px 14px;
     background: var(--blue);
     color: #ffffff;
@@ -407,24 +517,12 @@ body {
     white-space: nowrap;
     display: flex;
     align-items: center;
+    justify-content: center;
     gap: 6px;
-    flex-shrink: 0;
 }
 
-.settings-item .right .btn-send:hover { background: var(--blue-dark); }
-.settings-item .right .btn-send:disabled { opacity: 0.6; cursor: not-allowed; }
-
-/* Ligne "Envoyer le code" : email + bouton sur toute la largeur, en dessous du label */
-.settings-item:has(#shareEmail) {
-    flex-direction: column;
-    align-items: stretch;
-}
-
-.settings-item:has(#shareEmail) .right {
-    width: 100%;
-    margin-left: 0;
-    margin-top: 4px;
-}
+.btn-send:hover { background: var(--blue-dark); }
+.btn-send:disabled { opacity: 0.6; cursor: not-allowed; }
 
 /* ============================================================ */
 /* HISTORIQUE — TABS */
@@ -481,8 +579,8 @@ body {
 }
 
 /* ============================================================ */
-/* HISTORY ITEM — structure réelle générée par le JS :          */
-/* .h-icon / .h-info (.h-code + .h-email) / .h-status / .h-time / .h-actions */
+/* HISTORY ITEM — .h-icon / .h-info (.h-code + .h-email) /      */
+/* .h-status / .h-time / .h-actions (copier · maps · masquer)   */
 /* ============================================================ */
 .history-item {
     display: flex;
@@ -510,9 +608,6 @@ body {
     color: #ffffff;
     flex-shrink: 0;
 }
-
-.history-item .h-icon.received { background: var(--blue); }
-.history-item .h-icon.sent { background: var(--orange); }
 
 .history-item .h-info {
     flex: 1;
@@ -549,7 +644,6 @@ body {
     flex-shrink: 0;
 }
 
-.history-item .h-status.pending { background: var(--orange-light); color: var(--orange); }
 .history-item .h-status.success { background: var(--green-light); color: #1f8a4c; }
 .history-item .h-status.failed { background: var(--red-light); color: var(--red); }
 
@@ -559,24 +653,31 @@ body {
     flex-shrink: 0;
 }
 
+/* Barre d'actions : copier (gauche) · maps (centre) · masquer (droite) */
 .history-item .h-actions {
     display: flex;
-    gap: 6px;
+    gap: 8px;
     width: 100%;
-    justify-content: flex-end;
+    margin-top: 8px;
+    padding-top: 8px;
+    border-top: 1px solid var(--border);
 }
 
 .history-item .h-actions .btn-action {
     background: none;
     border: none;
     font-size: 0.72rem;
+    font-weight: 600;
     cursor: pointer;
-    padding: 6px 10px;
+    padding: 6px 8px;
     border-radius: 8px;
     transition: 0.2s;
     display: flex;
     align-items: center;
+    justify-content: center;
     gap: 4px;
+    flex: 1;
+    min-width: 0;
 }
 
 .history-item .h-actions .btn-copy-code { color: var(--blue); background: var(--blue-light); }
@@ -584,6 +685,10 @@ body {
 
 .history-item .h-actions .btn-maps { color: #1f8a4c; background: var(--green-light); }
 .history-item .h-actions .btn-maps:hover { background: #c8e6c9; }
+
+.history-item .h-actions .btn-delete { color: var(--red); background: var(--red-light); }
+.history-item .h-actions .btn-delete:hover { background: #f8bbd0; }
+.history-item .h-actions .btn-delete:active { transform: scale(0.95); }
 
 /* ============================================================ */
 /* EMPTY STATE */
@@ -624,6 +729,12 @@ body {
 
     .header-profile .email { font-size: 0.78rem; }
 
+    .pseudo-bar {
+        width: calc(100% - 20px);
+        max-width: calc(var(--content-max) - 20px);
+        padding: 10px 14px;
+    }
+
     .profile-container { padding: 0 10px; gap: 10px; }
 
     .card { padding: 13px; border-radius: 16px; }
@@ -641,253 +752,22 @@ body {
 
     .code-samsung .code-value { font-size: 0.82rem; }
 
+    .pseudo-input-group .pseudo-part { width: 28px; font-size: 0.8rem; }
+    .pseudo-input-group .pseudo-part.pseudo-letter { width: 18px; }
+
     .history-item .h-code { font-size: 0.82rem; }
     .history-item .h-email { font-size: 0.68rem; }
-    .history-item .h-actions .btn-action { font-size: 0.68rem; padding: 5px 8px; }
+    .history-item .h-actions .btn-action { font-size: 0.65rem; padding: 5px 6px; }
 
     .history-card .history-content { max-height: 260px; }
 }
 
 @media (max-width: 360px) {
     .history-item .h-time { display: none; }
-}
-/* ============================================================ */
-/* ME-ADDITIONAL.CSS - BOUTON SUPPRIMER & ACTIONS */
-/* ============================================================ */
 
-/* ============================================================ */
-/* ACTIONS - ALIGNEMENT ET TAILLE */
-/* ============================================================ */
-
-.history-item .h-actions {
-    display: flex;
-    gap: 8px;
-    width: 100%;
-    justify-content: flex-end;
-    flex-wrap: wrap;
-    margin-top: 6px;
-}
-
-.history-item .h-actions .btn-action {
-    background: none;
-    border: none;
-    font-size: 0.72rem;
-    font-weight: 600;
-    cursor: pointer;
-    padding: 6px 12px;
-    border-radius: 8px;
-    transition: 0.2s;
-    display: flex;
-    align-items: center;
-    gap: 4px;
-    min-width: 70px;
-    justify-content: center;
-}
-
-/* ============================================================ */
-/* BOUTON COPIER */
-/* ============================================================ */
-.history-item .h-actions .btn-copy-code {
-    color: #1976d2;
-    background: #e3edfb;
-}
-
-.history-item .h-actions .btn-copy-code:hover {
-    background: #c5d9f5;
-}
-
-/* ============================================================ */
-/* BOUTON MAPS */
-/* ============================================================ */
-.history-item .h-actions .btn-maps {
-    color: #1f8a4c;
-    background: #e8f5e9;
-}
-
-.history-item .h-actions .btn-maps:hover {
-    background: #c8e6c9;
-}
-
-/* ============================================================ */
-/* BOUTON SUPPRIMER */
-/* ============================================================ */
-.history-item .h-actions .btn-delete {
-    color: #d32f2f;
-    background: #fce4ec;
-}
-
-.history-item .h-actions .btn-delete:hover {
-    background: #f8bbd0;
-}
-
-.history-item .h-actions .btn-delete:active {
-    transform: scale(0.95);
-}
-
-/* ============================================================ */
-/* RESPONSIVE - PETITS ÉCRANS */
-/* ============================================================ */
-@media (max-width: 480px) {
-    .history-item .h-actions {
-        gap: 6px;
-        justify-content: flex-start;
-        flex-wrap: wrap;
-    }
-
-    .history-item .h-actions .btn-action {
-        font-size: 0.65rem;
-        padding: 5px 10px;
-        min-width: 60px;
-    }
-
-    .history-item .h-actions .btn-action i {
-        font-size: 0.6rem;
-    }
-}
-
-@media (max-width: 360px) {
     .history-item .h-actions .btn-action {
         font-size: 0.6rem;
-        padding: 4px 8px;
-        min-width: 50px;
-    }
-
-    .history-item .h-actions {
-        gap: 4px;
-    }
-}
-
-/* ============================================================ */
-/* DARK MODE (optionnel) */
-/* ============================================================ */
-@media (prefers-color-scheme: dark) {
-    .history-item .h-actions .btn-copy-code {
-        background: #1a2a5a;
-        color: #58a6ff;
-    }
-
-    .history-item .h-actions .btn-copy-code:hover {
-        background: #2a3a6a;
-    }
-
-    .history-item .h-actions .btn-maps {
-        background: #1a4a2a;
-        color: #4caf50;
-    }
-
-    .history-item .h-actions .btn-maps:hover {
-        background: #2a5a3a;
-    }
-
-    .history-item .h-actions .btn-delete {
-        background: #4a1a1a;
-        color: #ef5350;
-    }
-
-    .history-item .h-actions .btn-delete:hover {
-        background: #5a2a2a;
-    }
-}
-/* ============================================================ */
-/* ACTIONS - ESPACEMENT ÉQUITABLE */
-/* ============================================================ */
-
-.history-item .h-actions {
-    display: flex;
-    gap: 0;
-    width: 100%;
-    justify-content: space-between;
-    margin-top: 8px;
-    padding-top: 8px;
-    border-top: 1px solid #eef1f6;
-}
-
-.history-item .h-actions .btn-action {
-    background: none;
-    border: none;
-    font-size: 0.72rem;
-    font-weight: 600;
-    cursor: pointer;
-    padding: 6px 8px;
-    border-radius: 8px;
-    transition: 0.2s;
-    display: flex;
-    align-items: center;
-    gap: 4px;
-    flex: 1;
-    justify-content: center;
-    max-width: 120px;
-    min-width: 70px;
-}
-
-/* ============================================================ */
-/* BOUTON COPIER (à gauche) */
-/* ============================================================ */
-.history-item .h-actions .btn-copy-code {
-    color: #1976d2;
-    background: #e3edfb;
-    margin-right: auto;
-}
-
-.history-item .h-actions .btn-copy-code:hover {
-    background: #c5d9f5;
-}
-
-/* ============================================================ */
-/* BOUTON MAPS (au centre) */
-/* ============================================================ */
-.history-item .h-actions .btn-maps {
-    color: #1f8a4c;
-    background: #e8f5e9;
-}
-
-.history-item .h-actions .btn-maps:hover {
-    background: #c8e6c9;
-}
-
-/* ============================================================ */
-/* BOUTON SUPPRIMER (à droite) */
-/* ============================================================ */
-.history-item .h-actions .btn-delete {
-    color: #d32f2f;
-    background: #fce4ec;
-    margin-left: auto;
-}
-
-.history-item .h-actions .btn-delete:hover {
-    background: #f8bbd0;
-}
-
-.history-item .h-actions .btn-delete:active {
-    transform: scale(0.95);
-}
-
-/* ============================================================ */
-/* RESPONSIVE - PETITS ÉCRANS */
-/* ============================================================ */
-@media (max-width: 480px) {
-    .history-item .h-actions .btn-action {
-        font-size: 0.65rem;
-        padding: 5px 6px;
-        min-width: 50px;
-        max-width: 100px;
-    }
-
-    .history-item .h-actions .btn-action i {
-        font-size: 0.6rem;
-    }
-}
-
-@media (max-width: 360px) {
-    .history-item .h-actions .btn-action {
-        font-size: 0.55rem;
         padding: 4px 4px;
-        min-width: 40px;
-        max-width: 80px;
-        gap: 2px;
-    }
-
-    .history-item .h-actions {
         gap: 2px;
     }
 }
