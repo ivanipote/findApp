@@ -2706,3 +2706,330 @@ button:focus-visible {
         padding: 6px;
     }
 }
+/* ============================================================ */
+/* BOUTONS TRANSPORT AMÉLIORÉS */
+/* ============================================================ */
+
+.btn-transport {
+    background: #f0f2f5;
+    border: 2px solid transparent;
+    width: 34px;
+    height: 34px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #8a9aaa;
+    font-size: 0.85rem;
+    cursor: pointer;
+    transition: all 0.25s ease;
+    flex-shrink: 0;
+    position: relative;
+}
+
+.btn-transport:hover {
+    background: #e3edfb;
+    color: #1976d2;
+    transform: translateY(-2px);
+}
+
+.btn-transport:active {
+    transform: scale(0.92);
+}
+
+.btn-transport.active {
+    background: #1976d2;
+    color: #ffffff;
+    border-color: #1976d2;
+    box-shadow: 0 4px 12px rgba(25, 118, 210, 0.35);
+}
+
+.btn-transport.active:hover {
+    background: #1565c0;
+    border-color: #1565c0;
+    box-shadow: 0 6px 16px rgba(25, 118, 210, 0.45);
+}
+
+/* Icône active avec légère animation */
+.btn-transport.active i {
+    animation: transportPulse 0.5s ease;
+}
+
+@keyframes transportPulse {
+    0% { transform: scale(1); }
+    50% { transform: scale(1.2); }
+    100% { transform: scale(1); }
+}
+
+/* Tooltip au survol */
+.btn-transport::after {
+    content: attr(title);
+    position: absolute;
+    bottom: calc(100% + 8px);
+    left: 50%;
+    transform: translateX(-50%) scale(0.8);
+    background: #1a2a5a;
+    color: #ffffff;
+    padding: 4px 10px;
+    border-radius: 6px;
+    font-size: 0.55rem;
+    font-weight: 600;
+    white-space: nowrap;
+    opacity: 0;
+    pointer-events: none;
+    transition: all 0.2s ease;
+}
+
+.btn-transport:hover::after {
+    opacity: 1;
+    transform: translateX(-50%) scale(1);
+}
+
+/* ============================================================ */
+/* HEADER CARD - ESPACEMENT DES BOUTONS */
+/* ============================================================ */
+
+.position-card .card-header .left {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    flex-wrap: wrap;
+}
+
+/* Séparateur visuel entre les groupes */
+.position-card .card-header .left .btn-transport {
+    margin-left: 2px;
+}
+
+/* ============================================================ */
+/* RESPONSIVE - TRANSPORT */
+/* ============================================================ */
+
+@media (max-width: 600px) {
+    .btn-transport {
+        width: 30px;
+        height: 30px;
+        font-size: 0.75rem;
+    }
+
+    .position-card .card-header .left {
+        gap: 4px;
+    }
+}
+
+@media (max-width: 480px) {
+    .btn-transport {
+        width: 26px;
+        height: 26px;
+        font-size: 0.65rem;
+        border-width: 1.5px;
+    }
+
+    .position-card .card-header .left {
+        gap: 3px;
+    }
+
+    .btn-transport::after {
+        font-size: 0.45rem;
+        padding: 2px 6px;
+        bottom: calc(100% + 4px);
+    }
+}
+
+@media (max-width: 380px) {
+    .btn-transport {
+        width: 22px;
+        height: 22px;
+        font-size: 0.55rem;
+        border-width: 1px;
+    }
+
+    .position-card .card-header .left {
+        gap: 2px;
+    }
+
+    .btn-transport.active {
+        box-shadow: 0 2px 8px rgba(25, 118, 210, 0.3);
+    }
+}
+
+/* ============================================================ */
+/* AMÉLIORATION DU CARD HEADER POUR MOBILE */
+/* ============================================================ */
+
+@media (max-width: 480px) {
+    .position-card .card-header {
+        padding: 4px 8px;
+        min-height: 28px;
+        flex-wrap: wrap;
+        gap: 4px;
+    }
+
+    .position-card .card-header .left {
+        flex: 1 1 auto;
+    }
+
+    .position-card .card-header .right {
+        flex: 0 0 auto;
+    }
+
+    .position-card .card-header .right .info-item {
+        font-size: 0.5rem;
+        padding: 1px 5px;
+    }
+
+    .position-card .card-header .right .info-item i {
+        font-size: 0.5rem;
+    }
+}
+
+/* ============================================================ */
+/* TOGGLE SUIVRE - AMÉLIORÉ */
+/* ============================================================ */
+
+.toggle-btn {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    cursor: pointer;
+    font-size: 0.6rem;
+    font-weight: 600;
+    color: #1a2a5a;
+    background: #f0f2f5;
+    padding: 2px 8px 2px 3px;
+    border-radius: 30px;
+    border: 2px solid transparent;
+    transition: all 0.25s ease;
+    height: 30px;
+}
+
+.toggle-btn:hover {
+    background: #e3edfb;
+    border-color: #1976d2;
+}
+
+.toggle-btn.active {
+    border-color: #1976d2;
+    background: #e3edfb;
+    color: #1976d2;
+}
+
+.toggle-btn .toggle-track {
+    width: 28px;
+    height: 16px;
+    background: #b0b8c8;
+    border-radius: 30px;
+    position: relative;
+    transition: 0.3s;
+    flex-shrink: 0;
+}
+
+.toggle-btn .toggle-track .toggle-thumb {
+    width: 12px;
+    height: 12px;
+    background: #ffffff;
+    border-radius: 50%;
+    position: absolute;
+    top: 2px;
+    left: 2px;
+    transition: 0.3s;
+    box-shadow: 0 1px 4px rgba(0, 0, 0, 0.15);
+}
+
+.toggle-btn.active .toggle-track {
+    background: #1976d2;
+}
+
+.toggle-btn.active .toggle-track .toggle-thumb {
+    left: 14px;
+}
+
+@media (max-width: 480px) {
+    .toggle-btn {
+        font-size: 0.5rem;
+        padding: 1px 6px 1px 2px;
+        height: 24px;
+        gap: 3px;
+    }
+
+    .toggle-btn .toggle-track {
+        width: 22px;
+        height: 13px;
+    }
+
+    .toggle-btn .toggle-track .toggle-thumb {
+        width: 9px;
+        height: 9px;
+        top: 2px;
+        left: 2px;
+    }
+
+    .toggle-btn.active .toggle-track .toggle-thumb {
+        left: 11px;
+    }
+}
+
+/* ============================================================ */
+/* BOUTONS CENTRER */
+/* ============================================================ */
+
+.btn-center {
+    background: #f0f2f5;
+    border: 2px solid transparent;
+    width: 30px;
+    height: 30px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #1a2a5a;
+    font-size: 0.8rem;
+    cursor: pointer;
+    transition: all 0.25s ease;
+    flex-shrink: 0;
+}
+
+.btn-center:hover {
+    background: #e3edfb;
+    border-color: #1976d2;
+    color: #1976d2;
+    transform: translateY(-2px);
+}
+
+.btn-center:active {
+    transform: scale(0.92);
+}
+
+.btn-center.disabled {
+    opacity: 0.4;
+    cursor: not-allowed;
+    pointer-events: none;
+}
+
+.btn-center i {
+    font-size: 0.85rem;
+}
+
+@media (max-width: 480px) {
+    .btn-center {
+        width: 24px;
+        height: 24px;
+        font-size: 0.65rem;
+    }
+
+    .btn-center i {
+        font-size: 0.7rem;
+    }
+}
+
+@media (max-width: 380px) {
+    .btn-center {
+        width: 20px;
+        height: 20px;
+        font-size: 0.55rem;
+    }
+
+    .btn-center i {
+        font-size: 0.6rem;
+    }
+}

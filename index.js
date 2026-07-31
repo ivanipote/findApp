@@ -75,7 +75,6 @@ var state = {
     popup: null,
     routeDrawn: false,
     slideIndex: 0,
-    // ✅ Données OSRM sauvegardées
     osrmData: {
         distance: '--',
         time: '--',
@@ -312,7 +311,7 @@ function getPosition() {
 }
 
 // ================================================================
-// MAP - MAPLIBRE GL JS
+// MAP - MAPLIBRE GL JS (OpenStreetMap UNIQUE)
 // ================================================================
 function initMap() {
     if (typeof maplibregl === 'undefined') {
@@ -405,11 +404,6 @@ function updateUserMarker(lat, lng) {
     if (state.isFollowingActive && state.map) {
         state.map.flyTo({ center: [lng, lat], zoom: 15 });
     }
-    
-    if (state.following) {
-        // Ne plus calculer Haversine
-        // On garde les données OSRM existantes
-    }
 }
 
 // ================================================================
@@ -492,8 +486,9 @@ function drawRoute(coordinates) {
         },
         paint: {
             'line-color': '#1976d2',
-            'line-width': 4,
-            'line-opacity': 0.8
+            'line-width': 5,
+            'line-opacity': 0.9,
+            'line-blur': 0.5
         }
     });
 
@@ -559,7 +554,7 @@ function setTransportMode(mode) {
     var label = mode === 'driving' ? '🚗 Mode voiture' : '🚶 Mode piéton';
     toast(label, 'info', 1500);
     
-    // ✅ Recalculer l'itinéraire si déjà tracé
+    // Recalculer l'itinéraire si déjà tracé
     if (state.routeDrawn && state.following) {
         traceRoute();
     }
@@ -1216,7 +1211,8 @@ function formatTime(minutes) {
 function updateTrackStatsOSRM(distance, time, unit) {
     state.osrmData = { distance: distance, time: time, unit: unit };
     DOM.trackDistance.textContent = distance;
-    document.querySelector('.track-stat:first-child .track-stat-label').textContent = unit;
+    var statLabel = document.querySelector('.track-stat:first-child .track-stat-label');
+    if (statLabel) statLabel.textContent = unit;
     DOM.trackTime.textContent = time;
 }
 
@@ -1239,9 +1235,12 @@ async function traceRoute() {
         return;
     }
 
-    var dist = calculateDistanceAndTime(lat1, lng1, lat2, lng2);
-    if (dist.distance < 0.01) {
+    // Vérifier si on est déjà sur place
+    var dist = calculateHaversine(lat1, lng1, lat2, lng2);
+    if (dist < 0.02) {
         toast('📍 Vous êtes sur place', 'info', 3000);
+        DOM.trackDistance.textContent = '0';
+        DOM.trackTime.textContent = '0 min';
         return;
     }
 
@@ -1252,7 +1251,7 @@ async function traceRoute() {
         var profile = getOSRMProfile();
         var url = OSRM_URL + '/route/v1/' + profile + '/' +
             lng1 + ',' + lat1 + ';' + lng2 + ',' + lat2 +
-            '?overview=full&geometries=geojson';
+            '?overview=full&geometries=geojson&steps=true';
 
         console.log('🌐 URL OSRM:', url);
 
@@ -1271,27 +1270,31 @@ async function traceRoute() {
         }
 
         var route = data.routes[0];
-        var distanceRoute = (route.distance / 1000).toFixed(1);
-        var timeRoute = Math.round(route.duration / 60);
+        var distanceKm = route.distance / 1000;
+        var timeMin = Math.round(route.duration / 60);
         var unit = 'Km';
 
-        if (distanceRoute < 1) {
+        var distanceDisplay;
+        if (distanceKm < 1) {
             var meters = Math.round(route.distance);
-            distanceRoute = String(meters);
+            distanceDisplay = String(meters);
             unit = 'Mètres';
+        } else {
+            distanceDisplay = distanceKm.toFixed(1);
         }
 
-        // ✅ Sauvegarder les données OSRM
+        // Sauvegarder les données OSRM
         state.osrmData = {
-            distance: distanceRoute,
-            time: formatTime(Math.max(1, timeRoute)),
+            distance: distanceDisplay,
+            time: formatTime(Math.max(1, timeMin)),
             unit: unit
         };
 
-        // ✅ Afficher dans le slider
-        DOM.trackDistance.textContent = distanceRoute;
-        document.querySelector('.track-stat:first-child .track-stat-label').textContent = unit;
-        DOM.trackTime.textContent = formatTime(Math.max(1, timeRoute));
+        // Afficher dans le slider
+        DOM.trackDistance.textContent = distanceDisplay;
+        var statLabel = document.querySelector('.track-stat:first-child .track-stat-label');
+        if (statLabel) statLabel.textContent = unit;
+        DOM.trackTime.textContent = formatTime(Math.max(1, timeMin));
 
         var coordinates = route.geometry.coordinates.map(function(coord) {
             return [coord[0], coord[1]];
@@ -1299,6 +1302,7 @@ async function traceRoute() {
 
         drawRoute(coordinates);
 
+        // Récupérer les infos géographiques
         var geoInfo = await getLocationInfo(lat2, lng2);
         if (geoInfo) {
             updateGeoInfo(geoInfo, state.following);
@@ -1314,10 +1318,7 @@ async function traceRoute() {
             }, state.following);
         }
 
-        // ✅ Sauvegarder l'état
         saveFollowingState();
-
-        DOM.trackSlider.classList.remove('active');
 
         toast('✅ Itinéraire tracé', 'success', 2000);
 
@@ -1328,6 +1329,20 @@ async function traceRoute() {
         DOM.trackActionBtn.disabled = false;
         DOM.trackBtnLabel.textContent = '🗺️ Tracer l\'itinéraire';
     }
+}
+
+// ================================================================
+// CALCUL HAVERSINE (distance en km)
+// ================================================================
+function calculateHaversine(lat1, lng1, lat2, lng2) {
+    var R = 6371;
+    var dLat = (lat2 - lat1) * Math.PI / 180;
+    var dLng = (lng2 - lng1) * Math.PI / 180;
+    var a = Math.sin(dLat/2) * Math.sin(dLat/2) +
+            Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) *
+            Math.sin(dLng/2) * Math.sin(dLng/2);
+    var c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+    return R * c;
 }
 
 // ================================================================
@@ -1349,32 +1364,16 @@ function openInMaps() {
 }
 
 // ================================================================
-// CALCULER LA DISTANCE ET LE TEMPS (Haversine - FALLBACK SEULEMENT)
-// ================================================================
-function calculateDistanceAndTime(lat1, lng1, lat2, lng2) {
-    var R = 6371;
-    var dLat = (lat2 - lat1) * Math.PI / 180;
-    var dLng = (lng2 - lng1) * Math.PI / 180;
-    var a = Math.sin(dLat/2) * Math.sin(dLat/2) +
-            Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) *
-            Math.sin(dLng/2) * Math.sin(dLng/2);
-    var c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
-    var distance = R * c;
-    var time = Math.max(1, Math.round(distance / 5 * 60));
-    
-    return { distance: distance, time: time };
-}
-
-// ================================================================
 // SLIDER DE SUIVI (3 slides)
 // ================================================================
 function openTrackSlider(record) {
     DOM.trackEmail.textContent = '📧 ' + record.email;
     
-    // ✅ Restaurer les données OSRM si disponibles
+    // Restaurer les données OSRM si disponibles
     if (state.osrmData && state.osrmData.distance !== '--') {
         DOM.trackDistance.textContent = state.osrmData.distance;
-        document.querySelector('.track-stat:first-child .track-stat-label').textContent = state.osrmData.unit;
+        var statLabel = document.querySelector('.track-stat:first-child .track-stat-label');
+        if (statLabel) statLabel.textContent = state.osrmData.unit;
         DOM.trackTime.textContent = state.osrmData.time;
     } else {
         DOM.trackDistance.textContent = '--';
@@ -1410,7 +1409,7 @@ function openTrackSlider(record) {
         };
     }
 
-    // ✅ ACTION : Tracer l'itinéraire
+    // ACTION : Tracer l'itinéraire
     DOM.trackActionBtn.onclick = function() {
         traceRoute();
     };
