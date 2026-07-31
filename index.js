@@ -20,6 +20,11 @@ function getGraphHopperProfile() {
 }
 
 // ================================================================
+// 🔑 CONFIGURATION GITHUB
+// ================================================================
+var GITHUB_API = 'https://api.github.com/repos/ivanipote/findApp/commits?per_page=1';
+
+// ================================================================
 // 🔌 CLIENT SUPABASE
 // ================================================================
 var supabaseClient = null;
@@ -96,7 +101,9 @@ var state = {
         suburb: null,
         city: null,
         country: null
-    }
+    },
+    watchPositionId: null,
+    lastCommitDate: localStorage.getItem('last_commit_date') || null
 };
 
 // ================================================================
@@ -117,6 +124,7 @@ function cacheDom() {
         navFollowLabel: document.getElementById('navFollowLabel'),
         navMesPositions: document.getElementById('navMesPositions'),
         navWhereAmI: document.getElementById('navWhereAmI'),
+        navUpdateApp: document.getElementById('navUpdateApp'),
         categoriesGrid: document.getElementById('categoriesGrid'),
         resetCategories: document.getElementById('resetCategories'),
         categoriesSection: document.getElementById('categoriesSection'),
@@ -300,38 +308,60 @@ function resetCategories() {
 }
 
 // ================================================================
-// GEOLOCALISATION
+// GEOLOCALISATION - SUIVI EN CONTINU AVEC watchPosition()
 // ================================================================
-var watchId = null;
+function startWatchingPosition() {
+    // Nettoyer l'ancien watch s'il existe
+    if (state.watchPositionId) {
+        navigator.geolocation.clearWatch(state.watchPositionId);
+        state.watchPositionId = null;
+    }
 
-function getPosition() {
     if (!navigator.geolocation) {
         state.userLat = 5.3599517;
         state.userLng = -3.9792253;
+        console.warn('⚠️ Géolocalisation non disponible');
         return;
     }
-    navigator.geolocation.getCurrentPosition(
+
+    state.watchPositionId = navigator.geolocation.watchPosition(
         function(pos) {
-            state.userLat = pos.coords.latitude;
-            state.userLng = pos.coords.longitude;
+            var lat = pos.coords.latitude;
+            var lng = pos.coords.longitude;
+            
+            state.userLat = lat;
+            state.userLng = lng;
+            
             if (DOM.posStatus) DOM.posStatus.textContent = '✓';
-            updateUserMarker(state.userLat, state.userLng);
-            if (state.map) {
-                state.map.flyTo({ center: [state.userLng, state.userLat], zoom: 15 });
+            
+            updateUserMarker(lat, lng);
+            
+            // Si on suit quelqu'un et que l'itinéraire est déjà tracé, on recalcule
+            if (state.following && state.routeDrawn) {
+                traceRouteGraphHopper();
             }
-            if (state.isFollowingActive && state.map) {
-                state.map.flyTo({ center: [state.userLng, state.userLat], zoom: 15 });
-            }
+            
+            console.log('📍 Position mise à jour en temps réel:', lat, lng);
         },
         function(err) {
-            state.userLat = 5.3599517;
-            state.userLng = -3.9792253;
+            console.warn('⚠️ Erreur GPS watch:', err.message);
             if (DOM.posStatus) DOM.posStatus.textContent = '⚠️';
         }, {
             enableHighAccuracy: true,
-            timeout: 10000
+            timeout: 10000,
+            maximumAge: 3000    // Mise à jour toutes les 3 secondes
         }
     );
+    
+    console.log('📡 Suivi GPS en continu activé');
+}
+
+function stopWatchingPosition() {
+    if (state.watchPositionId) {
+        navigator.geolocation.clearWatch(state.watchPositionId);
+        state.watchPositionId = null;
+        console.log('🛑 Suivi GPS en continu arrêté');
+    }
 }
 
 // ================================================================
@@ -686,14 +716,22 @@ function initDropdown() {
         });
     }
 
-    // ============================================================
-    // NAV "JE SUIS OÙ ?"
-    // ============================================================
     if (DOM.navWhereAmI) {
         DOM.navWhereAmI.addEventListener('click', function(e) {
             e.preventDefault();
             DOM.dropdownMenu.classList.remove('active');
             openWhereAmI();
+        });
+    }
+
+    // ============================================================
+    // NAV "Mettre à jour"
+    // ============================================================
+    if (DOM.navUpdateApp) {
+        DOM.navUpdateApp.addEventListener('click', function(e) {
+            e.preventDefault();
+            DOM.dropdownMenu.classList.remove('active');
+            checkForUpdate();
         });
     }
 }
@@ -761,9 +799,10 @@ function initFollowToggle() {
             if (state.userLat && state.userLng && state.map) {
                 state.map.flyTo({ center: [state.userLng, state.userLat], zoom: 15 });
             }
-            getPosition();
+            startWatchingPosition();
         } else {
             toast('📍 Suivi GPS désactivé', 'info', 1500);
+            stopWatchingPosition();
         }
     });
 }
@@ -1617,6 +1656,76 @@ function whereCenterMap() {
 }
 
 // ================================================================
+// MISE À JOUR - VÉRIFICATION VIA GITHUB
+// ================================================================
+function checkForUpdate() {
+    toast('🔄 Vérification des mises à jour...', 'info', 3000);
+    
+    fetch(GITHUB_API)
+        .then(function(response) {
+            if (!response.ok) {
+                throw new Error('Erreur API GitHub: ' + response.status);
+            }
+            return response.json();
+        })
+        .then(function(data) {
+            if (!data || data.length === 0) {
+                throw new Error('Aucune donnée reçue');
+            }
+            
+            var lastCommitDate = data[0].commit.committer.date;
+            var storedDate = localStorage.getItem('last_commit_date');
+            
+            console.log('📅 Dernier commit GitHub:', lastCommitDate);
+            console.log('📅 Date stockée localement:', storedDate);
+            
+            if (storedDate !== lastCommitDate) {
+                // Nouvelle version disponible
+                toast('🔄 Nouvelle version disponible ! Mise à jour en cours...', 'info', 3000);
+                performUpdate(lastCommitDate);
+            } else {
+                toast('✅ Aucune mise à jour disponible', 'success', 3000);
+            }
+        })
+        .catch(function(error) {
+            console.error('❌ Erreur vérification mise à jour:', error);
+            toast('⚠️ Impossible de vérifier les mises à jour: ' + error.message, 'error', 4000);
+        });
+}
+
+function performUpdate(newCommitDate) {
+    // 1. Vider localStorage (sauf la date du commit pour éviter la boucle)
+    localStorage.clear();
+    
+    // 2. Sauvegarder la nouvelle date
+    localStorage.setItem('last_commit_date', newCommitDate);
+    
+    // 3. Vider les caches du Service Worker
+    if ('serviceWorker' in navigator) {
+        navigator.serviceWorker.getRegistration().then(function(reg) {
+            if (reg) {
+                // Forcer la mise à jour du Service Worker
+                reg.update();
+                
+                // Supprimer tous les caches
+                caches.keys().then(function(cacheNames) {
+                    cacheNames.forEach(function(cacheName) {
+                        caches.delete(cacheName);
+                        console.log('🗑️ Cache supprimé:', cacheName);
+                    });
+                });
+            }
+        });
+    }
+    
+    // 4. Recharger la page après un court délai
+    toast('🔄 Application mise à jour, redémarrage...', 'info', 2000);
+    setTimeout(function() {
+        window.location.reload(true);
+    }, 1500);
+}
+
+// ================================================================
 // SERVICE WORKER - PWA
 // ================================================================
 function registerServiceWorker() {
@@ -1638,14 +1747,17 @@ async function init() {
     console.log('🚀 Initialisation de l\'application...');
     console.log('🗺️ Carte: OpenStreetMap');
     console.log('🧭 Itinéraire: GraphHopper');
-    console.log('📍 Option "Je suis où ?" activée');
+    console.log('📍 Suivi GPS: watchPosition() en continu');
+    console.log('🔄 Mise à jour: Vérification via GitHub');
     cacheDom();
     checkAuth();
     
     state.selectedCategories = loadSelectedCategories();
     renderCategories();
     
-    getPosition();
+    // Démarrer le suivi GPS en continu
+    startWatchingPosition();
+    
     initMap();
     initSearch();
     initFollowToggle();
