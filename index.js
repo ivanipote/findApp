@@ -7,9 +7,8 @@ var SUPABASE_URL = 'https://slanrdeaxapzfqtuqhbf.supabase.co';
 var SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InNsYW5yZGVheGFwemZxdHVxaGJmIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODUzMzA3OTcsImV4cCI6MjEwMDkwNjc5N30.pUCb_N-66pjFs-QP2RefsqjAnffC4Rbq-rP9qHfnvK8';
 
 // ================================================================
-// 🔑 CONFIGURATION MAPTILER & GRAPHHOPPER
+// 🔑 CONFIGURATION GRAPHHOPPER
 // ================================================================
-var MAPTILER_KEY = 'tQknBxUJixNI7TN9VDB0';
 var GRAPHHOPPER_KEY = 'b1993ed7-7342-44e5-a31b-3bad5d6abde8';
 var GRAPHHOPPER_URL = 'https://graphhopper.com/api/1/route';
 
@@ -336,7 +335,7 @@ function getPosition() {
 }
 
 // ================================================================
-// MAP - MAPLIBRE GL JS (Maptiler)
+// MAP - MAPLIBRE GL JS (OpenStreetMap)
 // ================================================================
 function initMap() {
     if (typeof maplibregl === 'undefined') {
@@ -351,7 +350,24 @@ function initMap() {
 
     state.map = new maplibregl.Map({
         container: DOM.map,
-        style: 'https://api.maptiler.com/maps/streets/style.json?key=' + MAPTILER_KEY,
+        style: {
+            version: 8,
+            sources: {
+                'osm': {
+                    type: 'raster',
+                    tiles: ['https://tile.openstreetmap.org/{z}/{x}/{y}.png'],
+                    tileSize: 256,
+                    attribution: '&copy; OpenStreetMap contributors'
+                }
+            },
+            layers: [{
+                id: 'osm',
+                type: 'raster',
+                source: 'osm',
+                minzoom: 0,
+                maxzoom: 19
+            }]
+        },
         center: [state.userLng || -3.9792253, state.userLat || 5.3599517],
         zoom: 14,
         pitch: 0,
@@ -388,7 +404,7 @@ function initMap() {
     state.userMarker.setPopup(userPopup);
 
     state.map.on('load', function() {
-        console.log('🗺️ Carte Maptiler chargée');
+        console.log('🗺️ Carte OpenStreetMap chargée');
         if (state.userLat && state.userLng) {
             state.map.flyTo({ center: [state.userLng, state.userLat], zoom: 15 });
         }
@@ -1490,7 +1506,6 @@ function openWhereAmI() {
     DOM.whereLoader.style.display = 'flex';
     DOM.whereInfo.style.display = 'none';
 
-    // Récupérer la position
     if (!navigator.geolocation) {
         DOM.whereLoader.style.display = 'none';
         DOM.whereInfo.style.display = 'block';
@@ -1576,7 +1591,6 @@ function closeWhereAmI() {
     DOM.whereSlider.classList.remove('active');
 }
 
-// WHERE ACTIONS
 function whereOpenMaps() {
     var lat = state.whereData.lat;
     var lng = state.whereData.lng;
@@ -1622,7 +1636,7 @@ function registerServiceWorker() {
 // ================================================================
 async function init() {
     console.log('🚀 Initialisation de l\'application...');
-    console.log('🗺️ Carte: Maptiler (style Google Maps)');
+    console.log('🗺️ Carte: OpenStreetMap');
     console.log('🧭 Itinéraire: GraphHopper');
     console.log('📍 Option "Je suis où ?" activée');
     cacheDom();
@@ -1652,7 +1666,6 @@ async function init() {
         DOM.whereCenterBtn.addEventListener('click', whereCenterMap);
     }
 
-    // Fermer le slider en cliquant en dehors (sur l'overlay)
     DOM.whereSlider.addEventListener('click', function(e) {
         if (e.target === this) {
             closeWhereAmI();
