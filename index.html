@@ -1,12 +1,10 @@
 <!DOCTYPE html>
 <html lang="fr">
 <head>
-    
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
     <meta name="description" content="easily by megane — trouvez des lieux autour de vous et suivez vos proches" />
     <meta name="theme-color" content="#1976d2" />
-    <meta name="google-site-verification" content="OGr2F2wZBu9VAweMdehCKNcdjuOl0OXq00kgxDEUb0U" />
     <meta name="apple-mobile-web-app-capable" content="yes" />
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
 
@@ -47,6 +45,10 @@
             </button>
             <button class="dropdown-item" id="navMesPositions" type="button">
                 <i class="fas fa-map-pin"></i> Mes positions
+            </button>
+            <div class="dropdown-divider"></div>
+            <button class="dropdown-item" id="navWhereAmI" type="button">
+                <i class="fas fa-location-question"></i> Je suis où ?
             </button>
         </div>
     </header>
@@ -236,6 +238,60 @@
                 <button class="dot" data-index="2"></button>
             </div>
 
+        </div>
+    </div>
+
+    <!-- ============================================================ -->
+    <!-- SLIDER "JE SUIS OÙ ?" -->
+    <!-- ============================================================ -->
+    <div class="where-slider" id="whereSlider">
+        <div class="where-sheet">
+            <div class="where-handle"></div>
+
+            <div class="where-header">
+                <span class="where-title"><i class="fas fa-location-dot"></i> Ma position</span>
+                <button class="where-close" id="whereClose"><i class="fas fa-times"></i></button>
+            </div>
+
+            <div class="where-content" id="whereContent">
+                <!-- Rempli par JavaScript -->
+                <div class="where-loader" id="whereLoader">
+                    <div class="where-spinner"></div>
+                    <p class="where-loader-text">Récupération de votre position...</p>
+                </div>
+                <div class="where-info" id="whereInfo" style="display:none;">
+                    <div class="where-address">
+                        <div class="where-row">
+                            <span class="where-label">🏠 Adresse</span>
+                            <span class="where-value" id="whereFullAddress">--</span>
+                        </div>
+                        <div class="where-row">
+                            <span class="where-label">🏘️ Quartier</span>
+                            <span class="where-value" id="whereSuburb">--</span>
+                        </div>
+                        <div class="where-row">
+                            <span class="where-label">🏙️ Ville</span>
+                            <span class="where-value" id="whereCity">--</span>
+                        </div>
+                        <div class="where-row">
+                            <span class="where-label">🌍 Pays</span>
+                            <span class="where-value" id="whereCountry">--</span>
+                        </div>
+                        <div class="where-row">
+                            <span class="where-label">🛣️ Rue</span>
+                            <span class="where-value" id="whereRoad">--</span>
+                        </div>
+                    </div>
+                    <div class="where-actions">
+                        <button class="where-btn where-btn-maps" id="whereMapsBtn">
+                            <i class="fas fa-map-marked-alt"></i> Ouvrir dans Google Maps
+                        </button>
+                        <button class="where-btn where-btn-center" id="whereCenterBtn">
+                            <i class="fas fa-location-dot"></i> Centrer sur la carte
+                        </button>
+                    </div>
+                </div>
+            </div>
         </div>
     </div>
 

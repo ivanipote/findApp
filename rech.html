@@ -10,7 +10,7 @@
 
     <style>
         /* ============================================================ */
-        /* PAGE RECHERCHE - AVEC STYLE 9 */
+        /* PAGE RECHERCHE - HEADER SIMPLIFIÉ + MENU OPTIONS */
         /* ============================================================ */
         * {
             margin: 0;
@@ -28,7 +28,7 @@
         }
 
         /* ============================================================ */
-        /* HEADER - COMME INDEX.HTML */
+        /* HEADER - 2 ÉLÉMENTS : BARRE DE RECHERCHE + BOUTON OPTIONS */
         /* ============================================================ */
         .header-search {
             position: fixed;
@@ -41,8 +41,8 @@
             border-radius: 35px;
             display: flex;
             align-items: center;
-            padding: 0 20px;
-            gap: 14px;
+            padding: 0 8px 0 12px;
+            gap: 8px;
             box-shadow: 0 2px 12px rgba(0, 0, 0, 0.06);
             border: 3px solid #1976d2;
             max-width: 480px;
@@ -62,11 +62,12 @@
             background: none;
             border: none;
             color: #1976d2;
-            font-size: 1.2rem;
+            font-size: 1.1rem;
             cursor: pointer;
             padding: 4px 6px;
             border-radius: 50%;
             transition: 0.2s;
+            flex-shrink: 0;
         }
 
         .header-search .back-btn:hover {
@@ -75,17 +76,19 @@
 
         .header-search .icon {
             color: #1976d2;
-            font-size: 1rem;
+            font-size: 0.9rem;
+            flex-shrink: 0;
         }
 
         .header-search input {
             flex: 1;
             border: none;
             outline: none;
-            font-size: 0.95rem;
+            font-size: 0.9rem;
             color: #1a2a5a;
             background: transparent;
             height: 100%;
+            min-width: 40px;
         }
 
         .header-search input::placeholder {
@@ -96,10 +99,11 @@
             background: none;
             border: none;
             color: #aab4c8;
-            font-size: 1rem;
+            font-size: 0.9rem;
             cursor: pointer;
             padding: 4px;
             display: none;
+            flex-shrink: 0;
         }
 
         .header-search .clear-btn.visible {
@@ -107,7 +111,196 @@
         }
 
         /* ============================================================ */
-        /* CONTAINER RÉSULTATS - PLEINE LARGEUR */
+        /* BOUTON OPTIONS (2ᵉ élément du header) */
+        /* ============================================================ */
+        .options-btn {
+            position: relative;
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            border: none;
+            background: #f0f2f5;
+            color: #1976d2;
+            font-size: 1rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            flex-shrink: 0;
+            transition: 0.2s;
+        }
+
+        .options-btn:hover,
+        .options-btn.active {
+            background: #e3edfb;
+        }
+
+        .options-btn .mode-dot {
+            position: absolute;
+            top: 4px;
+            right: 4px;
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: #1976d2;
+            border: 2px solid #ffffff;
+        }
+
+        .options-btn .mode-dot.local {
+            background: #f39c12;
+        }
+
+        /* ============================================================ */
+        /* MENU OPTIONS (déroulant) */
+        /* ============================================================ */
+        .options-menu {
+            position: fixed;
+            top: 82px;
+            left: 12px;
+            right: 12px;
+            max-width: 480px;
+            margin: 0 auto;
+            background: #ffffff;
+            border-radius: 18px;
+            box-shadow: 0 12px 32px rgba(26, 42, 90, 0.16);
+            border: 1px solid #e8ecf4;
+            z-index: 999;
+            opacity: 0;
+            transform: translateY(-8px);
+            pointer-events: none;
+            transition: 0.2s ease;
+            overflow: hidden;
+        }
+
+        @media (min-width: 480px) {
+            .options-menu {
+                left: 50%;
+                right: auto;
+                transform: translate(-50%, -8px);
+            }
+            .options-menu.active {
+                transform: translate(-50%, 0);
+            }
+        }
+
+        .options-menu.active {
+            opacity: 1;
+            transform: translateY(0);
+            pointer-events: auto;
+        }
+
+        .options-menu-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 14px 16px 10px;
+        }
+
+        .options-menu-header span {
+            font-size: 0.75rem;
+            font-weight: 700;
+            color: #1a2a5a;
+            text-transform: uppercase;
+            letter-spacing: 0.4px;
+        }
+
+        .options-menu-header button {
+            background: none;
+            border: none;
+            color: #aab4c8;
+            font-size: 0.9rem;
+            cursor: pointer;
+            padding: 4px;
+        }
+
+        .options-section {
+            padding: 6px 16px 14px;
+            border-top: 1px solid #f0f2f5;
+        }
+
+        .options-section:first-of-type {
+            border-top: none;
+        }
+
+        .options-label {
+            font-size: 0.6rem;
+            font-weight: 700;
+            color: #8a9aaa;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-bottom: 8px;
+        }
+
+        .options-toggle-row {
+            display: flex;
+            gap: 8px;
+        }
+
+        .option-toggle-btn {
+            flex: 1;
+            padding: 9px 10px;
+            border: 1.5px solid #e8ecf4;
+            border-radius: 12px;
+            font-size: 0.75rem;
+            font-weight: 700;
+            cursor: pointer;
+            background: #f8f9fc;
+            color: #6b7a9a;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 6px;
+            transition: 0.2s;
+        }
+
+        .option-toggle-btn i {
+            font-size: 0.8rem;
+        }
+
+        .option-toggle-btn.active {
+            background: #1976d2;
+            border-color: #1976d2;
+            color: #ffffff;
+        }
+
+        .recent-list {
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+        }
+
+        .recent-item {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 9px 10px;
+            border-radius: 10px;
+            background: #f8f9fc;
+            border: 1px solid transparent;
+            cursor: pointer;
+            font-size: 0.8rem;
+            color: #1a2a5a;
+            transition: 0.2s;
+        }
+
+        .recent-item:hover {
+            background: #e3edfb;
+            border-color: #c7d3e8;
+        }
+
+        .recent-item i {
+            color: #aab4c8;
+            font-size: 0.75rem;
+        }
+
+        .recent-empty {
+            font-size: 0.75rem;
+            color: #aab4c8;
+            padding: 4px 2px;
+        }
+
+        /* ============================================================ */
+        /* CONTAINER RÉSULTATS */
         /* ============================================================ */
         .results-container {
             width: 100%;
@@ -127,7 +320,7 @@
         }
 
         /* ============================================================ */
-        /* CARTE STYLE 9 - COMME MESPOSITIONS */
+        /* CARTE RÉSULTAT - STYLE 9 */
         /* ============================================================ */
         .result-card-wrapper {
             background: #ffffff;
@@ -229,33 +422,28 @@
             min-height: 34px;
         }
 
-        .result-card .result-footer .footer-item i {
-            font-size: 0.6rem;
+        .result-card .result-footer .badge-type {
+            background: #e3edfb;
+            color: #1976d2;
         }
 
-        .result-card .result-footer .badge-category {
+        .result-card .result-footer .badge-country {
             background: #f0f2f5;
             color: #6b7a9a;
         }
 
-        .result-card .result-footer .status {
-            background: #e8f5e9;
-            color: #2ecc71;
+        .result-card .result-footer .badge-source {
+            background: #d4edda;
+            color: #155724;
         }
 
-        .result-card .result-footer .status.closed {
-            background: #fce4ec;
-            color: #d32f2f;
-        }
-
-        .result-card .result-footer .date-box {
-            background: #e3edfb;
-            color: #1976d2;
-            border: 1px solid #dbeafe;
+        .result-card .result-footer .badge-source.local {
+            background: #fff3cd;
+            color: #856404;
         }
 
         /* ============================================================ */
-        /* SNIPPET 4 : SQUELETTE (SHIMMER) */
+        /* SQUELETTE (SHIMMER) */
         /* ============================================================ */
         .skeleton-container {
             width: 100%;
@@ -407,24 +595,85 @@
         /* ============================================================ */
         /* RESPONSIVE */
         /* ============================================================ */
+        @media (max-width: 600px) {
+            .header-search {
+                height: 52px;
+                padding: 0 6px 0 10px;
+                gap: 6px;
+                border-radius: 30px;
+                border-width: 2px;
+            }
+
+            .header-search input {
+                font-size: 0.8rem;
+                min-width: 40px;
+            }
+
+            .header-search .icon {
+                font-size: 0.8rem;
+            }
+
+            .header-search .back-btn {
+                font-size: 1rem;
+                padding: 3px 5px;
+            }
+
+            .options-btn {
+                width: 36px;
+                height: 36px;
+                font-size: 0.9rem;
+            }
+
+            .options-menu {
+                top: 72px;
+            }
+        }
+
         @media (max-width: 480px) {
             body {
                 padding-top: 68px;
             }
 
             .header-search {
-                height: 52px;
-                padding: 0 16px;
+                height: 48px;
+                padding: 0 5px 0 8px;
+                gap: 4px;
                 top: 10px;
                 left: 10px;
                 right: 10px;
-                border-radius: 30px;
-                border-width: 2px;
+                border-radius: 24px;
                 max-width: 100%;
             }
 
-            .header-search .title {
-                font-size: 0.85rem;
+            .header-search input {
+                font-size: 0.75rem;
+                min-width: 30px;
+            }
+
+            .header-search .back-btn {
+                font-size: 0.9rem;
+                padding: 2px 4px;
+            }
+
+            .header-search .icon {
+                font-size: 0.7rem;
+            }
+
+            .header-search .clear-btn {
+                font-size: 0.7rem;
+            }
+
+            .options-btn {
+                width: 32px;
+                height: 32px;
+                font-size: 0.8rem;
+            }
+
+            .options-menu {
+                top: 66px;
+                left: 8px;
+                right: 8px;
+                border-radius: 16px;
             }
 
             .results-container {
@@ -459,10 +708,6 @@
                 min-height: 28px;
             }
 
-            .result-card .result-footer .footer-item i {
-                font-size: 0.5rem;
-            }
-
             .skeleton-container {
                 padding: 0 10px;
                 gap: 12px;
@@ -472,11 +717,28 @@
                 min-height: 100px;
                 padding: 14px;
             }
-
-            .skeleton-item .skeleton-line:nth-child(1) { height: 16px; }
         }
 
         @media (max-width: 380px) {
+            .header-search {
+                height: 42px;
+                padding: 0 4px 0 6px;
+                gap: 3px;
+                border-radius: 20px;
+                border-width: 1.5px;
+            }
+
+            .header-search input {
+                font-size: 0.65rem;
+                min-width: 24px;
+            }
+
+            .options-btn {
+                width: 28px;
+                height: 28px;
+                font-size: 0.72rem;
+            }
+
             .result-card .result-footer {
                 flex-direction: column;
                 align-items: center;
@@ -501,84 +763,75 @@
                 min-height: 24px;
             }
         }
+
         /* ============================================================ */
-/* APPARITION PROGRESSIVE DES RÉSULTATS */
-/* ============================================================ */
+        /* APPARITION PROGRESSIVE */
+        /* ============================================================ */
+        .result-card-wrapper {
+            opacity: 0;
+            transform: translateY(20px) scale(0.97);
+            animation: resultAppear 0.4s ease forwards;
+        }
 
-.result-card-wrapper {
-    opacity: 0;
-    transform: translateY(20px) scale(0.97);
-    animation: resultAppear 0.4s ease forwards;
-}
+        .result-card-wrapper:nth-child(1) { animation-delay: 0.05s; }
+        .result-card-wrapper:nth-child(2) { animation-delay: 0.10s; }
+        .result-card-wrapper:nth-child(3) { animation-delay: 0.15s; }
+        .result-card-wrapper:nth-child(4) { animation-delay: 0.20s; }
+        .result-card-wrapper:nth-child(5) { animation-delay: 0.25s; }
+        .result-card-wrapper:nth-child(6) { animation-delay: 0.30s; }
+        .result-card-wrapper:nth-child(7) { animation-delay: 0.35s; }
+        .result-card-wrapper:nth-child(8) { animation-delay: 0.40s; }
+        .result-card-wrapper:nth-child(9) { animation-delay: 0.45s; }
+        .result-card-wrapper:nth-child(10) { animation-delay: 0.50s; }
 
-.result-card-wrapper:nth-child(1) { animation-delay: 0.05s; }
-.result-card-wrapper:nth-child(2) { animation-delay: 0.10s; }
-.result-card-wrapper:nth-child(3) { animation-delay: 0.15s; }
-.result-card-wrapper:nth-child(4) { animation-delay: 0.20s; }
-.result-card-wrapper:nth-child(5) { animation-delay: 0.25s; }
-.result-card-wrapper:nth-child(6) { animation-delay: 0.30s; }
-.result-card-wrapper:nth-child(7) { animation-delay: 0.35s; }
-.result-card-wrapper:nth-child(8) { animation-delay: 0.40s; }
-.result-card-wrapper:nth-child(9) { animation-delay: 0.45s; }
-.result-card-wrapper:nth-child(10) { animation-delay: 0.50s; }
-.result-card-wrapper:nth-child(11) { animation-delay: 0.55s; }
-.result-card-wrapper:nth-child(12) { animation-delay: 0.60s; }
-.result-card-wrapper:nth-child(13) { animation-delay: 0.65s; }
-.result-card-wrapper:nth-child(14) { animation-delay: 0.70s; }
-.result-card-wrapper:nth-child(15) { animation-delay: 0.75s; }
+        @keyframes resultAppear {
+            0% {
+                opacity: 0;
+                transform: translateY(20px) scale(0.97);
+            }
+            100% {
+                opacity: 1;
+                transform: translateY(0) scale(1);
+            }
+        }
 
-@keyframes resultAppear {
-    0% {
-        opacity: 0;
-        transform: translateY(20px) scale(0.97);
-    }
-    100% {
-        opacity: 1;
-        transform: translateY(0) scale(1);
-    }
-}
-/* ============================================================ */
-/* DÉSACTIVER LES EFFETS DE CLIC SUR LES ÉLÉMENTS */
-/* ============================================================ */
+        /* ============================================================ */
+        /* DÉSACTIVER LES EFFETS DE CLIC */
+        /* ============================================================ */
+        * {
+            -webkit-tap-highlight-color: transparent !important;
+            -webkit-touch-callout: none !important;
+            -webkit-user-select: none !important;
+            user-select: none !important;
+        }
 
-/* Supprimer le highlight bleu sur mobile */
-* {
-    -webkit-tap-highlight-color: transparent !important;
-    -webkit-touch-callout: none !important;
-    -webkit-user-select: none !important;
-    user-select: none !important;
-}
+        button:focus,
+        input:focus,
+        textarea:focus,
+        select:focus,
+        div:focus {
+            outline: none !important;
+            box-shadow: none !important;
+        }
 
-/* Supprimer le contour de focus sur les boutons et éléments cliquables */
-button:focus,
-input:focus,
-textarea:focus,
-select:focus,
-div:focus {
-    outline: none !important;
-    box-shadow: none !important;
-}
+        a:focus,
+        a:active,
+        button:active,
+        .btn:active {
+            outline: none !important;
+            border-color: transparent !important;
+            box-shadow: none !important;
+        }
 
-/* Pour les éléments cliquables qui gardent un contour */
-a:focus,
-a:active,
-button:active,
-.btn:active {
-    outline: none !important;
-    border-color: transparent !important;
-    box-shadow: none !important;
-}
-
-/* Safari mobile - désactiver le grey highlight */
-* {
-    -webkit-touch-callout: none;
-}
+        * {
+            -webkit-touch-callout: none;
+        }
     </style>
 </head>
 <body>
 
     <!-- ============================================================ -->
-    <!-- HEADER -->
+    <!-- HEADER : BARRE DE RECHERCHE + BOUTON OPTIONS -->
     <!-- ============================================================ -->
     <header class="header-search" id="searchHeader">
         <button class="back-btn" id="backBtn" type="button" aria-label="Retour">
@@ -586,19 +839,56 @@ button:active,
         </button>
         <i class="fas fa-search icon"></i>
         <input type="text" id="searchInput" placeholder="Rechercher un lieu..." autocomplete="off" />
+
         <button class="clear-btn" id="clearBtn" type="button" aria-label="Effacer">
             <i class="fas fa-times-circle"></i>
         </button>
+
+        <button class="options-btn" id="optionsBtn" type="button" aria-label="Options de recherche">
+            <i class="fas fa-sliders"></i>
+            <span class="mode-dot" id="modeDot"></span>
+        </button>
     </header>
+
+    <!-- ============================================================ -->
+    <!-- MENU OPTIONS (déroulant) -->
+    <!-- ============================================================ -->
+    <div class="options-menu" id="optionsMenu">
+        <div class="options-menu-header">
+            <span>Options de recherche</span>
+            <button id="closeOptionsMenu" type="button" aria-label="Fermer">
+                <i class="fas fa-times"></i>
+            </button>
+        </div>
+
+        <div class="options-section">
+            <div class="options-label">Mode</div>
+            <div class="options-toggle-row">
+                <button class="option-toggle-btn active" data-mode="world" id="menuToggleWorld">
+                    <i class="fas fa-globe"></i> Monde
+                </button>
+                <button class="option-toggle-btn" data-mode="local" id="menuToggleLocal">
+                    <i class="fas fa-location-dot"></i> Local
+                </button>
+            </div>
+        </div>
+
+        <div class="options-section">
+            <div class="options-label">Recherches récentes</div>
+            <div class="recent-list" id="recentList">
+                <div class="recent-empty">Aucune recherche récente</div>
+            </div>
+        </div>
+    </div>
 
     <!-- ============================================================ -->
     <!-- RÉSULTATS -->
     <!-- ============================================================ -->
     <div class="results-container" id="resultsContainer">
         <div class="empty-state">
-            <i class="fas fa-search"></i>
-            <div class="empty-title">Recherchez un lieu</div>
-            <div class="empty-sub">Tapez un mot-clé pour trouver un lieu</div>
+            <i class="fas fa-globe"></i>
+            <div class="empty-title">Recherche mondiale</div>
+            <div class="empty-sub">Tapez un lieu, une ville, un pays... partout dans le monde</div>
         </div>
     </div>
 
@@ -629,46 +919,14 @@ button:active,
             'use strict';
 
             // ============================================================
-            // 🔑 CONFIGURATION SUPABASE
+            // CONFIGURATION SUPABASE (pour la recherche locale)
             // ============================================================
             var SUPABASE_URL = 'https://slanrdeaxapzfqtuqhbf.supabase.co';
             var SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InNsYW5yZGVheGFwemZxdHVxaGJmIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODUzMzA3OTcsImV4cCI6MjEwMDkwNjc5N30.pUCb_N-66pjFs-QP2RefsqjAnffC4Rbq-rP9qHfnvK8';
 
-            // ============================================================
-            // CATÉGORIES
-            // ============================================================
-            var CATEGORIES = [
-                { id: 'boutiques', label: 'Boutique', emoji: '🛍️', color: '#1976d2' },
-                { id: 'restaurants', label: 'Restaurant', emoji: '🍽️', color: '#d32f2f' },
-                { id: 'domiciles', label: 'Domicile', emoji: '🏠', color: '#2ecc71' },
-                { id: 'cybercafes', label: 'Cybercafé', emoji: '💻', color: '#e67e22' },
-                { id: 'sante', label: 'Santé', emoji: '🏥', color: '#e74c3c' },
-                { id: 'stations', label: 'Station', emoji: '⛽', color: '#3498db' }
-            ];
-
-            // ============================================================
-            // DOM REFS
-            // ============================================================
-            var searchInput = document.getElementById('searchInput');
-            var clearBtn = document.getElementById('clearBtn');
-            var backBtn = document.getElementById('backBtn');
-            var resultsContainer = document.getElementById('resultsContainer');
-            var redirectOverlay = document.getElementById('redirectOverlay');
-
-            var searchTimeout = null;
-            var redirectTimer = null;
-            var allPlaces = [];
-
-            // ============================================================
-            // API HELPERS
-            // ============================================================
-            function getSession() {
-                try {
-                    var session = localStorage.getItem('sb_session');
-                    if (session) return JSON.parse(session);
-                } catch (e) {}
-                return null;
-            }
+            // Clés de persistance locale
+            var RECENT_KEY = 'search_recent';      // 3 derniers mots recherchés
+            var LAST_STATE_KEY = 'search_last_state'; // dernière recherche + mode, pour restauration au retour sur la page
 
             function getHeaders(token) {
                 var headers = {
@@ -683,80 +941,123 @@ button:active,
                 return headers;
             }
 
-            // ============================================================
-            // CHARGER LES CATÉGORIES DEPUIS localStorage
-            // ============================================================
-            function loadSelectedCategories() {
+            function getSession() {
                 try {
-                    var saved = localStorage.getItem('selectedCategories');
-                    if (saved) {
-                        var parsed = JSON.parse(saved);
-                        return new Set(parsed);
-                    }
+                    var session = localStorage.getItem('sb_session');
+                    if (session) return JSON.parse(session);
                 } catch (e) {}
-                return new Set(CATEGORIES.map(function(c) { return c.id; }));
+                return null;
             }
 
             // ============================================================
-            // CHARGER LES LIEUX AVEC PHOTOS
+            // DOM REFS
             // ============================================================
-            async function loadPlaces() {
-                try {
-                    console.log('📥 Chargement des lieux depuis Supabase...');
+            var searchInput = document.getElementById('searchInput');
+            var clearBtn = document.getElementById('clearBtn');
+            var backBtn = document.getElementById('backBtn');
+            var resultsContainer = document.getElementById('resultsContainer');
+            var redirectOverlay = document.getElementById('redirectOverlay');
+            var optionsBtn = document.getElementById('optionsBtn');
+            var optionsMenu = document.getElementById('optionsMenu');
+            var closeOptionsMenu = document.getElementById('closeOptionsMenu');
+            var modeDot = document.getElementById('modeDot');
+            var menuToggleWorld = document.getElementById('menuToggleWorld');
+            var menuToggleLocal = document.getElementById('menuToggleLocal');
+            var recentList = document.getElementById('recentList');
 
-                    var response = await fetch(SUPABASE_URL + '/rest/v1/position?select=*&order=created_at.desc', {
-                        headers: getHeaders()
-                    });
+            var searchTimeout = null;
+            var redirectTimer = null;
+            var currentMode = 'world'; // 'world' | 'local'
+            var allLocalPlaces = [];
 
-                    if (!response.ok) {
-                        throw new Error('Erreur ' + response.status);
+            // ============================================================
+            // CATÉGORIES
+            // ============================================================
+            var CATEGORIES = [
+                { id: 'boutiques', label: 'Boutique', icon: 'fa-store' },
+                { id: 'restaurants', label: 'Restaurant', icon: 'fa-utensils' },
+                { id: 'domiciles', label: 'Domicile', icon: 'fa-house' },
+                { id: 'cybercafes', label: 'Cybercafé', icon: 'fa-laptop' },
+                { id: 'sante', label: 'Santé', icon: 'fa-heart-pulse' },
+                { id: 'stations', label: 'Station', icon: 'fa-gas-pump' }
+            ];
+
+            var categoryIcons = {
+                'restaurant': 'fa-utensils',
+                'cafe': 'fa-mug-saucer',
+                'hotel': 'fa-hotel',
+                'shop': 'fa-store',
+                'supermarket': 'fa-cart-shopping',
+                'pharmacy': 'fa-prescription-bottle',
+                'hospital': 'fa-hospital',
+                'school': 'fa-school',
+                'university': 'fa-university',
+                'bank': 'fa-landmark',
+                'church': 'fa-church',
+                'mosque': 'fa-mosque',
+                'park': 'fa-tree',
+                'museum': 'fa-landmark',
+                'theatre': 'fa-masks-theater',
+                'cinema': 'fa-film',
+                'library': 'fa-book-open',
+                'sport': 'fa-futbol',
+                'fuel': 'fa-gas-pump',
+                'parking': 'fa-parking',
+                'bus': 'fa-bus',
+                'train': 'fa-train',
+                'airport': 'fa-plane',
+                'default': 'fa-location-dot'
+            };
+
+            function getCategoryIcon(category) {
+                if (!category) return 'fa-location-dot';
+                var cat = category.toLowerCase().trim();
+                for (var key in categoryIcons) {
+                    if (cat.includes(key)) {
+                        return categoryIcons[key];
                     }
-
-                    var places = await response.json();
-
-                    if (!places || places.length === 0) {
-                        console.log('📌 Aucun lieu trouvé');
-                        allPlaces = [];
-                        return;
-                    }
-
-                    console.log('📌 ' + places.length + ' lieu(x) chargé(s)');
-
-                    // Récupérer les photos
-                    var placeIds = places.map(function(p) { return p.id; });
-                    var idsString = placeIds.map(function(id) { return '"' + id + '"'; }).join(',');
-
-                    var photosResponse = await fetch(
-                        SUPABASE_URL + '/rest/v1/photos?select=*&position_id=in.(' + idsString + ')', {
-                            headers: getHeaders()
-                        }
-                    );
-
-                    var photos = photosResponse.ok ? await photosResponse.json() : [];
-
-                    var photosByPlace = {};
-                    photos.forEach(function(photo) {
-                        if (!photosByPlace[photo.position_id]) {
-                            photosByPlace[photo.position_id] = [];
-                        }
-                        photosByPlace[photo.position_id].push(photo);
-                    });
-
-                    places.forEach(function(place) {
-                        place.photos = photosByPlace[place.id] || [];
-                    });
-
-                    allPlaces = places;
-                    console.log('📸 ' + photos.length + ' photo(s) chargée(s)');
-
-                } catch (e) {
-                    console.error('❌ Erreur chargement:', e);
-                    allPlaces = [];
                 }
+                return 'fa-location-dot';
+            }
+
+            function getCategoryLabel(category) {
+                if (!category) return 'Lieu';
+                var cat = category.toLowerCase().trim();
+                var labels = {
+                    'restaurant': 'Restaurant',
+                    'cafe': 'Café',
+                    'hotel': 'Hôtel',
+                    'shop': 'Boutique',
+                    'supermarket': 'Supermarché',
+                    'pharmacy': 'Pharmacie',
+                    'hospital': 'Hôpital',
+                    'school': 'École',
+                    'university': 'Université',
+                    'bank': 'Banque',
+                    'church': 'Église',
+                    'mosque': 'Mosquée',
+                    'park': 'Parc',
+                    'museum': 'Musée',
+                    'theatre': 'Théâtre',
+                    'cinema': 'Cinéma',
+                    'library': 'Bibliothèque',
+                    'fuel': 'Station essence',
+                    'parking': 'Parking',
+                    'bus': 'Arrêt bus',
+                    'train': 'Gare',
+                    'airport': 'Aéroport',
+                    'default': 'Lieu'
+                };
+                for (var key in labels) {
+                    if (cat.includes(key)) {
+                        return labels[key];
+                    }
+                }
+                return 'Lieu';
             }
 
             // ============================================================
-            // CATÉGORIE INFO
+            // GET CATEGORY INFO
             // ============================================================
             function getCategoryInfo(categoryId) {
                 var categories = {
@@ -767,22 +1068,281 @@ button:active,
                     'sante': { label: 'Santé', icon: 'fa-heart-pulse' },
                     'stations': { label: 'Station', icon: 'fa-gas-pump' }
                 };
-                return categories[categoryId] || { label: 'Non défini', icon: 'fa-location-dot' };
+                return categories[categoryId] || { label: 'Lieu', icon: 'fa-location-dot' };
             }
 
             // ============================================================
-            // REDIRECTION VERS INFO.HTML
+            // CORRESPONDANCE "COMMENCE PAR" (ex: "ab" -> "Aboisso", "Abi Boutique")
             // ============================================================
-            function redirectToInfo(placeId) {
-                redirectOverlay.classList.add('active');
-                if (redirectTimer) clearTimeout(redirectTimer);
-                redirectTimer = setTimeout(function() {
-                    window.location.href = 'info.html?place=' + placeId;
-                }, 1200);
+            // Vrai si le texte lui-même, OU l'un de ses mots, commence par la requête.
+            // Ça permet de taper "ab" et de matcher aussi bien "Abidjan Market"
+            // que "Boutique Aboudou" (le mot "Aboudou" commence par "ab").
+            function matchesPrefix(text, q) {
+                if (!text) return false;
+                text = text.toLowerCase();
+                if (text.indexOf(q) === 0) return true;
+                var words = text.split(/[\s,]+/);
+                for (var i = 0; i < words.length; i++) {
+                    if (words[i].indexOf(q) === 0) return true;
+                }
+                return false;
             }
 
             // ============================================================
-            // SQUELETTE (SNIPPET 4)
+            // HISTORIQUE DES RECHERCHES (3 derniers mots)
+            // ============================================================
+            function loadRecentSearches() {
+                try {
+                    var saved = localStorage.getItem(RECENT_KEY);
+                    if (saved) return JSON.parse(saved);
+                } catch (e) {}
+                return [];
+            }
+
+            function saveRecentSearch(query) {
+                query = (query || '').trim();
+                if (!query) return;
+
+                var list = loadRecentSearches();
+                list = list.filter(function(item) {
+                    return item.toLowerCase() !== query.toLowerCase();
+                });
+                list.unshift(query);
+                list = list.slice(0, 3);
+
+                localStorage.setItem(RECENT_KEY, JSON.stringify(list));
+                renderRecentList();
+            }
+
+            function renderRecentList() {
+                var list = loadRecentSearches();
+
+                if (list.length === 0) {
+                    recentList.innerHTML = '<div class="recent-empty">Aucune recherche récente</div>';
+                    return;
+                }
+
+                var html = '';
+                list.forEach(function(term) {
+                    html +=
+                        '<div class="recent-item" data-term="' + term.replace(/"/g, '&quot;') + '">' +
+                        '<i class="fas fa-clock-rotate-left"></i>' +
+                        '<span>' + term + '</span>' +
+                        '</div>';
+                });
+                recentList.innerHTML = html;
+
+                recentList.querySelectorAll('.recent-item').forEach(function(el) {
+                    el.addEventListener('click', function() {
+                        var term = this.dataset.term;
+                        searchInput.value = term;
+                        clearBtn.classList.add('visible');
+                        performSearch(term);
+                        closeMenu();
+                    });
+                });
+            }
+
+            // ============================================================
+            // RESTAURATION DE LA DERNIÈRE RECHERCHE
+            // ============================================================
+            function saveLastState(query, mode) {
+                localStorage.setItem(LAST_STATE_KEY, JSON.stringify({ query: query, mode: mode }));
+            }
+
+            function loadLastState() {
+                try {
+                    var saved = localStorage.getItem(LAST_STATE_KEY);
+                    if (saved) return JSON.parse(saved);
+                } catch (e) {}
+                return null;
+            }
+
+            // ============================================================
+            // LOAD LOCAL PLACES (Supabase)
+            // ============================================================
+            async function loadLocalPlaces() {
+                try {
+                    var session = getSession();
+                    var token = session ? session.access_token : null;
+
+                    var response = await fetch(SUPABASE_URL + '/rest/v1/position?select=*&order=created_at.desc', {
+                        headers: getHeaders(token)
+                    });
+
+                    if (!response.ok) {
+                        throw new Error('Erreur ' + response.status);
+                    }
+
+                    allLocalPlaces = await response.json();
+                    console.log('📌 ' + allLocalPlaces.length + ' lieux locaux chargés');
+
+                } catch (e) {
+                    console.error('❌ Erreur chargement lieux locaux:', e);
+                    allLocalPlaces = [];
+                }
+            }
+
+            // ============================================================
+            // MENU OPTIONS : OUVERTURE / FERMETURE
+            // ============================================================
+            function openMenu() {
+                optionsMenu.classList.add('active');
+                optionsBtn.classList.add('active');
+            }
+
+            function closeMenu() {
+                optionsMenu.classList.remove('active');
+                optionsBtn.classList.remove('active');
+            }
+
+            optionsBtn.addEventListener('click', function(e) {
+                e.stopPropagation();
+                if (optionsMenu.classList.contains('active')) {
+                    closeMenu();
+                } else {
+                    openMenu();
+                }
+            });
+
+            closeOptionsMenu.addEventListener('click', closeMenu);
+
+            document.addEventListener('click', function(e) {
+                if (optionsMenu.classList.contains('active') &&
+                    !optionsMenu.contains(e.target) &&
+                    e.target !== optionsBtn && !optionsBtn.contains(e.target)) {
+                    closeMenu();
+                }
+            });
+
+            // ============================================================
+            // TOGGLE MODE (dans le menu)
+            // ============================================================
+            function updateModeUI(mode) {
+                currentMode = mode;
+                menuToggleWorld.classList.toggle('active', mode === 'world');
+                menuToggleLocal.classList.toggle('active', mode === 'local');
+                modeDot.classList.toggle('local', mode === 'local');
+            }
+
+            function setMode(mode) {
+                updateModeUI(mode);
+                var query = searchInput.value.trim();
+                if (query) {
+                    performSearch(query);
+                } else {
+                    showEmptyState(mode);
+                }
+            }
+
+            menuToggleWorld.addEventListener('click', function() {
+                if (currentMode !== 'world') setMode('world');
+                closeMenu();
+                searchInput.focus();
+            });
+
+            menuToggleLocal.addEventListener('click', function() {
+                if (currentMode !== 'local') setMode('local');
+                closeMenu();
+                searchInput.focus();
+            });
+
+            // ============================================================
+            // EMPTY STATE
+            // ============================================================
+            function showEmptyState(mode) {
+                var isWorld = (mode === 'world');
+                resultsContainer.innerHTML =
+                    '<div class="empty-state">' +
+                    '<i class="fas ' + (isWorld ? 'fa-globe' : 'fa-location-dot') + '"></i>' +
+                    '<div class="empty-title">' + (isWorld ? 'Recherche mondiale' : 'Recherche locale') + '</div>' +
+                    '<div class="empty-sub">' + (isWorld ?
+                        'Tapez un lieu, une ville, un pays... partout dans le monde' :
+                        'Tapez un mot-clé pour chercher parmi les lieux locaux') +
+                    '</div>' +
+                    '</div>';
+            }
+
+            // ============================================================
+            // PERFORM SEARCH
+            // ============================================================
+            function performSearch(query) {
+                if (!query || query.trim() === '') {
+                    showEmptyState(currentMode);
+                    clearBtn.classList.remove('visible');
+                    return;
+                }
+
+                clearBtn.classList.add('visible');
+
+                if (currentMode === 'world') {
+                    searchNominatim(query);
+                } else {
+                    searchLocal(query);
+                }
+            }
+
+            // ============================================================
+            // RECHERCHE NOMINATIM (Monde)
+            // ============================================================
+            var NOMINATIM_URL = 'https://nominatim.openstreetmap.org/search';
+
+            function searchNominatim(query) {
+                showSkeleton();
+
+                var q = query.trim();
+                var url = NOMINATIM_URL +
+                    '?q=' + encodeURIComponent(q) +
+                    '&format=json' +
+                    '&addressdetails=1' +
+                    '&limit=20' +
+                    '&accept-language=fr';
+
+                console.log('🌐 Nominatim:', url);
+
+                fetch(url)
+                    .then(function(response) {
+                        if (!response.ok) {
+                            throw new Error('Erreur ' + response.status);
+                        }
+                        return response.json();
+                    })
+                    .then(function(data) {
+                        renderWorldResults(data, q);
+                    })
+                    .catch(function(error) {
+                        console.error('❌ Erreur Nominatim:', error);
+                        resultsContainer.innerHTML =
+                            '<div class="empty-state">' +
+                            '<i class="fas fa-exclamation-triangle"></i>' +
+                            '<div class="empty-title">Erreur de recherche</div>' +
+                            '<div class="empty-sub">' + error.message + '</div>' +
+                            '</div>';
+                    });
+            }
+
+            // ============================================================
+            // RECHERCHE LOCALE (Supabase) — correspondance "commence par"
+            // ============================================================
+            function searchLocal(query) {
+                showSkeleton();
+
+                var q = query.toLowerCase().trim();
+
+                setTimeout(function() {
+                    var results = allLocalPlaces.filter(function(p) {
+                        var cat = getCategoryInfo(p.category);
+                        return matchesPrefix(p.name, q) ||
+                            matchesPrefix(p.address, q) ||
+                            matchesPrefix(cat.label, q);
+                    });
+
+                    renderLocalResults(results, query);
+                }, 300);
+            }
+
+            // ============================================================
+            // SQUELETTE
             // ============================================================
             function showSkeleton() {
                 var html = '<div class="skeleton-container">';
@@ -799,14 +1359,77 @@ button:active,
             }
 
             // ============================================================
-            // RENDU DES RÉSULTATS - STYLE 9
+            // RENDU RÉSULTATS MONDIAUX
             // ============================================================
-            function renderResults(places) {
-                if (!places || places.length === 0) {
+            function renderWorldResults(data, originalQuery) {
+                // ✅ On enregistre la recherche dès que le résultat s'affiche,
+                // qu'il soit vide ou non, et on mémorise l'état pour la restauration.
+                saveRecentSearch(originalQuery);
+                saveLastState(originalQuery, 'world');
+
+                if (!data || data.length === 0) {
                     resultsContainer.innerHTML =
                         '<div class="empty-state">' +
                         '<i class="fas fa-search"></i>' +
                         '<div class="empty-title">Aucun résultat</div>' +
+                        '<div class="empty-sub">Essayez avec d\'autres mots-clés</div>' +
+                        '</div>';
+                    return;
+                }
+
+                var html = '';
+                data.forEach(function(item, index) {
+                    var displayName = item.display_name || item.name || 'Lieu';
+                    var address = item.display_name || 'Adresse non disponible';
+                    var category = item.type || item.category || '';
+                    var icon = getCategoryIcon(category);
+                    var label = getCategoryLabel(category);
+                    var country = (item.address && item.address.country) || 'Monde';
+                    var lat = item.lat || 0;
+                    var lon = item.lon || 0;
+
+                    var nameParts = displayName.split(',');
+                    var mainName = nameParts[0] || 'Lieu';
+
+                    html +=
+                        '<div class="result-card-wrapper" data-id="nominatim_' + (item.osm_id || index) +
+                        '" data-lat="' + lat + '" data-lon="' + lon +
+                        '" data-name="' + mainName.replace(/"/g, '&quot;') +
+                        '" data-address="' + address.replace(/"/g, '&quot;') +
+                        '" data-source="world">' +
+                        '<div class="result-card">' +
+                        '<div class="result-top">' +
+                        '<span class="result-name"><i class="fas ' + icon + '"></i> ' + mainName + '</span>' +
+                        '<span class="result-arrow"><i class="fas fa-chevron-right"></i></span>' +
+                        '</div>' +
+                        '<div class="result-address"><i class="fas fa-map-pin"></i> ' + address.substring(0, 100) +
+                        '</div>' +
+                        '<div class="result-footer">' +
+                        '<span class="footer-item badge-type"><i class="fas ' + icon + '"></i> ' + label + '</span>' +
+                        '<span class="footer-item badge-country"><i class="fas fa-flag"></i> ' + country + '</span>' +
+                        '<span class="footer-item badge-source"><i class="fas fa-globe"></i> 🌍 Monde</span>' +
+                        '</div>' +
+                        '</div>' +
+                        '</div>';
+                });
+
+                resultsContainer.innerHTML = html;
+                bindClicks();
+            }
+
+            // ============================================================
+            // RENDU RÉSULTATS LOCAUX
+            // ============================================================
+            function renderLocalResults(places, originalQuery) {
+                // ✅ Idem : on mémorise la recherche dès que le résultat local s'affiche.
+                saveRecentSearch(originalQuery);
+                saveLastState(originalQuery, 'local');
+
+                if (!places || places.length === 0) {
+                    resultsContainer.innerHTML =
+                        '<div class="empty-state">' +
+                        '<i class="fas fa-search"></i>' +
+                        '<div class="empty-title">Aucun résultat local</div>' +
                         '<div class="empty-sub">Essayez avec d\'autres mots-clés</div>' +
                         '</div>';
                     return;
@@ -818,113 +1441,97 @@ button:active,
                     var statusClass = place.status === 'open' ? 'open' : 'closed';
                     var statusLabel = place.status === 'open' ? 'Ouvert' : 'Fermé';
                     var statusIcon = place.status === 'open' ? 'fa-check-circle' : 'fa-times-circle';
-                    var date = place.created_at ? new Date(place.created_at).toLocaleDateString('fr-FR', { day: '2-digit', month: 'short', year: 'numeric' }) : 'N/A';
 
                     html +=
-                        '<div class="result-card-wrapper" data-id="' + place.id + '">' +
+                        '<div class="result-card-wrapper" data-id="' + place.id +
+                        '" data-lat="' + place.lat + '" data-lon="' + place.lng +
+                        '" data-name="' + place.name.replace(/"/g, '&quot;') +
+                        '" data-address="' + (place.address || '').replace(/"/g, '&quot;') +
+                        '" data-source="local">' +
                         '<div class="result-card">' +
-
                         '<div class="result-top">' +
-                        '<span class="result-name">' +
-                        '<i class="fas ' + cat.icon + '"></i> ' + place.name +
-                        '</span>' +
+                        '<span class="result-name"><i class="fas ' + cat.icon + '"></i> ' + place.name + '</span>' +
                         '<span class="result-arrow"><i class="fas fa-chevron-right"></i></span>' +
                         '</div>' +
-
-                        '<div class="result-address">' +
-                        '<i class="fas fa-map-pin"></i> ' + (place.address || 'Adresse non renseignée') +
-                        '</div>' +
-
+                        '<div class="result-address"><i class="fas fa-map-pin"></i> ' + (place.address ||
+                            'Adresse non renseignée') + '</div>' +
                         '<div class="result-footer">' +
-                        '<span class="footer-item badge-category"><i class="fas fa-tag"></i> ' + cat.label +
+                        '<span class="footer-item badge-type"><i class="fas ' + cat.icon + '"></i> ' + cat.label +
                         '</span>' +
-                        '<span class="footer-item status ' + statusClass + '"><i class="fas ' + statusIcon + '"></i> ' +
-                        statusLabel + '</span>' +
-                        '<span class="footer-item date-box"><i class="fas fa-calendar-alt"></i> ' + date + '</span>' +
+                        '<span class="footer-item badge-country" style="background:#fce4ec;color:#d32f2f;"><i class="fas ' +
+                        statusIcon + '"></i> ' + statusLabel + '</span>' +
+                        '<span class="footer-item badge-source local"><i class="fas fa-location-dot"></i> 📍 Local</span>' +
                         '</div>' +
-
                         '</div>' +
                         '</div>';
                 });
 
                 resultsContainer.innerHTML = html;
+                bindClicks();
+            }
 
-                // Clic sur un résultat → info.html
+            // ============================================================
+            // BIND CLICKS SUR LES RÉSULTATS
+            // ============================================================
+            function bindClicks() {
                 document.querySelectorAll('.result-card-wrapper').forEach(function(el) {
                     el.addEventListener('click', function(e) {
                         var id = this.dataset.id;
-                        redirectToInfo(id);
+                        var lat = this.dataset.lat;
+                        var lon = this.dataset.lon;
+                        var name = this.dataset.name || 'Lieu';
+                        var address = this.dataset.address || '';
+                        var source = this.dataset.source || 'world';
+
+                        // Rediriger vers info.html avec les paramètres
+                        var url = 'info.html?place=' + encodeURIComponent(id) +
+                            '&lat=' + encodeURIComponent(lat) +
+                            '&lon=' + encodeURIComponent(lon) +
+                            '&name=' + encodeURIComponent(name) +
+                            '&address=' + encodeURIComponent(address) +
+                            '&source=' + encodeURIComponent(source);
+
+                        // Overlay de redirection
+                        redirectOverlay.classList.add('active');
+                        if (redirectTimer) clearTimeout(redirectTimer);
+                        redirectTimer = setTimeout(function() {
+                            window.location.href = url;
+                        }, 800);
+
+                        console.log('📍 Redirection vers:', url);
                     });
                 });
             }
 
             // ============================================================
-            // RECHERCHE
-            // ============================================================
-            function searchPlaces(query) {
-                if (!query || query.trim() === '') {
-                    resultsContainer.innerHTML =
-                        '<div class="empty-state">' +
-                        '<i class="fas fa-search"></i>' +
-                        '<div class="empty-title">Recherchez un lieu</div>' +
-                        '<div class="empty-sub">Tapez un mot-clé pour trouver un lieu</div>' +
-                        '</div>';
-                    clearBtn.classList.remove('visible');
-                    return;
-                }
-
-                clearBtn.classList.add('visible');
-
-                showSkeleton();
-
-                var q = query.toLowerCase().trim();
-                var selectedCategories = loadSelectedCategories();
-
-                setTimeout(function() {
-                    var results = allPlaces.filter(function(p) {
-                        if (!selectedCategories.has(p.category)) return false;
-                        var cat = CATEGORIES.find(function(c) { return c.id === p.category; });
-                        var catLabel = cat ? cat.label.toLowerCase() : '';
-                        return (p.name || '').toLowerCase().includes(q) ||
-                            (p.address || '').toLowerCase().includes(q) ||
-                            catLabel.includes(q);
-                    });
-
-                    renderResults(results);
-                }, 600);
-            }
-
-            // ============================================================
             // ÉVÉNEMENTS
             // ============================================================
-
+            // Recherche en temps réel
             searchInput.addEventListener('input', function() {
                 var val = this.value;
                 if (searchTimeout) clearTimeout(searchTimeout);
                 searchTimeout = setTimeout(function() {
-                    searchPlaces(val);
-                }, 300);
+                    performSearch(val);
+                }, 400);
             });
 
+            // Effacer
             clearBtn.addEventListener('click', function() {
                 searchInput.value = '';
                 this.classList.remove('visible');
-                resultsContainer.innerHTML =
-                    '<div class="empty-state">' +
-                    '<i class="fas fa-search"></i>' +
-                    '<div class="empty-title">Recherchez un lieu</div>' +
-                    '<div class="empty-sub">Tapez un mot-clé pour trouver un lieu</div>' +
-                    '</div>';
+                showEmptyState(currentMode);
                 searchInput.focus();
             });
 
+            // Retour
             backBtn.addEventListener('click', function() {
                 window.history.back();
             });
 
+            // Enter
             searchInput.addEventListener('keyup', function(e) {
                 if (e.key === 'Enter') {
-                    searchPlaces(this.value);
+                    performSearch(this.value);
                 }
             });
 
@@ -932,16 +1539,22 @@ button:active,
             // INIT
             // ============================================================
             async function init() {
-                console.log('🔍 Recherche - Style 9');
-                await loadPlaces();
-                searchInput.focus();
+                console.log('🔍 Recherche : préfixe local + historique + restauration');
+                await loadLocalPlaces();
+                renderRecentList();
 
-                if (allPlaces.length === 0) {
-                    console.log('📌 Aucun lieu trouvé');
+                var last = loadLastState();
+                if (last && last.query) {
+                    updateModeUI(last.mode === 'local' ? 'local' : 'world');
+                    searchInput.value = last.query;
+                    clearBtn.classList.add('visible');
+                    performSearch(last.query);
                 } else {
-                    console.log('📌 ' + allPlaces.length + ' lieu(x) chargé(s)');
-                    console.log('📌 Catégories sélectionnées:', [...loadSelectedCategories()]);
+                    updateModeUI('world');
+                    showEmptyState('world');
                 }
+
+                searchInput.focus();
             }
 
             init();

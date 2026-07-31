@@ -7,14 +7,16 @@ var SUPABASE_URL = 'https://slanrdeaxapzfqtuqhbf.supabase.co';
 var SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InNsYW5yZGVheGFwemZxdHVxaGJmIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODUzMzA3OTcsImV4cCI6MjEwMDkwNjc5N30.pUCb_N-66pjFs-QP2RefsqjAnffC4Rbq-rP9qHfnvK8';
 
 // ================================================================
-// 🔑 CONFIGURATION OSRM
+// 🔑 CONFIGURATION MAPTILER & GRAPHHOPPER
 // ================================================================
-var OSRM_URL = 'https://router.project-osrm.org';
+var MAPTILER_KEY = 'tQknBxUJixNI7TN9VDB0';
+var GRAPHHOPPER_KEY = 'b1993ed7-7342-44e5-a31b-3bad5d6abde8';
+var GRAPHHOPPER_URL = 'https://graphhopper.com/api/1/route';
 
 // ✅ Mode de transport par défaut
-var transportMode = 'driving'; // 'driving' | 'foot'
+var transportMode = 'car'; // 'car' | 'foot' | 'bike'
 
-function getOSRMProfile() {
+function getGraphHopperProfile() {
     return transportMode;
 }
 
@@ -86,6 +88,15 @@ var state = {
         suburb: '',
         city: '',
         country: ''
+    },
+    whereData: {
+        lat: null,
+        lng: null,
+        address: null,
+        road: null,
+        suburb: null,
+        city: null,
+        country: null
     }
 };
 
@@ -106,6 +117,7 @@ function cacheDom() {
         navFollow: document.getElementById('navFollow'),
         navFollowLabel: document.getElementById('navFollowLabel'),
         navMesPositions: document.getElementById('navMesPositions'),
+        navWhereAmI: document.getElementById('navWhereAmI'),
         categoriesGrid: document.getElementById('categoriesGrid'),
         resetCategories: document.getElementById('resetCategories'),
         categoriesSection: document.getElementById('categoriesSection'),
@@ -144,7 +156,20 @@ function cacheDom() {
         geoLastUpdate: document.getElementById('geoLastUpdate'),
         btnGeoRefresh: document.getElementById('btnGeoRefresh'),
         btnOpenMaps: document.getElementById('btnOpenMaps'),
-        redirectOverlay: document.getElementById('redirectOverlay')
+        redirectOverlay: document.getElementById('redirectOverlay'),
+        // Where Am I
+        whereSlider: document.getElementById('whereSlider'),
+        whereClose: document.getElementById('whereClose'),
+        whereContent: document.getElementById('whereContent'),
+        whereLoader: document.getElementById('whereLoader'),
+        whereInfo: document.getElementById('whereInfo'),
+        whereFullAddress: document.getElementById('whereFullAddress'),
+        whereSuburb: document.getElementById('whereSuburb'),
+        whereCity: document.getElementById('whereCity'),
+        whereCountry: document.getElementById('whereCountry'),
+        whereRoad: document.getElementById('whereRoad'),
+        whereMapsBtn: document.getElementById('whereMapsBtn'),
+        whereCenterBtn: document.getElementById('whereCenterBtn')
     };
 }
 
@@ -311,7 +336,7 @@ function getPosition() {
 }
 
 // ================================================================
-// MAP - MAPLIBRE GL JS (OpenStreetMap UNIQUE)
+// MAP - MAPLIBRE GL JS (Maptiler)
 // ================================================================
 function initMap() {
     if (typeof maplibregl === 'undefined') {
@@ -326,24 +351,7 @@ function initMap() {
 
     state.map = new maplibregl.Map({
         container: DOM.map,
-        style: {
-            version: 8,
-            sources: {
-                'osm': {
-                    type: 'raster',
-                    tiles: ['https://tile.openstreetmap.org/{z}/{x}/{y}.png'],
-                    tileSize: 256,
-                    attribution: '&copy; OpenStreetMap contributors'
-                }
-            },
-            layers: [{
-                id: 'osm',
-                type: 'raster',
-                source: 'osm',
-                minzoom: 0,
-                maxzoom: 19
-            }]
-        },
+        style: 'https://api.maptiler.com/maps/streets/style.json?key=' + MAPTILER_KEY,
         center: [state.userLng || -3.9792253, state.userLat || 5.3599517],
         zoom: 14,
         pitch: 0,
@@ -380,7 +388,7 @@ function initMap() {
     state.userMarker.setPopup(userPopup);
 
     state.map.on('load', function() {
-        console.log('🗺️ Carte MapLibre chargée');
+        console.log('🗺️ Carte Maptiler chargée');
         if (state.userLat && state.userLng) {
             state.map.flyTo({ center: [state.userLng, state.userLat], zoom: 15 });
         }
@@ -544,19 +552,24 @@ function centerOnFollow() {
 }
 
 // ================================================================
-// MODE DE TRANSPORT
+// MODE DE TRANSPORT (GraphHopper)
 // ================================================================
 function setTransportMode(mode) {
     transportMode = mode;
-    if (DOM.btnCar) DOM.btnCar.classList.toggle('active', mode === 'driving');
+    
+    if (DOM.btnCar) DOM.btnCar.classList.toggle('active', mode === 'car');
     if (DOM.btnFoot) DOM.btnFoot.classList.toggle('active', mode === 'foot');
     
-    var label = mode === 'driving' ? '🚗 Mode voiture' : '🚶 Mode piéton';
-    toast(label, 'info', 1500);
+    var labelMap = {
+        'car': '🚗 Voiture',
+        'foot': '🚶 Piéton',
+        'bike': '🚲 Vélo'
+    };
     
-    // Recalculer l'itinéraire si déjà tracé
+    toast(labelMap[mode] || 'Mode ' + mode, 'info', 1500);
+    
     if (state.routeDrawn && state.following) {
-        traceRoute();
+        traceRouteGraphHopper();
     }
 }
 
@@ -656,6 +669,17 @@ function initDropdown() {
             window.location.href = 'mespositions.html';
         });
     }
+
+    // ============================================================
+    // NAV "JE SUIS OÙ ?"
+    // ============================================================
+    if (DOM.navWhereAmI) {
+        DOM.navWhereAmI.addEventListener('click', function(e) {
+            e.preventDefault();
+            DOM.dropdownMenu.classList.remove('active');
+            openWhereAmI();
+        });
+    }
 }
 
 // ================================================================
@@ -679,7 +703,7 @@ function initHeaderButtons() {
     if (DOM.btnCar) {
         DOM.btnCar.addEventListener('click', function(e) {
             e.stopPropagation();
-            setTransportMode('driving');
+            setTransportMode('car');
         });
     }
 
@@ -1140,7 +1164,7 @@ function restoreFollowing() {
 
     if (saved.transportMode) {
         transportMode = saved.transportMode;
-        if (DOM.btnCar) DOM.btnCar.classList.toggle('active', transportMode === 'driving');
+        if (DOM.btnCar) DOM.btnCar.classList.toggle('active', transportMode === 'car');
         if (DOM.btnFoot) DOM.btnFoot.classList.toggle('active', transportMode === 'foot');
     }
 
@@ -1206,9 +1230,9 @@ function formatTime(minutes) {
 }
 
 // ================================================================
-// UPDATE TRACK STATS (affichage OSRM)
+// UPDATE TRACK STATS
 // ================================================================
-function updateTrackStatsOSRM(distance, time, unit) {
+function updateTrackStats(distance, time, unit) {
     state.osrmData = { distance: distance, time: time, unit: unit };
     DOM.trackDistance.textContent = distance;
     var statLabel = document.querySelector('.track-stat:first-child .track-stat-label');
@@ -1217,9 +1241,9 @@ function updateTrackStatsOSRM(distance, time, unit) {
 }
 
 // ================================================================
-// TRACER L'ITINÉRAIRE (appel OSRM)
+// TRACER L'ITINÉRAIRE AVEC GRAPHHOPPER
 // ================================================================
-async function traceRoute() {
+async function traceRouteGraphHopper() {
     if (!state.following) {
         toast('⚠️ Aucune personne suivie', 'error', 3000);
         return;
@@ -1235,7 +1259,6 @@ async function traceRoute() {
         return;
     }
 
-    // Vérifier si on est déjà sur place
     var dist = calculateHaversine(lat1, lng1, lat2, lng2);
     if (dist < 0.02) {
         toast('📍 Vous êtes sur place', 'info', 3000);
@@ -1248,61 +1271,68 @@ async function traceRoute() {
         DOM.trackActionBtn.disabled = true;
         DOM.trackBtnLabel.textContent = '⏳ Tracé en cours...';
 
-        var profile = getOSRMProfile();
-        var url = OSRM_URL + '/route/v1/' + profile + '/' +
-            lng1 + ',' + lat1 + ';' + lng2 + ',' + lat2 +
-            '?overview=full&geometries=geojson&steps=true';
+        var profile = getGraphHopperProfile();
+        
+        var url = GRAPHHOPPER_URL +
+            '?point=' + lat1 + ',' + lng1 +
+            '&point=' + lat2 + ',' + lng2 +
+            '&profile=' + profile +
+            '&locale=fr' +
+            '&instructions=true' +
+            '&calc_points=true' +
+            '&points_encoded=false' +
+            '&key=' + GRAPHHOPPER_KEY;
 
-        console.log('🌐 URL OSRM:', url);
+        console.log('🌐 GraphHopper:', url);
 
         var response = await fetch(url);
 
         if (!response.ok) {
-            var errorText = await response.text();
-            console.error('❌ Erreur OSRM:', response.status, errorText);
-            throw new Error('Erreur OSRM: ' + response.status);
+            var errText = await response.text();
+            console.error('❌ Erreur GraphHopper:', response.status, errText);
+            throw new Error('Erreur GraphHopper: ' + response.status);
         }
 
         var data = await response.json();
 
-        if (!data.routes || data.routes.length === 0) {
+        if (!data.paths || data.paths.length === 0) {
             throw new Error('Aucun itinéraire trouvé');
         }
 
-        var route = data.routes[0];
-        var distanceKm = route.distance / 1000;
-        var timeMin = Math.round(route.duration / 60);
-        var unit = 'Km';
+        var path = data.paths[0];
+
+        var distanceKm = path.distance / 1000;
+        var timeMin = Math.round(path.time / 60000);
 
         var distanceDisplay;
+        var unit;
+
         if (distanceKm < 1) {
-            var meters = Math.round(route.distance);
+            var meters = Math.round(path.distance);
             distanceDisplay = String(meters);
-            unit = 'Mètres';
+            unit = 'm';
         } else {
             distanceDisplay = distanceKm.toFixed(1);
+            unit = 'km';
         }
 
-        // Sauvegarder les données OSRM
         state.osrmData = {
             distance: distanceDisplay,
             time: formatTime(Math.max(1, timeMin)),
             unit: unit
         };
 
-        // Afficher dans le slider
         DOM.trackDistance.textContent = distanceDisplay;
         var statLabel = document.querySelector('.track-stat:first-child .track-stat-label');
         if (statLabel) statLabel.textContent = unit;
         DOM.trackTime.textContent = formatTime(Math.max(1, timeMin));
 
-        var coordinates = route.geometry.coordinates.map(function(coord) {
+        var coordinates = path.points.coordinates.map(function(coord) {
             return [coord[0], coord[1]];
         });
 
         drawRoute(coordinates);
 
-        // Récupérer les infos géographiques
         var geoInfo = await getLocationInfo(lat2, lng2);
         if (geoInfo) {
             updateGeoInfo(geoInfo, state.following);
@@ -1320,11 +1350,11 @@ async function traceRoute() {
 
         saveFollowingState();
 
-        toast('✅ Itinéraire tracé', 'success', 2000);
+        toast('✅ Itinéraire tracé (GraphHopper)', 'success', 2000);
 
     } catch (e) {
         console.error('❌ Erreur traçage:', e);
-        toast('❌ Erreur: ' + e.message, 'error', 3000);
+        toast('❌ ' + e.message, 'error', 3000);
     } finally {
         DOM.trackActionBtn.disabled = false;
         DOM.trackBtnLabel.textContent = '🗺️ Tracer l\'itinéraire';
@@ -1369,7 +1399,6 @@ function openInMaps() {
 function openTrackSlider(record) {
     DOM.trackEmail.textContent = '📧 ' + record.email;
     
-    // Restaurer les données OSRM si disponibles
     if (state.osrmData && state.osrmData.distance !== '--') {
         DOM.trackDistance.textContent = state.osrmData.distance;
         var statLabel = document.querySelector('.track-stat:first-child .track-stat-label');
@@ -1409,9 +1438,8 @@ function openTrackSlider(record) {
         };
     }
 
-    // ACTION : Tracer l'itinéraire
     DOM.trackActionBtn.onclick = function() {
-        traceRoute();
+        traceRouteGraphHopper();
     };
 
     DOM.trackClose.onclick = function() {
@@ -1455,6 +1483,126 @@ function redirectToInfo(placeId) {
 }
 
 // ================================================================
+// "JE SUIS OÙ ?" — SLIDER
+// ================================================================
+function openWhereAmI() {
+    DOM.whereSlider.classList.add('active');
+    DOM.whereLoader.style.display = 'flex';
+    DOM.whereInfo.style.display = 'none';
+
+    // Récupérer la position
+    if (!navigator.geolocation) {
+        DOM.whereLoader.style.display = 'none';
+        DOM.whereInfo.style.display = 'block';
+        DOM.whereFullAddress.textContent = 'Géolocalisation non disponible';
+        DOM.whereSuburb.textContent = '--';
+        DOM.whereCity.textContent = '--';
+        DOM.whereCountry.textContent = '--';
+        DOM.whereRoad.textContent = '--';
+        toast('⚠️ Géolocalisation non disponible', 'error');
+        return;
+    }
+
+    navigator.geolocation.getCurrentPosition(
+        function(pos) {
+            var lat = pos.coords.latitude;
+            var lng = pos.coords.longitude;
+            state.whereData.lat = lat;
+            state.whereData.lng = lng;
+            getWhereAddress(lat, lng);
+        },
+        function(err) {
+            DOM.whereLoader.style.display = 'none';
+            DOM.whereInfo.style.display = 'block';
+            DOM.whereFullAddress.textContent = 'Erreur GPS: ' + err.message;
+            DOM.whereSuburb.textContent = '--';
+            DOM.whereCity.textContent = '--';
+            DOM.whereCountry.textContent = '--';
+            DOM.whereRoad.textContent = '--';
+            toast('⚠️ Erreur GPS: ' + err.message, 'error');
+        },
+        { enableHighAccuracy: true, timeout: 10000 }
+    );
+}
+
+async function getWhereAddress(lat, lng) {
+    try {
+        var url = 'https://nominatim.openstreetmap.org/reverse' +
+            '?lat=' + lat +
+            '&lon=' + lng +
+            '&format=json' +
+            '&zoom=16' +
+            '&addressdetails=1';
+
+        var response = await fetch(url);
+        if (!response.ok) throw new Error('Erreur Nominatim');
+
+        var data = await response.json();
+
+        DOM.whereLoader.style.display = 'none';
+        DOM.whereInfo.style.display = 'block';
+
+        var address = data.display_name || 'Adresse non disponible';
+        var road = (data.address && data.address.road) || (data.address && data.address.street) || '--';
+        var suburb = (data.address && data.address.suburb) || (data.address && data.address.neighbourhood) || (data.address && data.address.quarter) || '--';
+        var city = (data.address && data.address.city) || (data.address && data.address.town) || (data.address && data.address.village) || '--';
+        var country = (data.address && data.address.country) || '--';
+
+        state.whereData.address = address;
+        state.whereData.road = road;
+        state.whereData.suburb = suburb;
+        state.whereData.city = city;
+        state.whereData.country = country;
+
+        DOM.whereFullAddress.textContent = address;
+        DOM.whereSuburb.textContent = suburb;
+        DOM.whereCity.textContent = city;
+        DOM.whereCountry.textContent = country;
+        DOM.whereRoad.textContent = road;
+
+    } catch (e) {
+        console.error('❌ Erreur Nominatim:', e);
+        DOM.whereLoader.style.display = 'none';
+        DOM.whereInfo.style.display = 'block';
+        DOM.whereFullAddress.textContent = 'Erreur récupération adresse';
+        DOM.whereSuburb.textContent = '--';
+        DOM.whereCity.textContent = '--';
+        DOM.whereCountry.textContent = '--';
+        DOM.whereRoad.textContent = '--';
+    }
+}
+
+function closeWhereAmI() {
+    DOM.whereSlider.classList.remove('active');
+}
+
+// WHERE ACTIONS
+function whereOpenMaps() {
+    var lat = state.whereData.lat;
+    var lng = state.whereData.lng;
+    if (!lat || !lng) {
+        toast('⚠️ Position non disponible', 'error');
+        return;
+    }
+    var url = 'https://www.google.com/maps?q=' + lat + ',' + lng;
+    window.open(url, '_blank');
+}
+
+function whereCenterMap() {
+    var lat = state.whereData.lat;
+    var lng = state.whereData.lng;
+    if (!lat || !lng) {
+        toast('⚠️ Position non disponible', 'error');
+        return;
+    }
+    if (state.map) {
+        state.map.flyTo({ center: [lng, lat], zoom: 16 });
+        closeWhereAmI();
+        toast('📍 Centré sur votre position', 'info');
+    }
+}
+
+// ================================================================
 // SERVICE WORKER - PWA
 // ================================================================
 function registerServiceWorker() {
@@ -1474,6 +1622,9 @@ function registerServiceWorker() {
 // ================================================================
 async function init() {
     console.log('🚀 Initialisation de l\'application...');
+    console.log('🗺️ Carte: Maptiler (style Google Maps)');
+    console.log('🧭 Itinéraire: GraphHopper');
+    console.log('📍 Option "Je suis où ?" activée');
     cacheDom();
     checkAuth();
     
@@ -1487,6 +1638,26 @@ async function init() {
     initDropdown();
     initFollow();
     initHeaderButtons();
+
+    // WHERE EVENTS
+    if (DOM.whereClose) {
+        DOM.whereClose.addEventListener('click', closeWhereAmI);
+    }
+
+    if (DOM.whereMapsBtn) {
+        DOM.whereMapsBtn.addEventListener('click', whereOpenMaps);
+    }
+
+    if (DOM.whereCenterBtn) {
+        DOM.whereCenterBtn.addEventListener('click', whereCenterMap);
+    }
+
+    // Fermer le slider en cliquant en dehors (sur l'overlay)
+    DOM.whereSlider.addEventListener('click', function(e) {
+        if (e.target === this) {
+            closeWhereAmI();
+        }
+    });
 
     if (DOM.resetCategories) {
         DOM.resetCategories.addEventListener('click', resetCategories);
