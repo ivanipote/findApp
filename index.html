@@ -16,20 +16,25 @@
     <link rel="apple-touch-icon" href="icon-512.png" />
 
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
-    
-    <!-- MapLibre GL JS - CSS -->
-    <link rel="stylesheet" href="https://unpkg.com/maplibre-gl@2.4.0/dist/maplibre-gl.css" />
-    
     <link rel="stylesheet" href="style.css" />
+
+    <!-- Google Maps API -->
+    <script>
+        var GOOGLE_MAPS_API_KEY = 'AIzaSyA4VNn_yz4H4AurK3mJ7Fk6UkuTClxoe3M';
+        var SUPABASE_URL = 'https://slanrdeaxapzfqtuqhbf.supabase.co';
+        var SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InNsYW5yZGVheGFwemZxdHVxaGJmIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODUzMzA3OTcsImV4cCI6MjEwMDkwNjc5N30.pUCb_N-66pjFs-QP2RefsqjAnffC4Rbq-rP9qHfnvK8';
+    </script>
 </head>
 <body>
 
     <!-- ============================================================ -->
-    <!-- HEADER -->
+    <!-- HEADER : RECHERCHE + MENU SÉPARÉS -->
     <!-- ============================================================ -->
-    <header class="header-search" id="searchHeader">
-        <i class="fas fa-search icon"></i>
-        <input type="text" id="searchInput" placeholder="Rechercher un lieu..." readonly />
+    <header class="header-main" id="searchHeader">
+        <div class="header-left">
+            <i class="fas fa-search icon"></i>
+            <input type="text" id="searchInput" placeholder="Rechercher un lieu..." readonly />
+        </div>
         <button class="menu-dots" id="menuDots" type="button" aria-label="Menu">
             <i class="fas fa-ellipsis-v"></i>
         </button>
@@ -51,7 +56,7 @@
                 <i class="fas fa-location-question"></i> Je suis où ?
             </button>
             <button class="dropdown-item" id="navUpdateApp" type="button">
-                <i class="fas fa-sync-alt"></i> Mettre à jour app
+                <i class="fas fa-sync-alt"></i> Mettre à jour
             </button>
         </div>
     </header>
@@ -61,7 +66,7 @@
     <!-- ============================================================ -->
     <main class="main">
 
-        <!-- CATÉGORIES -->
+        <!-- FILTRES : CATÉGORIES + MONDE -->
         <section class="categories-section" id="categoriesSection">
             <div class="categories-header">
                 <span class="categories-title"><i class="fas fa-tags"></i> Catégories</span>
@@ -72,7 +77,7 @@
             </div>
         </section>
 
-        <!-- CARTE -->
+        <!-- CARTE GOOGLE -->
         <section class="position-card" id="positionCard">
             <div class="card-header">
                 <div class="left">
@@ -80,6 +85,8 @@
                         <span class="toggle-track"><span class="toggle-thumb"></span></span>
                         Suivre
                     </button>
+                </div>
+                <div class="center">
                     <button class="btn-center" id="btnCenterMe" type="button" title="Centrer sur ma position">
                         <i class="fas fa-location-dot"></i>
                     </button>
@@ -94,7 +101,13 @@
                     </button>
                 </div>
                 <div class="right">
-                    <span class="info-item"><i class="fas fa-location-dot"></i> <span id="posStatus">--</span></span>
+                    <button class="gps-garant" id="gpsGarant" type="button" title="Gestion de la localisation">
+                        <i class="fas fa-location-dot"></i>
+                        <span id="posStatus">--</span>
+                    </button>
+                    <button class="btn-recenter" id="btnRecenter" type="button" title="Revenir au suivi" style="display:none;">
+                        <i class="fas fa-location-arrow"></i>
+                    </button>
                 </div>
             </div>
             <div id="map"></div>
@@ -103,17 +116,15 @@
     </main>
 
     <!-- ============================================================ -->
-    <!-- OVERLAY SUIVRE QUELQU'UN -->
+    <!-- OVERLAY 1 : SUIVRE QUELQU'UN -->
     <!-- ============================================================ -->
     <div class="follow-overlay" id="followOverlay">
         <div class="follow-sheet">
             <span class="follow-handle"></span>
-
             <div class="follow-header">
                 <h2><i class="fas fa-eye"></i> Suivre quelqu'un</h2>
                 <button class="close-follow" id="closeFollow"><i class="fas fa-times"></i></button>
             </div>
-
             <div class="follow-content">
                 <div class="follow-loader" id="followLoader">
                     <div class="dots">
@@ -123,11 +134,8 @@
                     </div>
                     <p class="loader-text">Vérification du code...</p>
                 </div>
-
                 <div class="follow-input-area" id="followInputArea">
-                    <div class="follow-icon">
-                        <i class="fas fa-key"></i>
-                    </div>
+                    <div class="follow-icon"><i class="fas fa-key"></i></div>
                     <p class="follow-subtitle">Entrez le code de la personne à suivre</p>
                     <div class="follow-input-group">
                         <input type="text" id="followCode" placeholder="Ex: MAMA-007" maxlength="10" autocomplete="off" />
@@ -142,25 +150,66 @@
     </div>
 
     <!-- ============================================================ -->
-    <!-- SLIDER SUIVI (3 SLIDES) -->
+    <!-- OVERLAY 2 : JE SUIS OÙ ? (adresse en gras) -->
+    <!-- ============================================================ -->
+    <div class="where-slider" id="whereSlider">
+        <div class="where-sheet">
+            <span class="where-handle"></span>
+            <div class="where-header">
+                <span class="where-title"><i class="fas fa-location-dot"></i> 📍 Ma position</span>
+                <button class="where-close" id="whereClose"><i class="fas fa-times"></i></button>
+            </div>
+            <div class="where-content" id="whereContent">
+                <div class="where-loader" id="whereLoader">
+                    <div class="where-spinner"></div>
+                    <p class="where-loader-text">Récupération de votre position...</p>
+                </div>
+                <div class="where-info" id="whereInfo" style="display:none;">
+                    <div class="where-address-block">
+                        <i class="fas fa-map-pin"></i>
+                        <span class="where-address-full" id="whereFullAddress">--</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ============================================================ -->
+    <!-- OVERLAY 3 : MISE À JOUR -->
+    <!-- ============================================================ -->
+    <div class="update-slider" id="updateSlider">
+        <div class="update-sheet">
+            <span class="update-handle"></span>
+            <div class="update-header">
+                <span class="update-title"><i class="fas fa-sync-alt"></i> Mise à jour</span>
+                <button class="update-close" id="updateClose"><i class="fas fa-times"></i></button>
+            </div>
+            <div class="update-content" id="updateContent">
+                <div class="update-status" id="updateStatus">
+                    <i class="fas fa-check-circle" style="color:#2ecc71;font-size:2rem;"></i>
+                    <p class="update-text">✅ Votre application est à jour</p>
+                    <p class="update-date" id="updateDate">Dernière mise à jour : --</p>
+                </div>
+                <div class="update-loading" id="updateLoading" style="display:none;">
+                    <div class="update-spinner"></div>
+                    <p class="update-text">🔄 Recherche de mise à jour...</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ============================================================ -->
+    <!-- OVERLAY 4 : INFOS PERSONNE SUIVIE (3 slides) -->
     <!-- ============================================================ -->
     <div class="track-slider" id="trackSlider">
         <div class="track-sheet">
-            <div class="track-handle"></div>
-
+            <span class="track-handle"></span>
             <div class="track-header">
                 <span class="track-email" id="trackEmail">📧 email@exemple.com</span>
                 <button class="track-close" id="trackClose"><i class="fas fa-times"></i></button>
             </div>
-
-            <div class="track-timestamp" id="trackTimestamp">⏱️ Dernière mise à jour : ...</div>
-
-            <!-- ========================================================== -->
-            <!-- SLIDES HORIZONTAUX (3) -->
-            <!-- ========================================================== -->
             <div class="track-slides" id="trackSlides">
-
-                <!-- SLIDE 1 : CALCUL + TRACER -->
+                <!-- SLIDE 1 : Calculer le trajet -->
                 <div class="track-slide">
                     <div class="track-info">
                         <div class="track-stat">
@@ -173,126 +222,74 @@
                         </div>
                     </div>
                     <button class="track-btn" id="trackActionBtn">
-                        <i class="fas fa-route"></i> <span id="trackBtnLabel">Tracer l'itinéraire</span>
+                        <i class="fas fa-route" id="trackBtnIcon"></i> <span id="trackBtnLabel">Calculer le trajet</span>
                     </button>
+                    <p style="font-size:0.6rem;color:#8a9aaa;text-align:center;margin-top:4px;">
+                        ⏳ Restauration à chaque rechargement de la page
+                    </p>
                 </div>
-
-                <!-- SLIDE 2 : INFOS GÉOGRAPHIQUES -->
+                <!-- SLIDE 2 : Adresse -->
                 <div class="track-slide">
-                    <div class="geo-scrollable" id="geoScrollable">
-                        <div class="geo-section">
-                            <div class="geo-row">
-                                <span class="geo-label">📍 Adresse</span>
-                                <span class="geo-value" id="geoFullAddress">--</span>
-                            </div>
-                            <div class="geo-row">
-                                <span class="geo-label">🏘️ Quartier</span>
-                                <span class="geo-value" id="geoSuburb">--</span>
-                            </div>
-                            <div class="geo-row">
-                                <span class="geo-label">🏙️ Ville</span>
-                                <span class="geo-value" id="geoCity">--</span>
-                            </div>
-                            <div class="geo-row">
-                                <span class="geo-label">🌍 Pays</span>
-                                <span class="geo-value" id="geoCountry">--</span>
-                            </div>
-                            <div class="geo-row">
-                                <span class="geo-label">🛣️ Rue</span>
-                                <span class="geo-value" id="geoRoad">--</span>
-                            </div>
-                            <div class="geo-row geo-divider"></div>
-                            <div class="geo-row">
-                                <span class="geo-label">📧 Email</span>
-                                <span class="geo-value" id="geoEmail">--</span>
-                            </div>
-                            <div class="geo-row">
-                                <span class="geo-label">🔑 Code</span>
-                                <span class="geo-value" id="geoCode">--</span>
-                            </div>
-                            <div class="geo-row">
-                                <span class="geo-label">📅 Mise à jour</span>
-                                <span class="geo-value" id="geoLastUpdate">--</span>
-                            </div>
-                        </div>
+                    <div class="track-address-block">
+                        <i class="fas fa-map-pin" style="color:#1976d2;font-size:1.5rem;"></i>
+                        <span class="track-address-full" id="trackAddressFull">Adresse non disponible</span>
                     </div>
-                    <button class="btn-geo-refresh" id="btnGeoRefresh">
-                        <i class="fas fa-sync-alt"></i> Récupérer les infos du lieu
-                    </button>
                 </div>
-
-                <!-- SLIDE 3 : OUVRIR DANS MAPS -->
+                <!-- SLIDE 3 : Suivre le chemin avec Google Maps -->
                 <div class="track-slide">
-                    <div class="maps-action">
-                        <i class="fas fa-map-marked-alt"></i>
-                        <p>Ouvrir la position dans Google Maps</p>
-                        <button class="btn-maps-open" id="btnOpenMaps">
-                            <i class="fas fa-external-link-alt"></i> Ouvrir dans Maps
+                    <div class="track-maps-action">
+                        <i class="fas fa-map-marked-alt" style="font-size:2.5rem;color:#1976d2;"></i>
+                        <button class="track-maps-btn" id="trackMapsBtn">
+                            <i class="fas fa-external-link-alt"></i> Suivre le chemin avec Google Maps
                         </button>
+                        <p class="track-maps-message">
+                            📱 Bientôt vous pourriez le faire depuis l'application.<br />
+                            🚗 Bon parcours à vous !
+                        </p>
                     </div>
                 </div>
-
             </div>
-
-            <!-- DOTS -->
             <div class="track-dots" id="trackDots">
                 <button class="dot active" data-index="0"></button>
                 <button class="dot" data-index="1"></button>
                 <button class="dot" data-index="2"></button>
             </div>
-
         </div>
     </div>
 
     <!-- ============================================================ -->
-    <!-- SLIDER "JE SUIS OÙ ?" -->
+    <!-- OVERLAY 5 : GARANT DE POSITION (GPS) -->
     <!-- ============================================================ -->
-    <div class="where-slider" id="whereSlider">
-        <div class="where-sheet">
-            <div class="where-handle"></div>
-
-            <div class="where-header">
-                <span class="where-title"><i class="fas fa-location-dot"></i> Ma position</span>
-                <button class="where-close" id="whereClose"><i class="fas fa-times"></i></button>
+    <div class="gps-slider" id="gpsSlider">
+        <div class="gps-sheet">
+            <span class="gps-handle"></span>
+            <div class="gps-header">
+                <span class="gps-title"><i class="fas fa-satellite-dish"></i> Localisation</span>
+                <button class="gps-close" id="gpsClose"><i class="fas fa-times"></i></button>
             </div>
-
-            <div class="where-content" id="whereContent">
-                <!-- Rempli par JavaScript -->
-                <div class="where-loader" id="whereLoader">
-                    <div class="where-spinner"></div>
-                    <p class="where-loader-text">Récupération de votre position...</p>
+            <div class="gps-content">
+                <div class="gps-status">
+                    <span class="gps-status-label">📡 État actuel</span>
+                    <span class="gps-status-value" id="gpsStatusValue">Activée</span>
                 </div>
-                <div class="where-info" id="whereInfo" style="display:none;">
-                    <div class="where-address">
-                        <div class="where-row">
-                            <span class="where-label">🏠 Adresse</span>
-                            <span class="where-value" id="whereFullAddress">--</span>
-                        </div>
-                        <div class="where-row">
-                            <span class="where-label">🏘️ Quartier</span>
-                            <span class="where-value" id="whereSuburb">--</span>
-                        </div>
-                        <div class="where-row">
-                            <span class="where-label">🏙️ Ville</span>
-                            <span class="where-value" id="whereCity">--</span>
-                        </div>
-                        <div class="where-row">
-                            <span class="where-label">🌍 Pays</span>
-                            <span class="where-value" id="whereCountry">--</span>
-                        </div>
-                        <div class="where-row">
-                            <span class="where-label">🛣️ Rue</span>
-                            <span class="where-value" id="whereRoad">--</span>
-                        </div>
+                <div class="gps-toggle-row">
+                    <span class="gps-toggle-label">✅ Autoriser l'app à utiliser ma position</span>
+                    <div class="toggle-switch active" id="gpsToggle">
+                        <span class="thumb"></span>
                     </div>
-                    <div class="where-actions">
-                        <button class="where-btn where-btn-maps" id="whereMapsBtn">
-                            <i class="fas fa-map-marked-alt"></i> Ouvrir dans Google Maps
-                        </button>
-                        <button class="where-btn where-btn-center" id="whereCenterBtn">
-                            <i class="fas fa-location-dot"></i> Centrer sur la carte
-                        </button>
-                    </div>
+                </div>
+                <div class="gps-actions">
+                    <button class="gps-btn gps-btn-refresh" id="gpsRefreshBtn">
+                        <i class="fas fa-sync-alt"></i> Rafraîchir
+                    </button>
+                    <button class="gps-btn gps-btn-center" id="gpsCenterBtn">
+                        <i class="fas fa-location-dot"></i> Centrer sur ma position
+                    </button>
+                </div>
+                <div class="gps-coords" id="gpsCoords">
+                    📍 Latitude : --<br />
+                    📍 Longitude : --<br />
+                    📏 Précision : -- m
                 </div>
             </div>
         </div>
@@ -325,10 +322,11 @@
     <!-- ============================================================ -->
     <!-- SCRIPTS -->
     <!-- ============================================================ -->
-    <!-- MapLibre GL JS -->
-    <script src="https://unpkg.com/maplibre-gl@2.4.0/dist/maplibre-gl.js"></script>
-    <script src="https://unpkg.com/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
-    <script src="index.js"></script>
-
+    <script src="https://unpkg.com/@supabase/supabase-js@2/dist/umd/supabase.min.js">
+    </script>
+    <script src="index.js">
+    </script>
+    <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyA4VNn_yz4H4AurK3mJ7Fk6UkuTClxoe3M&libraries=places,geometry&loading=async&callback=initMap">
+    </script>
 </body>
 </html>
