@@ -51,7 +51,6 @@ var state = {
     watchPositionId: null,
     lastCommitDate: localStorage.getItem('last_commit_date') || null,
     transportMode: 'DRIVING',
-    // Navigation avancée
     routePath: [],
     routeCumDistances: [],
     currentPathIndex: 0,
@@ -62,7 +61,6 @@ var state = {
     destLng: null,
     totalDistance: 0,
     followCodeValue: null,
-    // Animation
     animFrom: null,
     animTo: null,
     animStartTime: 0,
@@ -351,6 +349,18 @@ function stopWatchingPosition() {
 function initMap() {
     console.log('🗺️ initMap appelé');
     
+    // ✅ Vérifier que DOM est prêt
+    if (!DOM.map) {
+        console.warn('⚠️ DOM pas prêt, tentative de cache...');
+        cacheDom();
+    }
+    
+    if (!DOM.map) {
+        console.error('❌ DOM.map introuvable - impossible d\'initialiser la carte');
+        toast('⚠️ Erreur d\'initialisation de la carte', 'error', 3000);
+        return;
+    }
+    
     if (typeof google === 'undefined' || typeof google.maps === 'undefined') {
         console.warn('⚠️ Google Maps JS API non chargée');
         toast('⚠️ Google Maps non disponible', 'error', 3000);
@@ -374,6 +384,7 @@ function initMap() {
         mapId: 'DEMO_MAP_ID'
     });
 
+    // Icône utilisateur (flèche)
     var userIcon = {
         path: google.maps.SymbolPath.FORWARD_CLOSED_ARROW,
         fillColor: '#1976d2',
@@ -407,6 +418,13 @@ function initMap() {
         zIndex: 999
     });
 
+    // ✅ CENTRER SUR LA POSITION RÉELLE DE L'UTILISATEUR
+    if (state.userLat && state.userLng) {
+        state.map.setCenter({ lat: state.userLat, lng: state.userLng });
+        state.map.setZoom(16);
+        console.log('📍 Carte centrée sur la position:', state.userLat, state.userLng);
+    }
+
     // Détection de la vue libre
     state.map.addListener('dragstart', function() {
         if (state.isNavigating) {
@@ -422,9 +440,6 @@ function initMap() {
     if (lastCode && DOM.followCode) {
         DOM.followCode.value = lastCode;
     }
-
-    // Vérifier s'il y a un code de suivi à restaurer (pour l'affichage seulement)
-    // On ne restaure plus le suivi automatiquement, juste le champ
 
     console.log('🗺️ Google Maps chargée avec succès');
     toast('✅ Carte Google Maps chargée', 'success', 2000);
@@ -734,7 +749,6 @@ function updateNavigationPosition(rawLatLng) {
         state.map.setZoom(zoomForSpeed(state.lastKnownSpeed));
     }
 
-    // Distance restante
     var distAtSegStart = state.routeCumDistances[nearest.segIndex];
     var segLength = google.maps.geometry.spherical.computeDistanceBetween(
         state.routePath[nearest.segIndex], state.routePath[nearest.segIndex + 1]
@@ -747,15 +761,12 @@ function updateNavigationPosition(rawLatLng) {
         ? Math.round(remainingMeters) + ' m'
         : (remainingMeters / 1000).toFixed(1) + ' km';
     
-    // Afficher la distance restante dans le slider (trackDistance)
     if (DOM.trackDistance) {
         DOM.trackDistance.textContent = remainingDisplay;
-        // Mettre à jour le label
         var statLabel = document.querySelector('.track-stat:first-child .track-stat-label');
         if (statLabel) statLabel.textContent = remainingMeters < 1000 ? 'm' : 'km';
     }
 
-    // ETA dynamique
     if (state.lastKnownSpeed > 1) {
         var etaMinutes = Math.max(1, Math.round((remainingMeters / state.lastKnownSpeed) / 60));
         if (DOM.trackTime) {
@@ -792,12 +803,10 @@ function startNavigation() {
     state.isFreeLook = false;
     if (DOM.btnRecenter) DOM.btnRecenter.style.display = 'none';
 
-    if (DOM.btnStart) {
-        DOM.btnStart.innerHTML = '<i class="fas fa-stop"></i> Arrêter';
-        DOM.btnStart.classList.add('running');
-    }
-    if (DOM.trackBtnLabel) {
-        DOM.trackBtnLabel.textContent = '🔄 Navigation en cours...';
+    // Utiliser le bouton start dans le slider (trackActionBtn)
+    if (DOM.trackActionBtn) {
+        DOM.trackActionBtn.textContent = '🛑 Arrêter';
+        DOM.trackActionBtn.classList.add('running');
     }
 
     toast('🚗 Navigation démarrée ! Suivez la route', 'success', 3000);
@@ -807,7 +816,6 @@ function startNavigation() {
         if (state.map.setTilt) state.map.setTilt(45);
     }
 
-    // Mettre à jour la position initiale
     updateNavigationPosition({ lat: state.userLat, lng: state.userLng });
 }
 
@@ -816,13 +824,10 @@ function stopNavigation() {
     state.isFreeLook = false;
     if (DOM.btnRecenter) DOM.btnRecenter.style.display = 'none';
 
-    if (DOM.btnStart) {
-        DOM.btnStart.innerHTML = '<i class="fas fa-play"></i> Démarrer';
-        DOM.btnStart.classList.remove('running');
-        DOM.btnStart.classList.remove('arrived');
-    }
-    if (DOM.trackBtnLabel) {
-        DOM.trackBtnLabel.textContent = '🗺️ Tracer l\'itinéraire';
+    if (DOM.trackActionBtn) {
+        DOM.trackActionBtn.textContent = '🗺️ Tracer l\'itinéraire';
+        DOM.trackActionBtn.classList.remove('running');
+        DOM.trackActionBtn.classList.remove('arrived');
     }
 
     toast('🛑 Navigation arrêtée', 'info', 2000);
@@ -832,7 +837,6 @@ function stopNavigation() {
         if (state.map.setHeading) state.map.setHeading(0);
     }
 
-    // Remettre le marqueur à l'icône par défaut
     if (state.userMarker) {
         var defaultIcon = {
             path: google.maps.SymbolPath.FORWARD_CLOSED_ARROW,
@@ -851,7 +855,6 @@ function stopNavigation() {
         var totalDist = state.totalDistance;
         var distanceDisplay = totalDist < 1 ? Math.round(totalDist * 1000) + ' m' : totalDist.toFixed(1) + ' km';
         DOM.trackDistance.textContent = distanceDisplay;
-        // Restaurer le label km
         var statLabel = document.querySelector('.track-stat:first-child .track-stat-label');
         if (statLabel) statLabel.textContent = totalDist < 1 ? 'm' : 'km';
     }
@@ -862,16 +865,15 @@ function arrivedDestination() {
     state.isFreeLook = false;
     if (DOM.btnRecenter) DOM.btnRecenter.style.display = 'none';
 
-    if (DOM.btnStart) {
-        DOM.btnStart.innerHTML = '<i class="fas fa-flag-checkered"></i> Arrivé !';
-        DOM.btnStart.classList.remove('running');
-        DOM.btnStart.classList.add('arrived');
-        DOM.btnStart.disabled = true;
+    if (DOM.trackActionBtn) {
+        DOM.trackActionBtn.textContent = '✅ Arrivé !';
+        DOM.trackActionBtn.classList.remove('running');
+        DOM.trackActionBtn.classList.add('arrived');
+        DOM.trackActionBtn.disabled = true;
     }
 
     if (DOM.trackDistance) DOM.trackDistance.textContent = '0 m';
     if (DOM.trackTime) DOM.trackTime.textContent = '0 min';
-    if (DOM.trackBtnLabel) DOM.trackBtnLabel.textContent = '✅ Arrivé !';
 
     toast('✅ Vous êtes arrivé à destination !', 'success', 4000);
 
@@ -979,8 +981,6 @@ function clearFollowingState() {
 }
 
 function restoreFollowing() {
-    // NE PLUS RESTAURER LE SUIVI AUTOMATIQUEMENT
-    // On garde juste le champ de code rempli
     var lastCode = localStorage.getItem('last_follow_code');
     if (lastCode && DOM.followCode) {
         DOM.followCode.value = lastCode;
@@ -1436,7 +1436,6 @@ function startFollowing(record) {
     state.destLat = record.latitude;
     state.destLng = record.longitude;
     
-    // Sauvegarder le code pour le champ
     localStorage.setItem('last_follow_code', record.code);
     if (DOM.followCode) DOM.followCode.value = record.code;
 
@@ -1485,16 +1484,14 @@ function stopFollowing() {
     if (DOM.btnCenterFollow) {
         DOM.btnCenterFollow.classList.add('disabled');
     }
-    if (DOM.btnStart) {
-        DOM.btnStart.innerHTML = '<i class="fas fa-play"></i> Démarrer';
-        DOM.btnStart.classList.remove('running');
-        DOM.btnStart.classList.remove('arrived');
-        DOM.btnStart.disabled = true;
+    if (DOM.trackActionBtn) {
+        DOM.trackActionBtn.innerHTML = '<i class="fas fa-route"></i> Calculer le trajet';
+        DOM.trackActionBtn.classList.remove('running');
+        DOM.trackActionBtn.classList.remove('arrived');
+        DOM.trackActionBtn.disabled = true;
     }
-    if (DOM.trackBtnLabel) DOM.trackBtnLabel.textContent = 'Calculer le trajet';
     if (DOM.trackDistance) DOM.trackDistance.textContent = '--';
     if (DOM.trackTime) DOM.trackTime.textContent = '--';
-    // Remettre le label km
     var statLabel = document.querySelector('.track-stat:first-child .track-stat-label');
     if (statLabel) statLabel.textContent = 'Km';
     
@@ -1509,7 +1506,7 @@ function openTrackSlider(record) {
     DOM.trackAddressFull.textContent = 'Adresse en cours de récupération...';
     DOM.trackDistance.textContent = '--';
     DOM.trackTime.textContent = '--';
-    DOM.trackBtnLabel.textContent = 'Calculer le trajet';
+    DOM.trackActionBtn.innerHTML = '<i class="fas fa-route"></i> Calculer le trajet';
     if (DOM.trackActionBtn) DOM.trackActionBtn.disabled = false;
     DOM.trackSlider.classList.add('active');
     updateTrackDots(0);
@@ -1721,7 +1718,6 @@ function initHeaderButtons() {
     if (DOM.btnCar) {
         DOM.btnCar.addEventListener('click', function(e) {
             e.stopPropagation();
-            // Mode voiture
             state.transportMode = 'DRIVING';
             DOM.btnCar.classList.add('active');
             DOM.btnFoot.classList.remove('active');
@@ -1822,119 +1818,54 @@ function registerServiceWorker() {
 }
 
 // ================================================================
-// CHARGER GOOGLE MAPS
-// ================================================================
-function loadGoogleMaps() {
-    // Google Maps est chargé via le script dans index.html avec callback initMap
-    // Cette fonction est juste pour la sécurité
-    if (typeof google !== 'undefined' && typeof google.maps !== 'undefined') {
-        console.log('✅ Google Maps déjà chargé');
-        if (!state.map) {
-            initMap();
-        }
-        return;
-    }
-    console.log('⏳ Google Maps en cours de chargement...');
-}
-
-// ================================================================
 // INIT
 // ================================================================
-function initMap() {
-    console.log('🗺️ initMap appelé');
+function init() {
+    console.log('🚀 Initialisation de l\'application...');
+    cacheDom();
+    checkAuth();
     
-    // ✅ Vérifier que DOM est prêt
-    if (!DOM.map) {
-        console.warn('⚠️ DOM pas prêt, tentative de cache...');
-        cacheDom();
-    }
+    state.selectedCategories = loadSelectedCategories();
+    renderCategories();
     
-    if (!DOM.map) {
-        console.error('❌ DOM.map introuvable - impossible d\'initialiser la carte');
-        toast('⚠️ Erreur d\'initialisation de la carte', 'error', 3000);
-        return;
-    }
-    
-    if (typeof google === 'undefined' || typeof google.maps === 'undefined') {
-        console.warn('⚠️ Google Maps JS API non chargée');
-        toast('⚠️ Google Maps non disponible', 'error', 3000);
-        return;
-    }
-
-    var container = DOM.map;
-    container.innerHTML = '';
-
-    state.map = new google.maps.Map(container, {
-        center: { lat: state.userLat || 5.3599517, lng: state.userLng || -3.9792253 },
-        zoom: 15,
-        mapTypeId: 'roadmap',
-        mapTypeControl: false,
-        fullscreenControl: false,
-        streetViewControl: false,
-        zoomControl: true,
-        zoomControlOptions: {
-            position: google.maps.ControlPosition.RIGHT_BOTTOM
-        },
-        mapId: 'DEMO_MAP_ID'
-    });
-
-    // Icône utilisateur (flèche)
-    var userIcon = {
-        path: google.maps.SymbolPath.FORWARD_CLOSED_ARROW,
-        fillColor: '#1976d2',
-        fillOpacity: 1,
-        strokeColor: '#ffffff',
-        strokeWeight: 2,
-        scale: 6,
-        rotation: 0,
-        anchor: new google.maps.Point(0, 2.6)
-    };
-
-    state.userMarker = new google.maps.Marker({
-        position: { lat: state.userLat || 5.3599517, lng: state.userLng || -3.9792253 },
-        map: state.map,
-        icon: userIcon,
-        title: '📍 Ma position',
-        zIndex: 1000
-    });
-
-    state.userPulse = new google.maps.Marker({
-        position: { lat: state.userLat || 5.3599517, lng: state.userLng || -3.9792253 },
-        map: state.map,
-        icon: {
-            path: google.maps.SymbolPath.CIRCLE,
-            fillColor: '#1976d2',
-            fillOpacity: 0.15,
-            strokeColor: '#1976d2',
-            strokeWeight: 2,
-            scale: 18
-        },
-        zIndex: 999
-    });
-
-    // ✅ CENTRER SUR LA POSITION RÉELLE DE L'UTILISATEUR
-    if (state.userLat && state.userLng) {
-        state.map.setCenter({ lat: state.userLat, lng: state.userLng });
-        state.map.setZoom(16);
-        console.log('📍 Carte centrée sur la position:', state.userLat, state.userLng);
-    }
-
-    // Détection de la vue libre
-    state.map.addListener('dragstart', function() {
-        if (state.isNavigating) {
-            state.isFreeLook = true;
-            if (DOM.btnRecenter) DOM.btnRecenter.style.display = 'flex';
-        }
-    });
-
     startWatchingPosition();
-
-    // Restaurer le code de suivi dans le champ
-    var lastCode = localStorage.getItem('last_follow_code');
-    if (lastCode && DOM.followCode) {
-        DOM.followCode.value = lastCode;
+    state.isFollowingActive = true;
+    if (DOM.toggleFollow) DOM.toggleFollow.classList.add('active');
+    updateGpsGarant();
+    
+    initSearch();
+    initFollowToggle();
+    initDropdown();
+    initFollow();
+    initHeaderButtons();
+    initSliderEvents();
+    
+    if (DOM.resetCategories) {
+        DOM.resetCategories.addEventListener('click', resetCategories);
     }
+    if (DOM.btnCenterFollow) {
+        DOM.btnCenterFollow.classList.add('disabled');
+    }
+    
+    registerServiceWorker();
+    restoreFollowing();
+    
+    // La carte sera initialisée via le callback Google Maps
+    // Si Google Maps est déjà chargé, on initie la carte
+    if (typeof google !== 'undefined' && typeof google.maps !== 'undefined') {
+        initMap();
+    }
+    
+    console.log('🏠 easily by megane — prêt');
+    console.log('🔐 Authentifié:', state.isAuthenticated);
+    console.log('📌 Catégories sélectionnées:', [...state.selectedCategories]);
+}
 
-    console.log('🗺️ Google Maps chargée avec succès');
-    toast('✅ Carte Google Maps chargée', 'success', 2000);
+// Exposer initMap globalement pour le callback Google Maps
+window.initMap = initMap;
+
+if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', init);
+} else {
+    init();
 }
