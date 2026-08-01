@@ -1840,52 +1840,101 @@ function loadGoogleMaps() {
 // ================================================================
 // INIT
 // ================================================================
-function init() {
-    console.log('🚀 Initialisation de l\'application avec Google Maps...');
-    cacheDom();
-    checkAuth();
+function initMap() {
+    console.log('🗺️ initMap appelé');
     
-    state.selectedCategories = loadSelectedCategories();
-    renderCategories();
+    // ✅ Vérifier que DOM est prêt
+    if (!DOM.map) {
+        console.warn('⚠️ DOM pas prêt, tentative de cache...');
+        cacheDom();
+    }
     
-    // Démarrer le suivi GPS
+    if (!DOM.map) {
+        console.error('❌ DOM.map introuvable - impossible d\'initialiser la carte');
+        toast('⚠️ Erreur d\'initialisation de la carte', 'error', 3000);
+        return;
+    }
+    
+    if (typeof google === 'undefined' || typeof google.maps === 'undefined') {
+        console.warn('⚠️ Google Maps JS API non chargée');
+        toast('⚠️ Google Maps non disponible', 'error', 3000);
+        return;
+    }
+
+    var container = DOM.map;
+    container.innerHTML = '';
+
+    state.map = new google.maps.Map(container, {
+        center: { lat: state.userLat || 5.3599517, lng: state.userLng || -3.9792253 },
+        zoom: 15,
+        mapTypeId: 'roadmap',
+        mapTypeControl: false,
+        fullscreenControl: false,
+        streetViewControl: false,
+        zoomControl: true,
+        zoomControlOptions: {
+            position: google.maps.ControlPosition.RIGHT_BOTTOM
+        },
+        mapId: 'DEMO_MAP_ID'
+    });
+
+    // Icône utilisateur (flèche)
+    var userIcon = {
+        path: google.maps.SymbolPath.FORWARD_CLOSED_ARROW,
+        fillColor: '#1976d2',
+        fillOpacity: 1,
+        strokeColor: '#ffffff',
+        strokeWeight: 2,
+        scale: 6,
+        rotation: 0,
+        anchor: new google.maps.Point(0, 2.6)
+    };
+
+    state.userMarker = new google.maps.Marker({
+        position: { lat: state.userLat || 5.3599517, lng: state.userLng || -3.9792253 },
+        map: state.map,
+        icon: userIcon,
+        title: '📍 Ma position',
+        zIndex: 1000
+    });
+
+    state.userPulse = new google.maps.Marker({
+        position: { lat: state.userLat || 5.3599517, lng: state.userLng || -3.9792253 },
+        map: state.map,
+        icon: {
+            path: google.maps.SymbolPath.CIRCLE,
+            fillColor: '#1976d2',
+            fillOpacity: 0.15,
+            strokeColor: '#1976d2',
+            strokeWeight: 2,
+            scale: 18
+        },
+        zIndex: 999
+    });
+
+    // ✅ CENTRER SUR LA POSITION RÉELLE DE L'UTILISATEUR
+    if (state.userLat && state.userLng) {
+        state.map.setCenter({ lat: state.userLat, lng: state.userLng });
+        state.map.setZoom(16);
+        console.log('📍 Carte centrée sur la position:', state.userLat, state.userLng);
+    }
+
+    // Détection de la vue libre
+    state.map.addListener('dragstart', function() {
+        if (state.isNavigating) {
+            state.isFreeLook = true;
+            if (DOM.btnRecenter) DOM.btnRecenter.style.display = 'flex';
+        }
+    });
+
     startWatchingPosition();
-    state.isFollowingActive = true;
-    if (DOM.toggleFollow) DOM.toggleFollow.classList.add('active');
-    updateGpsGarant();
-    
-    // La carte sera initialisée via le callback Google Maps
-    // initMap() est appelé automatiquement par le script Google Maps
-    
-    initSearch();
-    initFollowToggle();
-    initDropdown();
-    initFollow();
-    initHeaderButtons();
-    initSliderEvents();
-    
-    if (DOM.resetCategories) {
-        DOM.resetCategories.addEventListener('click', resetCategories);
-    }
-    if (DOM.btnCenterFollow) {
-        DOM.btnCenterFollow.classList.add('disabled');
-    }
-    
-    registerServiceWorker();
-    
-    // Restaurer le champ code (pas le suivi)
-    restoreFollowing();
-    
-    console.log('🏠 easily by megane — prêt avec Google Maps');
-    console.log('🔐 Authentifié:', state.isAuthenticated);
-    console.log('📌 Catégories sélectionnées:', [...state.selectedCategories]);
-}
 
-// Exposer initMap globalement
-window.initMap = initMap;
+    // Restaurer le code de suivi dans le champ
+    var lastCode = localStorage.getItem('last_follow_code');
+    if (lastCode && DOM.followCode) {
+        DOM.followCode.value = lastCode;
+    }
 
-if (document.readyState === 'loading') {
-    document.addEventListener('DOMContentLoaded', init);
-} else {
-    init();
+    console.log('🗺️ Google Maps chargée avec succès');
+    toast('✅ Carte Google Maps chargée', 'success', 2000);
 }
